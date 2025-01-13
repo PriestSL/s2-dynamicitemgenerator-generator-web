@@ -5,7 +5,6 @@ const sendConfigToServer = (file) => {
     let url = new URL('https://s2-loadout-packer-rest-production.up.railway.app/pack');
     xhr.open("POST", url, true);
     xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-    xhr.setRequestHeader("Access-Control-Allow-Origin", "*");
     xhr.send(JSON.stringify({file: file}));
     xhr.onload = function() {
         if (xhr.status != 200) {
