@@ -4,9 +4,7 @@
   "description": "Software to generate DynamicItemGenerator.cfg for Stalker 2 in web",
   "main": "app.js",
   "scripts": {
-    "start": "node src/app.js",
-    "lint": "eslint src/*.js",
-    "format": "prettier --write src/*.js"
+    "start": "node app.js"
   },
   "author": "PriestSL",
   "license": "MIT",
