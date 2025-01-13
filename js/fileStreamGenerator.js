@@ -2,7 +2,7 @@ import { createLoadout } from './textGenerators.js';
 
 const sendConfigToServer = (file) => {
     let xhr = new XMLHttpRequest();
-    let url = new URL('https://s2-loadout-packer-rest-production.up.railway.app/pack');
+    let url = new URL('http://s2-loadout-packer-rest-production.up.railway.app/pack');
     xhr.open("POST", url, true);
     xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
     xhr.setRequestHeader("Access-Control-Allow-Origin", "*");
