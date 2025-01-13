@@ -3,9 +3,6 @@
   "version": "1.0.0",
   "description": "Software to generate DynamicItemGenerator.cfg for Stalker 2 in web",
   "main": "app.js",
-  "scripts": {
-    "start": "node app.js"
-  },
   "author": "PriestSL",
   "license": "MIT",
   "devDependencies": {
