@@ -108,6 +108,16 @@ body{
     flex-direction: row;
     background-color: rgb(130, 187, 184);
     border-radius: 5px;
+    height: 25px;
+    padding-top: 3px;
+    border-top: 1px solid black;
+}
+
+.item_column{
+    display: flex;
+    flex-direction: column;
+    background-color: rgb(130, 187, 184);
+    border-radius: 5px;
 }
 
 summary.item_row{
@@ -151,9 +161,29 @@ details.attributes_item_row{
     display: flex;
     flex-direction: row;
     width: 100%;
-    background-color: rgb(130, 187, 184);
+    background-color: rgb(159, 230, 226);
     border-radius: 5px;
     column-gap: 5px;
+}
+
+.attr_row{
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    background-color: rgb(159, 230, 226);
+    border-radius: 5px;
+    column-gap: 5px;
+    height: 25px;
+    padding-top: 3px;
+    border-top: 1px solid black;
+}
+
+.attr_item{
+    display: block;
+    min-width: 200px;
+    max-width: 200px;
+    cursor: pointer;
+    background-color: rgb(159, 230, 226);
 }
 
 .chance{

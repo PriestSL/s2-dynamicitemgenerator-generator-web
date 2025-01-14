@@ -13,6 +13,9 @@ export var modifiedWeaponList = deepCopy(configs.oWeaponList);
 export var modsCompatibility = {Faction_Patches: true}
 export var modifiedDropConfigs = deepCopy(configs.oDropConfigs);
 
+const typeToTable = {
+    weapon: modifiedWeaponList
+};
 
 const updateLabels = (oSettings, level, classification = '') => {
     let total = 0;
@@ -21,7 +24,7 @@ const updateLabels = (oSettings, level, classification = '') => {
     }
 
     for (let item in oSettings) {
-        let label = document.getElementById(item + '-' + level + '-' + classification + '_label');
+        let label = document.getElementById(classification + '-' + item + '-' + 'chances' + '-' + level + '_label');
         label.innerHTML = '~'+(oSettings[item][level]/total*100).toFixed(2)+'%';
     }
 
@@ -34,55 +37,46 @@ const updateAllLabels = (oSettings, classification = '') => {
 }
 
 function onWeaponChanceChange(e) {
-    let options = e.target.id.split('-');
-
-    let item = options[0];
-    let level = options[1];
-    let classification = options[2];
+    //TODO rewrite to use typeToTable
+    let faction = e.target.getAttribute('to_faction');
+    let classification = e.target.getAttribute('to_classification');
+    let item = e.target.getAttribute('to_item');
+    let level = e.target.getAttribute('to_level');
     let value = e.target.value;
-    let GeneralSettings = 'GeneralNPC_'+currentFaction;
+    let GeneralSettings = 'GeneralNPC_'+faction;
     let WeaponSettings = modifiedWeaponSettings[GeneralSettings];
     WeaponSettings[classification][item][level] = value;
 
     updateLabels(WeaponSettings[classification], level, classification);
 };
 
-function onArmorChanceChange(e) {
-    let options = e.target.id.split('-');
-
-    let item = options[0];
-    let level = options[1];
+function onGrenadeChanceChange (e) {
+    let item = e.target.getAttribute('to_item');
+    let attr = e.target.getAttribute('to_attr');
+    let level = e.target.getAttribute('to_level');
     let value = e.target.value;
-    let GeneralSettings = 'GeneralNPC_'+currentFaction;
+    modifiedGrenadeSettings.Default[item][attr][level] = value;
+};
+
+function onArmorChanceChange(e) {
+    let faction = e.target.getAttribute('to_faction');
+    let item = e.target.getAttribute('to_item');
+    let level = e.target.getAttribute('to_level');
+    let value = e.target.value;
+    let GeneralSettings = 'GeneralNPC_'+faction;
     let ArmorSettings = modifiedArmorSettings[GeneralSettings];
     ArmorSettings[item][level] = value;
 
     updateLabels(ArmorSettings, level);
-}
-
-function onGrenadeChanceChange(e) {
-    let options = e.target.id.split('-');
-
-    let item = options[0];
-    let level = options[1];
-    let value = e.target.value;
-    let GrenadeSettings = modifiedGrenadeSettings;
-    GrenadeSettings[item][level] = value;
-}
+};
 
 function onAmmoChanceChange(e){
-    let options = e.target.id.split('-');
-
-    let item = options[0];
-    let level = options[1];
+    let item = e.target.getAttribute('to_item');
+    let level = e.target.getAttribute('to_level');
     let value = e.target.value;
     let AmmoSettings = modifiedAmmoByWeaponClass;
     AmmoSettings[item][level] = value;
 }
-
-const typeToTable = {
-    weapon: modifiedWeaponList
-};
 
 function onAttributeChange(e) {
     let item = e.target.getAttribute('to_item');
@@ -92,28 +86,38 @@ function onAttributeChange(e) {
     typeToTable[type][item][attr] = value;
 };
 
-const fillChancesTable = (oSettings, parentElement, newRowReplace ) => {
+//TODO rewrite to use typeToTable
+const fillChancesTable = (oSettings, parentElement, newRowReplace, classification = '') => {
     let chancesTable = document.createElement('div');
 
-    const createChances = (item, summary, chances) => {
+    const createChances = (item, summary, chances, linear = true, attr = 'chances') => {
         let chancesElement = document.createElement('div');
         chancesElement.classList.add('chances_row');
         for (let i=0; i<chances.length; i++) {
-            let resultElement = document.createElement('div');
+            let resultElement = document.createElement('div'); //container to show real chance
                 resultElement.classList.add('chance');
-            if (isNaN(parseFloat(chances[i]))) {
+            if (isNaN(parseFloat(chances[i]))) { //for static text
                 resultElement.innerHTML = chances[i];
-            }else{
+            }else{ //inputs
+                let faction = currentFaction;
+                let itemType = currentCategory;
+
                 let chanceElement = document.createElement('input');
                     chanceElement.type = 'number';
                     chanceElement.classList.add('chance');
                     chanceElement.value = chances[i];
-                let classification = parentElement.getAttribute('classification') || '';
-                    chanceElement.id = item + '-' + i + '-' + classification;
+                    chanceElement.setAttribute('to_faction', faction);
+                    chanceElement.setAttribute('to_classification', classification);
+                    chanceElement.setAttribute('to_item_type', itemType);
+                    chanceElement.setAttribute('to_item', item);
+                    chanceElement.setAttribute('to_attr', attr);
+                    chanceElement.setAttribute('to_level', i);
+
+                    //chanceElement.id = faction + ' - ' + itemType + '-' +itemName + '-' + attrName + '-' + i;
                 resultElement.appendChild(chanceElement);
 
                 let chanceLabel = document.createElement('div');
-                    chanceLabel.id = item + '-' + i + '-' + classification + '_label';
+                    chanceLabel.id = classification + '-' + item + '-' + attr + '-' + i + '_label';
                     chanceLabel.classList.add('chance_label');
                 resultElement.appendChild(chanceLabel);
 
@@ -125,17 +129,30 @@ const fillChancesTable = (oSettings, parentElement, newRowReplace ) => {
     }
 
     const addRow = (parentElement, item, chances) => {
-        let row = document.createElement('details');
-        row.classList.add('item_row');
-        let summary = document.createElement('summary');
-        summary.classList.add('item_row');
+        let row = document.createElement('div');
+        row.classList.add(typeof chances=== 'object' && chances.length?'item_row':'item_column');
         let itemElement = document.createElement('div');
         itemElement.classList.add('chances_item');
         itemElement.innerHTML = item;
-        summary.appendChild(itemElement);
+        row.appendChild(itemElement);
 
-        createChances(item, summary, chances, parentElement);
-        row.appendChild(summary);
+        if (typeof chances === 'object'){
+            if (chances.length){
+                createChances(item, row, chances, true);
+            }else{
+                for (let attr in chances) {
+                    let innerRow = document.createElement('div');
+                    innerRow.classList.add('attr_row');
+                    row.appendChild(innerRow);
+                    let attrNameElement = document.createElement('div');
+                    attrNameElement.classList.add('attr_item');
+                    attrNameElement.innerHTML = attr;
+                    innerRow.appendChild(attrNameElement);
+                    createChances(item, innerRow, chances[attr], false, attr);
+                }
+            }
+            
+        }
         parentElement.appendChild(row);
     };
 
@@ -230,7 +247,7 @@ const showPrimary = ()=>{
         classElement.classList.add('item_level1');
         document.getElementById('content').appendChild(classElement);
 
-        fillChancesTable(WeaponSettings[classification], classElement);
+        fillChancesTable(WeaponSettings[classification], classElement, null, classification);
 
         window.setTimeout(()=>{updateAllLabels(WeaponSettings[classification], classification);}, 100);
     }
@@ -243,7 +260,10 @@ const showPrimary = ()=>{
 }
 
 const showSecondary = ()=>{
-    console.log("Secondary");
+    let infoElement = document.createElement('div');
+    infoElement.innerHTML = 'Secondary weapons are not implemented yet';
+
+    document.getElementById('content').appendChild(infoElement);
 };
 
 const showArmor = ()=>{
@@ -260,11 +280,17 @@ const showArmor = ()=>{
 };
 
 const showArtifacts = ()=>{
-    console.log("Artifacts");
+    let infoElement = document.createElement('div');
+    infoElement.innerHTML = 'Artifacts are not implemented yet (and game uses Artifact class to generate grenades)';
+
+    document.getElementById('content').appendChild(infoElement);
 };
 
 const showConsumables = ()=>{
-    console.log("Consumables");
+    let infoElement = document.createElement('div');
+    infoElement.innerHTML = 'Consumables are not implemented yet';
+
+    document.getElementById('content').appendChild(infoElement);
 };
 
 const showAmmo = ()=>{

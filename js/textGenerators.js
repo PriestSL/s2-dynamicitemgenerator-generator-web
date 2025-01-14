@@ -1,5 +1,5 @@
 import * as config from './configs.js';
-import {modifiedWeaponSettings, modifiedArmorSettings, modifiedWeaponList, modifiedAmmoByWeaponClass, modsCompatibility, modifiedDropConfigs} from './app.js';
+import {modifiedWeaponSettings, modifiedArmorSettings, modifiedWeaponList, modifiedAmmoByWeaponClass, modifiedGrenadeSettings, modsCompatibility, modifiedDropConfigs} from './app.js';
 
 const oArmorSpawnSettings = config.oArmorSpawnSettings;
 var oArmorLoadoutSettings;
@@ -11,12 +11,12 @@ const nMinWeaponDurability = config.nMinWeaponDurability;
 const nMaxWeaponDurability = config.nMaxWeaponDurability;
 const nPistolLootChance = config.nPistolLootChance;
 const oSupportedMods = config.oSupportedMods;
-const oGrenadesSettings = config.oGrenadesSettings;
 
 
 let ranks = ['Newbie', 'Experienced', 'Veteran', 'Master'];
 
 const createArmorItemGenerator = (cArmorName)=>{
+    //TODO Lootable chances by player rank
     const createLootable = ()=>
     `            [1] : struct.begin
                ItemPrototypeSID = ${oArmorSpawnSettings[cArmorName].dropItem || cArmorName}
@@ -295,7 +295,7 @@ const createGrenadeStruct = (oGrenades, rank)=>{
 const createGrenadesItemGenerators = ()=>{
     let cGrenadeGenerators = '';
 
-    for (let clas in oGrenadesSettings){
+    for (let clas in modifiedGrenadeSettings){
             cGrenadeGenerators += `${clas}_Grenades : struct.begin {refurl=../ItemGeneratorPrototypes.cfg;refkey=[0]}\n`;
             cGrenadeGenerators += `   SID = ${clas}_Grenades \n`;
             cGrenadeGenerators += `   ItemGenerator : struct.begin\n`;
@@ -304,7 +304,7 @@ const createGrenadesItemGenerators = ()=>{
             cGrenadeGenerators += `         Category = EItemGenerationCategory::Artifact\n`;
             cGrenadeGenerators += `         PlayerRank = ERank::${ranks[rank]}\n`;
             cGrenadeGenerators += `         PossibleItems : struct.begin\n`;
-            cGrenadeGenerators +=              createGrenadeStruct(oGrenadesSettings[clas], rank)
+            cGrenadeGenerators +=              createGrenadeStruct(modifiedGrenadeSettings[clas], rank)
             cGrenadeGenerators += `         struct.end\n`;
             cGrenadeGenerators += `      struct.end\n`;
         }
@@ -316,7 +316,7 @@ const createGrenadesItemGenerators = ()=>{
 
 const createGrenades = (clas)=>{
     let cRet = '';
-    let cItemGenerator = oGrenadesSettings[clas]?`${clas}_Grenades`:'Default_Grenades';
+    let cItemGenerator = modifiedGrenadeSettings[clas]?`${clas}_Grenades`:'Default_Grenades';
 
     cRet += `      [*] : struct.begin\n`;
     cRet += `         Category = EItemGenerationCategory::SubItemGenerator\n`;

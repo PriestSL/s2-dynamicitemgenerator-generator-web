@@ -1070,12 +1070,12 @@ export const oGrenadesSettings = {
     Default: {
         GrenadeF1: {
             chances: [0, 20, 50, 70],
-            minAmmo: [1, 1, 1, 1],
+            minAmmo: [0, 0, 0, 0],
             maxAmmo: [1, 1, 1, 2]
         },
         GrenadeRGD5: {
             chances: [100, 80, 50, 30],
-            minAmmo: [1, 1, 1, 1],
+            minAmmo: [0, 0, 0, 0],
             maxAmmo: [1, 1, 2, 2]
         }
     }
