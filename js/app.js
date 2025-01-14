@@ -90,7 +90,7 @@ function onAttributeChange(e) {
 const fillChancesTable = (oSettings, parentElement, newRowReplace, classification = '') => {
     let chancesTable = document.createElement('div');
 
-    const createChances = (item, summary, chances, linear = true, attr = 'chances') => {
+    const createChances = (item, summary, chances, attr = 'chances') => {
         let chancesElement = document.createElement('div');
         chancesElement.classList.add('chances_row');
         for (let i=0; i<chances.length; i++) {
@@ -138,7 +138,7 @@ const fillChancesTable = (oSettings, parentElement, newRowReplace, classificatio
 
         if (typeof chances === 'object'){
             if (chances.length){
-                createChances(item, row, chances, true);
+                createChances(item, row, chances);
             }else{
                 for (let attr in chances) {
                     let innerRow = document.createElement('div');
@@ -148,7 +148,7 @@ const fillChancesTable = (oSettings, parentElement, newRowReplace, classificatio
                     attrNameElement.classList.add('attr_item');
                     attrNameElement.innerHTML = attr;
                     innerRow.appendChild(attrNameElement);
-                    createChances(item, innerRow, chances[attr], false, attr);
+                    createChances(item, innerRow, chances[attr], attr);
                 }
             }
             
