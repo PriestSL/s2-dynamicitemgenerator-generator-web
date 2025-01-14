@@ -1,15 +1,15 @@
 import * as config from './configs.js';
-import {modifiedWeaponSettings, modifiedArmorSettings} from './app.js';
+import {modifiedWeaponSettings, modifiedArmorSettings, modifiedWeaponList, modofiedAmmoByWeaponClass} from './app.js';
 
 const oArmorSpawnSettings = config.oArmorSpawnSettings;
-var oArmorLoadoutSettings = modifiedArmorSettings;
-var oWeaponLoadoutSettings = modifiedWeaponSettings;
+var oArmorLoadoutSettings;
+var oWeaponLoadoutSettings;
+var oWeaponList;
 const oSecondaryLoadoutSettings = config.oSecondaryLoadoutSettings;
 const nMinDurability = config.nMinDurability;
 const nMaxDurability = config.nMaxDurability;
 const nLootChance = config.nLootChance;
-const oWeaponList = config.oWeaponList;
-const oAmmoByWeaponClass = config.oAmmoByWeaponClass;
+var oAmmoByWeaponClass;
 const nMinWeaponDurability = config.nMinWeaponDurability;
 const nMaxWeaponDurability = config.nMaxWeaponDurability;
 const nPistolLootChance = config.nPistolLootChance;
@@ -386,6 +386,8 @@ export const createLoadout = async ()=>{
 
     oArmorLoadoutSettings = modifiedArmorSettings;
     oWeaponLoadoutSettings = modifiedWeaponSettings;
+    oWeaponList = modifiedWeaponList;
+    oAmmoByWeaponClass = modofiedAmmoByWeaponClass;
 
     let oPrepared = prepareWeaponStruct(oWeaponLoadoutSettings); //Everything based on weapon loadout settings
     let oPreparedSecondary = prepareWeaponStruct(oSecondaryLoadoutSettings); //Everything based on weapon loadout settings

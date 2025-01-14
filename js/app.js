@@ -8,8 +8,8 @@ var currentCategory = "Primary";
 export var modifiedWeaponSettings = deepCopy(configs.oWeaponLoadoutSettings);
 export var modifiedArmorSettings = deepCopy(configs.oArmorLoadoutSettings);
 export var modifiedGrenadeSettings = deepCopy(configs.oGrenadesSettings);
-export var ammoByWeaponClass = deepCopy(configs.oAmmoByWeaponClass);
-export var oWeaponList = deepCopy(configs.oWeaponList);
+export var modofiedAmmoByWeaponClass = deepCopy(configs.oAmmoByWeaponClass);
+export var modifiedWeaponList = deepCopy(configs.oWeaponList);
 
 
 const updateLabels = (oSettings, level, classification = '') => {
@@ -74,9 +74,21 @@ function onAmmoChanceChange(e){
     let item = options[0];
     let level = options[1];
     let value = e.target.value;
-    let AmmoSettings = Object.assign(oWeaponList, ammoByWeaponClass);
+    let AmmoSettings = modofiedAmmoByWeaponClass;
     AmmoSettings[item][level] = value;
 }
+
+const typeToTable = {
+    weapon: modifiedWeaponList
+};
+
+function onAttributeChange(e) {
+    let item = e.target.getAttribute('to_item');
+    let attr = e.target.getAttribute('to_attr');
+    let type = e.target.getAttribute('item_type');
+    let value = e.target.value;
+    typeToTable[type][item][attr] = value;
+};
 
 const fillChancesTable = (oSettings, parentElement) => {
     let chancesTable = document.createElement('div');
@@ -135,7 +147,73 @@ const fillChancesTable = (oSettings, parentElement) => {
     parentElement.appendChild(chancesTable);
 }
 
+const fillAttributesTable = (oSettings, parentElement, type) => {
+    const typeToAttributeList = {
+        weapon: [['minAmmo', 'number'], ['maxAmmo','number']]
+    };
+
+
+    let attributesTable = document.createElement('div');
+
+    attributesTable.classList.add('attributes_table');
+
+    const addAttributes = (item, oAttr, parentElement) => {
+        let attributesElement = document.createElement('div');
+        attributesElement.classList.add('attributes_grid');
+        for (let attr in typeToAttributeList[type]) {
+            let thisAttr = typeToAttributeList[type][attr];
+            let labelEl = document.createElement('label');
+            labelEl.classList.add('attribute');
+            labelEl.innerHTML = thisAttr[0];
+            let attrElement = document.createElement('input');
+            attrElement.type = thisAttr[1];
+            attrElement.value = oAttr[thisAttr[0]];
+            attrElement.setAttribute('item_type', type);
+            attrElement.setAttribute('to_item', item);
+            attrElement.setAttribute('to_attr', thisAttr[0]);
+            attrElement.addEventListener('change', onAttributeChange);
+
+            attributesElement.appendChild(labelEl);
+            attributesElement.appendChild(attrElement);
+        }
+            
+
+        parentElement.appendChild(attributesElement);
+    }
+
+    const addRow = (parentElement, item, value) => {
+        let row = document.createElement('details');
+        row.classList.add('attributes_item_row');
+        row.setAttribute('open', 'open');
+        let summary = document.createElement('summary');
+        summary.classList.add('attributes_item_row');
+        summary.innerHTML = item;
+        row.appendChild(summary);
+        addAttributes(item, value, row);
+        parentElement.appendChild(row);        
+    };
+
+    for (let item in oSettings) {
+        addRow(attributesTable, item, oSettings[item]);
+    }
+
+    parentElement.appendChild(attributesTable);
+}
+
+const showPrimarySettings = () => {
+    fillAttributesTable(modifiedWeaponList, document.getElementById('content'), 'weapon');
+
+    let elements = document.getElementsByClassName('chance');
+    for (let i = 0; i < elements.length; i++) {
+        elements[i].addEventListener('change', onAmmoChanceChange);
+    }
+};
+
 const showPrimary = ()=>{
+    if (currentFaction === 'Generic_settings'){
+        showPrimarySettings();
+        return;
+    }
     let GeneralSettings = 'GeneralNPC_'+currentFaction;
     let WeaponSettings = modifiedWeaponSettings[GeneralSettings];
     for (let classification in WeaponSettings) {
@@ -188,7 +266,7 @@ const showConsumables = ()=>{
 };
 
 const showAmmo = ()=>{
-    let AmmoSettings = Object.assign(oWeaponList, ammoByWeaponClass);
+    let AmmoSettings = modofiedAmmoByWeaponClass;
     fillChancesTable(AmmoSettings, document.getElementById('content'));
 
     let elements = document.getElementsByClassName('chance');
@@ -257,6 +335,45 @@ const subscribeToEvents = () => {
 
 subscribeToEvents()
 
+const drawHelp = () => `
+    <div class="help">
+        <h2>Help</h2>
+        <p>After configuring all settings press download <img src="img/file.png" style="width:20px"></img> icon</p>
+        <p>Download <a href="https://www.nexusmods.com/stalker2heartofchornobyl/mods/398" target="_blank">packing tool</a> if you don't have it</p>
+        <p>Unzip into folder, named as zip archive, into <b>2-extracted-pak-files</b>(if you using software from link above)</p>
+        <p>Run <b>2-repack_pak.bat</b>, select your folder and wait until it finishes</p>
+        <p>Copy created .pak file from <b>3-repacked-pak-files</b> to <b>Stalker 2 Game Folder\\Stalker2\\Content\\Paks\\~mods\\</b></p>
+    </div>
+`;
+
+const drawCloseButton = () => `
+    <div class="closeButton">
+        <button id="btn_close_msg">Close</button>
+    </div>
+`;
+
+const createMessageBox = (message) => {
+    if (document.getElementsByClassName('messageBox').length > 0) {
+        return;
+    }
+
+    let messageBox = document.createElement('div');
+    messageBox.classList.add('messageBox');
+    messageBox.innerHTML = message + drawCloseButton();
+    document.body.appendChild(messageBox);
+};
+
+const removeMessageBox = () => {
+    let messageBox = document.getElementsByClassName('messageBox')[0];
+    document.body.removeChild(messageBox);
+};
+
 
 let button = document.getElementById('btn_save');
 button.addEventListener('click', generateConfig);
+    button = document.getElementById('btn_help');
+button.addEventListener('click', function() {
+    createMessageBox(drawHelp());
+    let closeButton = document.getElementById('btn_close_msg');
+    closeButton.addEventListener('click', removeMessageBox);
+});
