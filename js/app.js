@@ -368,6 +368,49 @@ const removeMessageBox = () => {
     document.body.removeChild(messageBox);
 };
 
+const exportToJSON = () => {
+    let data = {
+        WeaponSettings: modifiedWeaponSettings,
+        ArmorSettings: modifiedArmorSettings,
+        GrenadeSettings: modifiedGrenadeSettings,
+        AmmoSettings: modofiedAmmoByWeaponClass,
+        WeaponList: modifiedWeaponList
+    };
+
+    let blob = new Blob([JSON.stringify(data)], {type: 'text/plain'});
+    let url = URL.createObjectURL(blob);
+    let a = document.createElement('a');
+    a.href = url;
+    a.download = 'config.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+};
+
+const importFromJSON = () => {
+    let input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+    input.onchange = function(e) {
+        let file = e.target.files[0];
+        let reader = new FileReader();
+        reader.onload = function(e) {
+            let data = JSON.parse(e.target.result);
+            modifiedWeaponSettings = data.WeaponSettings;
+            modifiedArmorSettings = data.ArmorSettings;
+            modifiedGrenadeSettings = data.GrenadeSettings;
+            modofiedAmmoByWeaponClass = data.AmmoSettings;
+            modifiedWeaponList = data.WeaponList;
+            document.getElementById('content').innerHTML = '';
+            oCategoryToEvent[currentCategory]();
+        };
+        reader.readAsText(file);
+    };
+    input.click();
+};
+
+
+
 
 let button = document.getElementById('btn_save');
 button.addEventListener('click', generateConfig);
@@ -377,3 +420,7 @@ button.addEventListener('click', function() {
     let closeButton = document.getElementById('btn_close_msg');
     closeButton.addEventListener('click', removeMessageBox);
 });
+button = document.getElementById('btn_export');
+button.addEventListener('click', exportToJSON);
+button = document.getElementById('btn_import');
+button.addEventListener('click', importFromJSON);
