@@ -258,5 +258,5 @@ const subscribeToEvents = () => {
 subscribeToEvents()
 
 
-let button = document.getElementById('settings_button');
+let button = document.getElementById('btn_save');
 button.addEventListener('click', generateConfig);
