@@ -1,5 +1,8 @@
-export const oMainConfigs = {
-    createDroppableArmor: true
+export const oDropConfigs = {
+    createDroppableArmor: true,
+    nMinDurability:0.25,
+    nMaxDurability:1.0,
+    nLootChance:0.5
 };
 
 export const oWeaponList = {
@@ -1078,9 +1081,6 @@ export const oGrenadesSettings = {
     }
 };
 
-export const nMinDurability = 0.25;
-export const nMaxDurability = 1.0;
-export const nLootChance = 0.5;
 export const nPistolLootChance = 0.3;
 
 export const nMinWeaponDurability = 0.25;

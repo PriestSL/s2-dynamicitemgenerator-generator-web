@@ -8,8 +8,10 @@ var currentCategory = "Primary";
 export var modifiedWeaponSettings = deepCopy(configs.oWeaponLoadoutSettings);
 export var modifiedArmorSettings = deepCopy(configs.oArmorLoadoutSettings);
 export var modifiedGrenadeSettings = deepCopy(configs.oGrenadesSettings);
-export var modofiedAmmoByWeaponClass = deepCopy(configs.oAmmoByWeaponClass);
+export var modifiedAmmoByWeaponClass = deepCopy(configs.oAmmoByWeaponClass);
 export var modifiedWeaponList = deepCopy(configs.oWeaponList);
+export var modsCompatibility = {Faction_Patches: true}
+export var modifiedDropConfigs = deepCopy(configs.oDropConfigs);
 
 
 const updateLabels = (oSettings, level, classification = '') => {
@@ -74,7 +76,7 @@ function onAmmoChanceChange(e){
     let item = options[0];
     let level = options[1];
     let value = e.target.value;
-    let AmmoSettings = modofiedAmmoByWeaponClass;
+    let AmmoSettings = modifiedAmmoByWeaponClass;
     AmmoSettings[item][level] = value;
 }
 
@@ -90,7 +92,7 @@ function onAttributeChange(e) {
     typeToTable[type][item][attr] = value;
 };
 
-const fillChancesTable = (oSettings, parentElement) => {
+const fillChancesTable = (oSettings, parentElement, newRowReplace ) => {
     let chancesTable = document.createElement('div');
 
     const createChances = (item, summary, chances) => {
@@ -138,7 +140,7 @@ const fillChancesTable = (oSettings, parentElement) => {
     };
 
     chancesTable.classList.add('chances_table');
-    addRow(chancesTable, '', ['Newbie', 'Experienced', 'Veteran', 'Master']);
+    addRow(chancesTable, '', newRowReplace || ['Newbie', 'Experienced', 'Veteran', 'Master']);
 
     for (let item in oSettings) {
         addRow(chancesTable, item, oSettings[item]);
@@ -266,8 +268,8 @@ const showConsumables = ()=>{
 };
 
 const showAmmo = ()=>{
-    let AmmoSettings = modofiedAmmoByWeaponClass;
-    fillChancesTable(AmmoSettings, document.getElementById('content'));
+    let AmmoSettings = modifiedAmmoByWeaponClass;
+    fillChancesTable(AmmoSettings, document.getElementById('content'), ['MinAmmo', 'MaxAmmo']);
 
     let elements = document.getElementsByClassName('chance');
     for (let i = 0; i < elements.length; i++) {
@@ -346,25 +348,84 @@ const drawHelp = () => `
     </div>
 `;
 
-const drawCloseButton = () => `
+const drawCloseButton = (wind) => `
     <div class="closeButton">
-        <button id="btn_close_msg">Close</button>
+        <button id="btn_close_msg_${wind}">Close</button>
     </div>
 `;
 
-const createMessageBox = (message) => {
-    if (document.getElementsByClassName('messageBox').length > 0) {
+const drawFileSettings = () => `
+    <div class="fileSettings">
+        <hr>
+        <h2>Compatibility settings</h2>
+        <hr>
+        <label for="copm_FP">Faction Patches</label>
+        <input type="checkbox" id="copm_FP" ${modsCompatibility.Faction_Patches ? 'checked' : ''}>
+        <hr>
+        <h2>Armor drop settings<h2>
+        <hr>
+        <label for="drop_armor">Enable armor droping</label>
+        <input type="checkbox" id="drop_armor" ${modifiedDropConfigs.createDroppableArmor ? 'checked' : ''}>
+        <div class="armor_drop_settings" style="display:${modifiedDropConfigs.createDroppableArmor ? 'grid' : 'none'}">
+            <label for="armor_chance">Armor drop chance</label>
+            <input type="number" id="armor_chance" value="${modifiedDropConfigs.nLootChance}">
+            <label for="min_condition">Minimal armor condition</label>
+            <input type="number" id="min_condition" value="${modifiedDropConfigs.nMinDurability}">
+            <label for="max_condition">Maximal armor condition</label>
+            <input type="number" id="max_condition" value="${modifiedDropConfigs.nMaxDurability}">
+        </div>
+    </div>
+`;
+
+const subscribeFileSettingsEvents = () => {
+    let FPComp = document.getElementById('copm_FP');
+    FPComp.addEventListener('change', function(e) {
+        modsCompatibility.Faction_Patches = e.target.checked;
+    });
+
+    let dropArmor = document.getElementById('drop_armor');
+    dropArmor.addEventListener('change', function(e) {
+        modifiedDropConfigs.createDroppableArmor = e.target.checked;
+        if (e.target.checked) {
+            document.querySelector('.armor_drop_settings').style.display = 'grid';
+        }
+        else {
+            document.querySelector('.armor_drop_settings').style.display = 'none';
+        }
+    });
+
+    let armorChance = document.getElementById('armor_chance');
+    armorChance.addEventListener('change', function(e) {
+        modifiedDropConfigs.ArmorDrop.Chance = e.target.value;
+    });
+
+    let minCondition = document.getElementById('min_condition');
+    minCondition.addEventListener('change', function(e) {
+        modifiedDropConfigs.ArmorDrop.MinCondition = e.target.value;
+    });
+
+    let maxCondition = document.getElementById('max_condition');
+    maxCondition.addEventListener('change', function(e) {
+        modifiedDropConfigs.ArmorDrop.MaxCondition = e.target.value;
+    });
+
+
+};
+
+const createMessageBox = (wind, message) => {
+    if (document.getElementById('messageBox_'+wind)) {
         return;
     }
 
     let messageBox = document.createElement('div');
     messageBox.classList.add('messageBox');
-    messageBox.innerHTML = message + drawCloseButton();
+    messageBox.id = 'messageBox_'+wind;
+    messageBox.innerHTML = message + drawCloseButton(wind);
     document.body.appendChild(messageBox);
 };
 
-const removeMessageBox = () => {
-    let messageBox = document.getElementsByClassName('messageBox')[0];
+const removeMessageBox = (wind) => {
+    let messageBox = document.getElementById('messageBox_'+wind);
     document.body.removeChild(messageBox);
 };
 
@@ -373,15 +434,18 @@ const exportToJSON = () => {
         WeaponSettings: modifiedWeaponSettings,
         ArmorSettings: modifiedArmorSettings,
         GrenadeSettings: modifiedGrenadeSettings,
-        AmmoSettings: modofiedAmmoByWeaponClass,
-        WeaponList: modifiedWeaponList
+        AmmoSettings: modifiedAmmoByWeaponClass,
+        WeaponList: modifiedWeaponList,
+        DropConfigs: modifiedDropConfigs,
+        Compatibility: modsCompatibility
     };
 
+    let configName = document.getElementById('config_name').value || 'config';
     let blob = new Blob([JSON.stringify(data)], {type: 'text/plain'});
     let url = URL.createObjectURL(blob);
     let a = document.createElement('a');
     a.href = url;
-    a.download = 'config.json';
+    a.download = configName+'.json';
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -399,8 +463,10 @@ const importFromJSON = () => {
             modifiedWeaponSettings = data.WeaponSettings;
             modifiedArmorSettings = data.ArmorSettings;
             modifiedGrenadeSettings = data.GrenadeSettings;
-            modofiedAmmoByWeaponClass = data.AmmoSettings;
+            modifiedAmmoByWeaponClass = data.AmmoSettings;
             modifiedWeaponList = data.WeaponList;
+            modifiedDropConfigs = data.DropConfigs;
+            modsCompatibility = data.Compatibility;
             document.getElementById('content').innerHTML = '';
             oCategoryToEvent[currentCategory]();
         };
@@ -416,11 +482,18 @@ let button = document.getElementById('btn_save');
 button.addEventListener('click', generateConfig);
     button = document.getElementById('btn_help');
 button.addEventListener('click', function() {
-    createMessageBox(drawHelp());
-    let closeButton = document.getElementById('btn_close_msg');
-    closeButton.addEventListener('click', removeMessageBox);
+    createMessageBox('help', drawHelp());
+    let closeButton = document.getElementById('btn_close_msg_help');
+    closeButton.addEventListener('click', ()=>removeMessageBox('help'));
 });
 button = document.getElementById('btn_export');
 button.addEventListener('click', exportToJSON);
 button = document.getElementById('btn_import');
 button.addEventListener('click', importFromJSON);
+button = document.getElementById('btn_file_settings');
+button.addEventListener('click', function() {
+    createMessageBox('settings', drawFileSettings());
+    subscribeFileSettingsEvents();
+    let closeButton = document.getElementById('btn_close_msg_settings');
+    closeButton.addEventListener('click', ()=>removeMessageBox('settings'));
+});

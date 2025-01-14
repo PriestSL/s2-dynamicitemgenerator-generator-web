@@ -8,7 +8,7 @@ body{
     width: 100%;
     height: 100vh;
     display: grid;
-    grid-template-columns: 45px 1fr 200px;
+    grid-template-columns: 45px 2fr 1fr;
     grid-template-rows: 45px 1fr;
 }
 
@@ -212,4 +212,14 @@ input.chance{
     padding: 10px;
     z-index: 100;
     display: block;
+}
+
+.armor_drop_settings{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+}
+
+.armor_drop_settings label{
+    font-size: 16px;
+    font-weight: normal;
 }

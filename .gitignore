@@ -133,3 +133,6 @@ dist
 Output
 OutputTemp
 RawFiles
+package-lock.json
+package.json
+eslint.config.mjs

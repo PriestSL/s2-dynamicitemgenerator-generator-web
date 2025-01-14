@@ -1,21 +1,18 @@
 import * as config from './configs.js';
-import {modifiedWeaponSettings, modifiedArmorSettings, modifiedWeaponList, modofiedAmmoByWeaponClass} from './app.js';
+import {modifiedWeaponSettings, modifiedArmorSettings, modifiedWeaponList, modifiedAmmoByWeaponClass, modsCompatibility, modifiedDropConfigs} from './app.js';
 
 const oArmorSpawnSettings = config.oArmorSpawnSettings;
 var oArmorLoadoutSettings;
 var oWeaponLoadoutSettings;
 var oWeaponList;
 const oSecondaryLoadoutSettings = config.oSecondaryLoadoutSettings;
-const nMinDurability = config.nMinDurability;
-const nMaxDurability = config.nMaxDurability;
-const nLootChance = config.nLootChance;
 var oAmmoByWeaponClass;
 const nMinWeaponDurability = config.nMinWeaponDurability;
 const nMaxWeaponDurability = config.nMaxWeaponDurability;
 const nPistolLootChance = config.nPistolLootChance;
 const oSupportedMods = config.oSupportedMods;
 const oGrenadesSettings = config.oGrenadesSettings;
-const oMainConfigs = config.oMainConfigs;
+
 
 let ranks = ['Newbie', 'Experienced', 'Veteran', 'Master'];
 
@@ -23,9 +20,9 @@ const createArmorItemGenerator = (cArmorName)=>{
     const createLootable = ()=>
     `            [1] : struct.begin
                ItemPrototypeSID = ${oArmorSpawnSettings[cArmorName].dropItem || cArmorName}
-               MinDurability = ${nMinDurability}
-               MaxDurability = ${nMaxDurability}
-               Chance = ${nLootChance}
+               MinDurability = ${modifiedDropConfigs.nMinDurability}
+               MaxDurability = ${modifiedDropConfigs.nMaxDurability}
+               Chance = ${modifiedDropConfigs.nLootChance}
             struct.end`;
 
     const createHelmet = ()=>{
@@ -66,7 +63,7 @@ const createArmorItemGenerator = (cArmorName)=>{
                ItemPrototypeSID = ${cArmorName}
                Chance = 1
             struct.end
-${oMainConfigs.createDroppableArmor && oArmorSpawnSettings[cArmorName].drop ? createLootable() : ''}
+${modifiedDropConfigs.createDroppableArmor && oArmorSpawnSettings[cArmorName].drop ? createLootable() : ''}
          struct.end
       struct.end
 ${oArmorSpawnSettings[cArmorName].helmets ? createHelmet() : ''}
@@ -334,14 +331,6 @@ const createGrenades = (clas)=>{
     return cRet;
 };
 
-const checkModdedItemGenerators = ()=>{
-    let oRet = {};
-    for (let mod in oSupportedMods){
-        oRet[mod] = true; //not needed for web
-    }
-    return oRet;
-};
-
 const getModdedItemGenerators = async (oExistedFiles)=>{
     let cRet = '';
 
@@ -349,8 +338,7 @@ const getModdedItemGenerators = async (oExistedFiles)=>{
         if (oExistedFiles[mod]){
             let response = await fetch(`Mods/${oSupportedMods[mod]}`);
 
-            if (response.ok) { // если HTTP-статус в диапазоне 200-299
-            // получаем тело ответа (см. про этот метод ниже)
+            if (response.ok) { 
                 let moddedItemGenerators = await response.text();
                 cRet += moddedItemGenerators;
                 cRet += '\n';
@@ -387,7 +375,7 @@ export const createLoadout = async ()=>{
     oArmorLoadoutSettings = modifiedArmorSettings;
     oWeaponLoadoutSettings = modifiedWeaponSettings;
     oWeaponList = modifiedWeaponList;
-    oAmmoByWeaponClass = modofiedAmmoByWeaponClass;
+    oAmmoByWeaponClass = modifiedAmmoByWeaponClass;
 
     let oPrepared = prepareWeaponStruct(oWeaponLoadoutSettings); //Everything based on weapon loadout settings
     let oPreparedSecondary = prepareWeaponStruct(oSecondaryLoadoutSettings); //Everything based on weapon loadout settings
@@ -401,9 +389,8 @@ export const createLoadout = async ()=>{
     cRet += `//Grenades itemgenerators\n`;
     cRet += createGrenadesItemGenerators();
 
-    let oEnabledMods = checkModdedItemGenerators();
     cRet += `//Itemgenerators from another mods\n\n`;
-    let response = await getModdedItemGenerators(oEnabledMods);
+    let response = await getModdedItemGenerators(modsCompatibility);
     if (response) {
         cRet += response;
     }
@@ -435,7 +422,7 @@ export const createLoadout = async ()=>{
             cRet +=        createSecondaryWeapons(oPreparedSecondary, faction, clas);
             cRet +=        createArmorAndPistol(faction); //may be splitted in future
             cRet +=        createConsumables(faction, clas);
-            cRet += oEnabledMods.FactionPatches?createFactionPatches(faction):'';
+            cRet += modsCompatibility.Faction_Patches?createFactionPatches(faction):'';
             cRet +=        createDetector(faction);
             //cRet +=        createArtifact(faction); //Why grenade uses artifact category?
             cRet +=        createGrenades(clas);
