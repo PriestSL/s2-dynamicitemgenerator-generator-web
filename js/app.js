@@ -509,12 +509,13 @@ const TODOList = [
     "Helmet and suit settings",
     "Consumables settings",
     "Artifacts settings",
+    "Splitted files as in refactor mod",
     "Secondary weapons settings",
     "packing into .pak file"
 ];
 
 const drawToDo = () => {
-    let finalStr = '<ul>';
+    let finalStr = '<h2>TODO LIST</h2><ul>';
     for (let item of TODOList) {
         finalStr += '<li>'+item+'</li>';
     }
