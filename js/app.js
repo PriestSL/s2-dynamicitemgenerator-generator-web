@@ -501,6 +501,32 @@ const importFromJSON = () => {
     input.click();
 };
 
+const TODOList = [
+    "Adding and removing items",
+    "Local storage of settings",
+    "Loot chances by player rank",
+    "Ammo count by player rank",
+    "Helmet and suit settings",
+    "Consumables settings",
+    "Artifacts settings",
+    "Secondary weapons settings",
+    "packing into .pak file"
+];
+
+const drawToDo = () => {
+    let finalStr = '<ul>';
+    for (let item of TODOList) {
+        finalStr += '<li>'+item+'</li>';
+    }
+    finalStr += '</ul>';
+    return finalStr;
+};
+
+const showToDoWindow = () => {
+    createMessageBox('todo', drawToDo());
+    let closeButton = document.getElementById('btn_close_msg_todo');
+    closeButton.addEventListener('click', ()=>removeMessageBox('todo'));
+};
 
 
 
@@ -523,3 +549,5 @@ button.addEventListener('click', function() {
     let closeButton = document.getElementById('btn_close_msg_settings');
     closeButton.addEventListener('click', ()=>removeMessageBox('settings'));
 });
+button = document.getElementById('btn_todo');
+button.addEventListener('click', showToDoWindow);
