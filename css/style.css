@@ -118,6 +118,28 @@ details.item_row{
     margin: 0px 0px 5px 5px;
 }
 
+.attributes_item_row{
+    display: flex;
+    flex-direction: column;
+    background-color: rgb(138, 201, 198);
+    border-radius: 5px;
+}
+
+summary.attributes_item_row{
+    height: 25px;
+}
+
+details.attributes_item_row{
+    margin: 0px 0px 5px 5px;
+}
+
+.attributes_grid{
+    display: grid;
+    grid-template-columns: 100px 80px;
+    row-gap: 5px;
+    background-color: rgb(157, 231, 228);
+}
+
 .chances_item{
     display: block;
     min-width: 200px;
@@ -177,4 +199,17 @@ input.chance{
     display: grid;
     grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
 
+}
+
+.messageBox{
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: white;
+    border: 1px solid black;
+    border-radius: 5px;
+    padding: 10px;
+    z-index: 100;
+    display: block;
 }
