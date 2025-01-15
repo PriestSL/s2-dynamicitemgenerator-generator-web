@@ -288,7 +288,7 @@ const showArtifacts = ()=>{
 
 const showConsumables = ()=>{
     let infoElement = document.createElement('div');
-    infoElement.innerHTML = 'Consumables are not implemented yet';
+    infoElement.innerHTML = 'Consumables are not implemented yet. Use preheader, that have consumables settings';
 
     document.getElementById('content').appendChild(infoElement);
 };
@@ -504,6 +504,8 @@ const importFromJSON = () => {
 const TODOList = [
     "Adding and removing items",
     "Local storage of settings",
+    "preheader and footer configuration",
+    "saving few of preheader and footer configurations",
     "Loot chances by player rank",
     "Ammo count by player rank",
     "Helmet and suit settings",
