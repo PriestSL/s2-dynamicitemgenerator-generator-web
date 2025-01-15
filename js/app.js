@@ -506,12 +506,14 @@ const TODOList = [
     "Local storage of settings",
     "preheader and footer configuration",
     "saving few of preheader and footer configurations",
+    "Separated helmets and armor compatibility",
+    "Helmets drops",
+    "Create as splitted files and override",
     "Loot chances by player rank",
     "Ammo count by player rank",
     "Helmet and suit settings",
     "Consumables settings",
     "Artifacts settings",
-    "Splitted files as in refactor mod",
     "Secondary weapons settings",
     "packing into .pak file"
 ];
