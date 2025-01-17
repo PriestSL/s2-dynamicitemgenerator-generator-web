@@ -10,7 +10,7 @@ export const generateConfig = async ()=>{
     let zipName = document.getElementById('config_name').value || 'Stalker2Loadout';
     zipName = zipName.replace(/\s/g, '');
     let zip = new JSZip();
-    zip.file("Stalker2/Content/GameLite/GameData/ItemGeneratorPrototypes/DynamicItemGenerator.cfg", cArmorGenerators);
+    zip.file("Stalker2/Content/GameLite/GameData/ItemGeneratorPrototypes/New_NPC_Loadouts.cfg", cArmorGenerators);
     zip.generateAsync({type:"blob"})
     .then(function(content) {
         saveAs(content, `zzzz_${zipName}_1_P.zip`);

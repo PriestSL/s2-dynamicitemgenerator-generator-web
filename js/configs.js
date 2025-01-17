@@ -43,397 +43,260 @@ export const oWeaponList = {
 export let oArmorSpawnSettings = {
     Jemmy_Neutral_Armor: {
         drop: true,
-        helmets: {
-            Light_Neutral_Helmet:{
-                spawn:{
-                    Newbie: 0.3,
-                    Experienced: 0.5,
-                    Veteran: 0.6,
-                    Master: 0.7
-                }
-            }
-        }
+        helmet: 'Light_Neutral_Helmet',
+        helmetSpawn: true
     },
     Newbee_Neutral_Armor:{
         drop: true,
-        helmets: {
-            Light_Neutral_Helmet:{
-                spawn:{
-                    Newbie: 0.3,
-                    Experienced: 0.5,
-                    Veteran: 0.6,
-                    Master: 0.7
-                }
-            }
-        }
+        helmet: 'Light_Neutral_Helmet',
+        helmetSpawn: true
     },
     NPC_Sel_Neutral_Armor:{
         drop: false,
-        helmets: {
-            Light_Neutral_Helmet:{
-                spawn:{
-                    Newbie: 0.3,
-                    Experienced: 0.5,
-                    Veteran: 0.6,
-                    Master: 0.7
-                }
-            }
-        }
+        helmet: 'Light_Neutral_Helmet',
+        helmetSpawn: true
     },
     Nasos_Neutral_Armor:{
         drop: true,
-        helmets: {
-            Light_Neutral_Helmet:{
-                spawn:{
-                    Newbie: 0.3,
-                    Experienced: 0.5,
-                    Veteran: 0.6,
-                    Master: 0.7
-                }
-            }
-        }
+        helmet: 'Light_Neutral_Helmet',
+        helmetSpawn: true
     },
     Zorya_Neutral_Armor:{
         drop: true,
-        helmets: {
-            Light_Neutral_Helmet:{
-                spawn:{
-                    Newbie: 0.3,
-                    Experienced: 0.5,
-                    Veteran: 0.6,
-                    Master: 0.7
-                }
-            }
-        }
+        helmet: 'Light_Neutral_Helmet',
+        helmetSpawn: true
     },
     SEVA_Neutral_Armor:{
-        drop: true
+        drop: true,
+        helmet: 'Light_Neutral_Helmet'
     },
     NPC_Cloak_Heavy_Neutral_Armor:{
-        drop: false
+        drop: false,
+        helmet: 'Light_Neutral_Helmet'
     },
     Exoskeleton_Neutral_Armor:{
-        drop: true
+        drop: true,
+        helmet: 'Light_Neutral_Helmet'
     },
     SkinJacket_Bandit_Armor:{
         drop: true,
-        helmets: {
-            Light_Bandit_Helmet:{
-                spawn:{
-                    Experienced: 0.5,
-                    Veteran: 0.6,
-                    Master: 0.7
-                }
-            }
-        }
+        helmet: 'Light_Bandit_Helmet',
+        helmetSpawn: true
     },
     NPC_SkinCloak_Bandit_Armor:{
         drop: false,
-        helmets: {
-            Light_Bandit_Helmet:{
-                spawn:{
-                    Experienced: 0.5,
-                    Veteran: 0.6,
-                    Master: 0.7
-                }
-            }
-        }
+        helmet: 'Light_Bandit_Helmet',
+        helmetSpawn: true
     },
     Jacket_Bandit_Armor:{
         drop: true,
-        helmets: {
-            Light_Bandit_Helmet:{
-                spawn:{
-                    Experienced: 0.5,
-                    Veteran: 0.6,
-                    Master: 0.7
-                }
-            }
-        }
+        helmet: 'Light_Bandit_Helmet',
+        helmetSpawn: true
     },
     Middle_Bandit_Armor:{
         drop: true,
-        helmets: {
-            Light_Bandit_Helmet:{
-                spawn:{
-                    Experienced: 0.5,
-                    Veteran: 0.6,
-                    Master: 0.7
-                }
-            }
-        }
+        helmet: 'Light_Bandit_Helmet',
+        helmetSpawn: true
     },
     Light_Mercenaries_Armor:{
         drop: true,
-        helmets: {
-            Light_Mercenaries_Helmet:{
-                spawn:{
-                    Newbie: 0.3,
-                    Experienced: 0.5,
-                    Veteran: 0.6,
-                    Master: 0.7
-                }
-            }
-        }
+        helmet: 'Light_Mercenaries_Helmet',
+        helmetSpawn: true
     },
     Heavy_Mercenaries_Armor:{
         drop: true,
-        helmets: {
-            Light_Mercenaries_Helmet:{
-                spawn:{
-                    Newbie: 0.3,
-                    Experienced: 0.5,
-                    Veteran: 0.6,
-                    Master: 0.7
-                }
-            }
-        }
+        helmet: 'Light_Mercenaries_Helmet',
+        helmetSpawn: true
     },
     Exoskeleton_Mercenaries_Armor:{
-        drop: true
+        drop: true,
+        helmet: 'Light_Mercenaries_Helmet'
     },
     NPC_HeavyExoskeleton_Mercenaries_Armor:{
         drop: true,
-        dropItem: 'Exoskeleton_Mercenaries_Armor'
+        dropItem: 'Exoskeleton_Mercenaries_Armor',
+        helmet: 'Light_Mercenaries_Helmet'
     },
     Anomaly_Scientific_Armor: {
-        drop: true
+        drop: true,
+        helmet: 'Light_Mercenaries_Helmet'
     },
     NPC_Sci_Armor:{
         drop: false
     },
     HeavyAnomaly_Scientific_Armor:{
-        drop: true
+        drop: true,
+        helmet: 'Light_Mercenaries_Helmet'
     },
     Default_Military_Armor:{
         drop: true,
-        helmets: {
-            Light_Military_Helmet:{
-                spawn:{
-                    Newbie: 0.3
-                }
-            },
-            Battle_Military_Helmet:{
-                spawn:{
-                    Experienced: 0.5,
-                    Veteran: 0.6,
-                    Master: 0.7
-                }
-            }
-        }
+        helmet: 'Light_Military_Helmet',
+        helmetSpawn: true
     },
     NPC_Cloak_Heavy_Military_Armor:{
         drop: true,
-        dropItem: 'Heavy2_Military_Armor'
+        dropItem: 'Heavy2_Military_Armor',
+        helmet: 'Battle_Military_Helmet'
     },
     NPC_Heavy_Military_Armor:{
         drop: true,
-        dropItem: 'Heavy2_Military_Armor'
+        dropItem: 'Heavy2_Military_Armor',
+        helmet: 'Battle_Military_Helmet'
     },
     Heavy2_Military_Armor:{
-        drop: true
+        drop: true,
+        helmet: 'Battle_Military_Helmet'
     },
     Battle_Monolith_Armor:{
         drop: true,
-        helmets: {
-            Battle_Military_Helmet:{
-                spawn:{
-                    Newbie: 0.3,
-                    Experienced: 0.5,
-                    Veteran: 0.6,
-                    Master: 0.7
-                }
-            }
-        }
+        helmet: 'Battle_Military_Helmet',
+        helmetSpawn: true
     },
     HeavyAnomaly_Monolith_Armor:{
-        drop: true
+        drop: true,
+        helmet: 'Battle_Military_Helmet'
     },
     HeavyExoskeleton_Monolith_Armor:{
-        drop: true
+        drop: true,
+        helmet: 'Battle_Military_Helmet'
     },
     Exoskeleton_Monolith_Armor:{
-        drop: true
+        drop: true,
+        helmet: 'Battle_Military_Helmet'
     },
     Rook_Dolg_Armor:{
         drop: true,
-        helmets: {
-            Light_Duty_Helmet:{
-                spawn:{
-                    Newbie: 0.3
-                }
-            },
-            Heavy_Duty_Helmet:{
-                spawn:{
-                    Experienced: 0.5,
-                    Veteran: 0.6,
-                    Master: 0.7
-                }
-            }
-        }
+        helmet: 'Light_Duty_Helmet',
+        helmetSpawn: true
     },
     Battle_Dolg_Armor:{
         drop: true,
-        helmets: {
-            Light_Duty_Helmet:{
-                spawn:{
-                    Newbie: 0.3
-                }
-            },
-            Heavy_Duty_Helmet:{
-                spawn:{
-                    Experienced: 0.5,
-                    Veteran: 0.6,
-                    Master: 0.7
-                }
-            }
-        }
+        helmet: 'Heavy_Duty_Helmet',
+        helmetSpawn: true
     },
     SEVA_Dolg_Armor:{
-        drop: true
+        drop: true,
+        helmet: 'Heavy_Duty_Helmet'
     },
     Heavy_Dolg_Armor:{
-        drop: true
+        drop: true,
+        helmet: 'Heavy_Duty_Helmet'
     },
     Exoskeleton_Dolg_Armor:{
-        drop: true
+        drop: true,
+        helmet: 'Heavy_Duty_Helmet'
     },
     HeavyExoskeleton_Dolg_Armor:{
-        drop: true
+        drop: true,
+        helmet: 'Heavy_Duty_Helmet'
     },
     Rook_Svoboda_Armor:{
         drop: true,
-        helmets: {
-            Heavy_Duty_Helmet:{
-                spawn:{
-                    Newbie: 0.2,
-                    Experienced: 0.5,
-                    Veteran: 0.6,
-                    Master: 0.7
-                }
-            }
-        }
+        helmet: 'Heavy_Svoboda_Helmet',
+        helmetSpawn: true
     },
     Battle_Svoboda_Armor:{
         drop: true,
-        helmets: {
-            Heavy_Duty_Helmet:{
-                spawn:{
-                    Newbie: 0.2,
-                    Experienced: 0.5,
-                    Veteran: 0.6,
-                    Master: 0.7
-                }
-            }
-        }
+        helmet: 'Heavy_Svoboda_Helmet',
+        helmetSpawn: true
     },
     SEVA_Svoboda_Armor:{
-        drop: true
+        drop: true,
+        helmet: 'Heavy_Svoboda_Helmet'
     },
     Heavy_Svoboda_Armor:{
-        drop: true
+        drop: true,
+        helmet: 'Heavy_Svoboda_Helmet'
     },
     Exoskeleton_Svoboda_Armor:{
-        drop: true
+        drop: true,
+        helmet: 'Heavy_Svoboda_Helmet'
     },
     HeavyExoskeleton_Svoboda_Armor:{
-        drop: true
+        drop: true,
+        helmet: 'Heavy_Svoboda_Helmet'
     },
     Battle_Varta_Armor:{
         drop: true,
-        helmets: {
-            Heavy_Varta_Helmet:{
-                spawn:{
-                    Newbie: 0.3,
-                    Experienced: 0.5,
-                    Veteran: 0.6,
-                    Master: 0.7
-                }
-            }
-        }
+        helmet: 'Heavy_Varta_Helmet',
+        helmetSpawn: true
     },
     BattleExoskeleton_Varta_Armor:{
-        drop: true
+        drop: true,
+        helmet: 'Heavy_Varta_Helmet'
     },
     NPC_Battle_Noon_Armor:{
         drop: true,
         dropItem: 'Battle_Monolith_Armor',
-        helmets: {
-            Battle_Military_Helmet:{
-                spawn:{
-                    Newbie: 0.3,
-                    Experienced: 0.3
-                }
-            },
-            Heavy_Military_Helmet:{
-                spawn:{
-                    Veteran: 0.6,
-                    Master: 0.7
-                }
-            }
-        }
+        helmet: 'Battle_Military_Helmet',
+        helmetSpawn: true
     },
     NPC_HeavyAnomaly_Noon_Armor:{
         drop: true,
-        dropItem: 'HeavyAnomaly_Monolith_Armor'
+        dropItem: 'HeavyAnomaly_Monolith_Armor',
+        helmet: 'Battle_Military_Helmet'
     },
     NPC_Exoskeleton_Noon_Armor:{
         drop: true,
-        dropItem: 'Exoskeleton_Monolith_Armor'
+        dropItem: 'Exoskeleton_Monolith_Armor',
+        helmet: 'Battle_Military_Helmet'
     },
     NPC_HeavyExoskeleton_Noon_Armor:{
         drop: true,
-        dropItem: 'HeavyExoskeleton_Monolith_Armor'
+        dropItem: 'HeavyExoskeleton_Monolith_Armor',
+        helmet: 'Battle_Military_Helmet'
     },
     Battle_Spark_Armor:{
         drop: true,
-        helmets: {
-            Battle_Military_Helmet:{
-                spawn:{
-                    Newbie: 0.3,
-                    Experienced: 0.5,
-                    Veteran: 0.6,
-                    Master: 0.7
-                }
-            }
-        }
+        helmet: 'Battle_Military_Helmet',
+        helmetSpawn: true
     },
     NPC_Anomaly_Spark_Armor:{
         drop: true,
-        dropItem: 'HeavyAnomaly_Spark_Armor'
+        dropItem: 'HeavyAnomaly_Spark_Armor',
+        helmet: 'Battle_Military_Helmet'
     },
     HeavyAnomaly_Spark_Armor:{
-        drop: true
+        drop: true,
+        helmet: 'Battle_Military_Helmet'
     },
     SEVA_Spark_Armor:{
-        drop: true
+        drop: true,
+        helmet: 'Battle_Military_Helmet'
     },
     HeavyBattle_Spark_Armor:{
-        drop: true
+        drop: true,
+        helmet: 'Battle_Military_Helmet'
     },
     NPC_HeavyExoskeleton_Spark_Armor:{
         drop: true,
-        dropItem: 'Exoskeleton_Neutral_Armor'
+        dropItem: 'Exoskeleton_Neutral_Armor',
+        helmet: 'Battle_Military_Helmet'
     },
     NPC_Heavy_Corps_Armor:{
         drop: true,
-        dropItem: 'Heavy2_Military_Armor'
+        dropItem: 'Heavy2_Military_Armor',
+        helmet: 'Battle_Military_Helmet'
     },
     NPC_Heavy2_Coprs_Armor:{
         drop: true,
-        dropItem: 'Heavy2_Military_Armor'
+        dropItem: 'Heavy2_Military_Armor',
+        helmet: 'Battle_Military_Helmet'
     },
     NPC_Heavy3_Corps_Armor:{
         drop: true,
-        dropItem: 'Heavy2_Military_Armor'
+        dropItem: 'Heavy2_Military_Armor',
+        helmet: 'Battle_Military_Helmet'
     },
     NPC_Heavy3Exoskeleton_Coprs_Armor:{
         drop: true,
-        dropItem: 'Exoskeleton_Neutral_Armor'
+        dropItem: 'Exoskeleton_Neutral_Armor',
+        helmet: 'Battle_Military_Helmet'
     },
     NPC_Exoskeleton_Coprs_Armor:{
         drop: true,
-        dropItem: 'Exoskeleton_Neutral_Armor'
+        dropItem: 'Exoskeleton_Neutral_Armor',
+        helmet: 'Battle_Military_Helmet'
     }
 };
 
@@ -521,6 +384,88 @@ export let oArmorLoadoutSettings = {
         NPC_Exoskeleton_Coprs_Armor: [0, 1, 2, 5]
     }
 };
+
+export let oHelmetsSettings = {
+    Light_Neutral_Helmet: {
+        drop: true,
+        spawn: {
+            Newbie: 0.3,
+            Experienced: 0.5,
+            Veteran: 0.6,
+            Master: 0.7
+        }
+    },
+    Light_Bandit_Helmet: {
+        drop: true,
+        spawn: {
+            Experienced: 0.5,
+            Veteran: 0.6,
+            Master: 0.7
+        }
+    },
+    Light_Mercenaries_Helmet: {
+        drop: true,
+        spawn: {
+            Newbie: 0.3,
+            Experienced: 0.5,
+            Veteran: 0.6,
+            Master: 0.7
+        }
+    },
+    Light_Military_Helmet: {
+        drop: true,
+        spawn: {
+            Newbie: 0.3
+        }
+    },
+    Battle_Military_Helmet: {
+        drop: true,
+        spawn: {
+            Experienced: 0.5,
+            Veteran: 0.6,
+            Master: 0.7
+        }
+    },
+    Light_Duty_Helmet: {
+        drop: true,
+        spawn: {
+            Newbie: 0.3
+        }
+    },
+    Heavy_Duty_Helmet: {
+        drop: true,
+        spawn: {
+            Experienced: 0.5,
+            Veteran: 0.6,
+            Master: 0.7
+        }
+    },
+    Heavy_Svoboda_Helmet: {
+        drop: true,
+        spawn: {
+            Newbie: 0.2,
+            Experienced: 0.5,
+            Veteran: 0.6,
+            Master: 0.7
+        }
+    },
+    Heavy_Varta_Helmet: {
+        drop: true,
+        spawn: {
+            Newbie: 0.3,
+            Experienced: 0.5,
+            Veteran: 0.6,
+            Master: 0.7
+        }
+    },
+    Heavy_Military_Helmet: {
+        drop: true,
+        spawn: {
+            Veteran: 0.6,
+            Master: 0.7
+        }
+    }
+}
 
 export let oWeaponLoadoutSettings = {
     GeneralNPC_Neutral:{

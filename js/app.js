@@ -385,8 +385,8 @@ const drawFileSettings = () => `
         <hr>
         <h2>Compatibility settings</h2>
         <hr>
-        <label for="copm_FP">Faction Patches</label>
-        <input type="checkbox" id="copm_FP" ${modsCompatibility.Faction_Patches ? 'checked' : ''}>
+        <label for="copm_SHA">Separeted Helmets and Armors</label>
+        <input type="checkbox" id="copm_SHA" ${modsCompatibility.SHA ? 'checked' : ''}>
         <hr>
         <h2>Armor drop settings<h2>
         <hr>
@@ -504,12 +504,10 @@ const importFromJSON = () => {
 const TODOList = [
     "Adding and removing items",
     "Local storage of settings",
-    "preheader and footer configuration",
-    "saving few of preheader and footer configurations",
     "Separated helmets and armor compatibility",
     "Helmets drops",
     "Create as splitted files and override",
-    "Loot chances by player rank",
+    "Armor Loot chances by player rank",
     "Ammo count by player rank",
     "Helmet and suit settings",
     "Consumables settings",
