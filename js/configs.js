@@ -376,7 +376,6 @@ export let oArmorLoadoutSettings = {
         NPC_HeavyExoskeleton_Spark_Armor: [0, 1, 4, 10]
     },
     GeneralNPC_Corpus:{
-        Default_Military_Armor: [91, 80, 39, 30],
         NPC_Heavy_Corps_Armor: [3, 7, 19, 20],
         NPC_Heavy2_Coprs_Armor: [3, 6, 19, 20],
         NPC_Heavy3_Corps_Armor: [3, 6, 19, 20],
