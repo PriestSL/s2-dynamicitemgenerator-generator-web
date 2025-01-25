@@ -1,7 +1,6 @@
 import * as config from './configs.js';
-import {modifiedWeaponSettings, modifiedArmorSettings, modifiedWeaponList, modifiedAmmoByWeaponClass, modifiedGrenadeSettings, modsCompatibility, modifiedDropConfigs} from './app.js';
+import {modifiedWeaponSettings, modifiedArmorSettings, modifiedWeaponList, modifiedAmmoByWeaponClass, modifiedGrenadeSettings, modsCompatibility, modifiedDropConfigs, modifiedArmorSpawnSettings, modifiedHelmetSettings} from './app.js';
 
-const oArmorSpawnSettings = config.oArmorSpawnSettings;
 var oArmorLoadoutSettings;
 var oWeaponLoadoutSettings;
 var oWeaponList;
@@ -10,7 +9,6 @@ var oAmmoByWeaponClass;
 const nMinWeaponDurability = config.nMinWeaponDurability;
 const nMaxWeaponDurability = config.nMaxWeaponDurability;
 const nPistolLootChance = config.nPistolLootChance;
-const oHelmetsSettings = config.oHelmetsSettings;
 
 
 let ranks = ['Newbie', 'Experienced', 'Veteran', 'Master'];
@@ -19,16 +17,16 @@ const createArmorItemGenerator = (cArmorName)=>{
     //TODO Lootable chances by player rank
     const createLootable = ()=>
     `            [1] : struct.begin
-               ItemPrototypeSID = ${oArmorSpawnSettings[cArmorName].dropItem || cArmorName}
+               ItemPrototypeSID = ${modifiedArmorSpawnSettings[cArmorName].dropItem || cArmorName}
                MinDurability = ${modifiedDropConfigs.nMinDurability}
                MaxDurability = ${modifiedDropConfigs.nMaxDurability}
                Chance = ${modifiedDropConfigs.nLootChance}
             struct.end`;
 
     const createHelmet = ()=>{
-        if (!oArmorSpawnSettings[cArmorName].helmetSpawn && !modsCompatibility.SHA) return '';
-        const cHelmet = oArmorSpawnSettings[cArmorName].helmet;
-        const oHelmet = oHelmetsSettings[cHelmet];
+        if (!modifiedArmorSpawnSettings[cArmorName].helmetSpawn && !modsCompatibility.SHA) return '';
+        const cHelmet = modifiedArmorSpawnSettings[cArmorName].helmet;
+        const oHelmet = modifiedHelmetSettings[cHelmet];
 
         let cRet = '';
         for (let rank in oHelmet.spawn){
@@ -59,7 +57,7 @@ const createArmorItemGenerator = (cArmorName)=>{
                ItemPrototypeSID = ${cArmorName}
                Chance = 1
             struct.end
-${modifiedDropConfigs.createDroppableArmor && oArmorSpawnSettings[cArmorName].drop ? createLootable() : ''}
+${modifiedDropConfigs.createDroppableArmor && modifiedArmorSpawnSettings[cArmorName].drop ? createLootable() : ''}
          struct.end
       struct.end
 ${createHelmet()}
@@ -408,7 +406,7 @@ export const createLoadout = async ()=>{
 
     //creating modded structures
     cRet += `//Armor itemgenerators to provide better helmet spawn and features like armor drop\n`;
-    for (let armor in oArmorSpawnSettings){
+    for (let armor in modifiedArmorSpawnSettings){
         cRet += createArmorItemGenerator(armor);
     }
 

@@ -7,15 +7,26 @@ var currentCategory = "Primary";
 
 export var modifiedWeaponSettings = deepCopy(configs.oWeaponLoadoutSettings);
 export var modifiedArmorSettings = deepCopy(configs.oArmorLoadoutSettings);
+export var modifiedArmorSpawnSettings = deepCopy(configs.oArmorSpawnSettings); 
+export var modifiedHelmetSettings = deepCopy(configs.oHelmetsSettings);
 export var modifiedGrenadeSettings = deepCopy(configs.oGrenadesSettings);
 export var modifiedAmmoByWeaponClass = deepCopy(configs.oAmmoByWeaponClass);
 export var modifiedWeaponList = deepCopy(configs.oWeaponList);
-export var modsCompatibility = {Faction_Patches: true}
+export var modsCompatibility = {SHA: false}
 export var modifiedDropConfigs = deepCopy(configs.oDropConfigs);
 
 const typeToTable = {
-    weapon: modifiedWeaponList
+    weapon: modifiedWeaponList,
+    armor: modifiedArmorSpawnSettings
 };
+
+const drawAttentionDiv = () => {
+    let text = 'This section is for all factions, settings for specific factions are not implemented yet';
+    let div = document.createElement('div');
+    div.classList.add('attention');
+    div.innerHTML = text;
+    return div;
+}
 
 const updateLabels = (oSettings, level, classification = '') => {
     let total = 0;
@@ -168,7 +179,8 @@ const fillChancesTable = (oSettings, parentElement, newRowReplace, classificatio
 
 const fillAttributesTable = (oSettings, parentElement, type) => {
     const typeToAttributeList = {
-        weapon: [['minAmmo', 'number'], ['maxAmmo','number']]
+        weapon: [['minAmmo', 'number'], ['maxAmmo','number']],
+        armor: [['drop', 'checkbox'], ['dropItem', 'select'], ['helmet', 'select'], ['helmetSpawn', 'checkbox']]
     };
 
 
@@ -184,13 +196,33 @@ const fillAttributesTable = (oSettings, parentElement, type) => {
             let labelEl = document.createElement('label');
             labelEl.classList.add('attribute');
             labelEl.innerHTML = thisAttr[0];
-            let attrElement = document.createElement('input');
-            attrElement.type = thisAttr[1];
-            attrElement.value = oAttr[thisAttr[0]];
-            attrElement.setAttribute('item_type', type);
-            attrElement.setAttribute('to_item', item);
-            attrElement.setAttribute('to_attr', thisAttr[0]);
-            attrElement.addEventListener('change', onAttributeChange);
+            let attrElement = null;
+            if (thisAttr[1] === 'select') {
+                attrElement = document.createElement('select');
+                attrElement.setAttribute('item_type', type);
+                attrElement.setAttribute('to_item', item);
+                attrElement.setAttribute('to_attr', thisAttr[0]);
+                let itemList = type==='armor'?thisAttr[0]=='helmet'?modifiedHelmetSettings:modifiedArmorSpawnSettings:modifiedWeaponList; //bruh
+                for (let item in itemList) {
+                    let option = document.createElement('option');
+                    option.value = item;
+                    option.text = item;
+                    attrElement.appendChild(option);
+                }
+                attrElement.value = oAttr[thisAttr[0]];
+                attrElement.addEventListener('change', onAttributeChange);
+            }else{
+                attrElement = document.createElement('input');
+                attrElement.type = thisAttr[1];
+                attrElement.value = oAttr[thisAttr[0]];
+                if (thisAttr[1] === 'checkbox') {
+                    attrElement.checked = oAttr[thisAttr[0]];
+                }
+                attrElement.setAttribute('item_type', type);
+                attrElement.setAttribute('to_item', item);
+                attrElement.setAttribute('to_attr', thisAttr[0]);
+                attrElement.addEventListener('change', onAttributeChange);
+            }
 
             attributesElement.appendChild(labelEl);
             attributesElement.appendChild(attrElement);
@@ -221,11 +253,10 @@ const fillAttributesTable = (oSettings, parentElement, type) => {
 
 const showPrimarySettings = () => {
     fillAttributesTable(modifiedWeaponList, document.getElementById('content'), 'weapon');
+};
 
-    let elements = document.getElementsByClassName('chance');
-    for (let i = 0; i < elements.length; i++) {
-        elements[i].addEventListener('change', onAmmoChanceChange);
-    }
+const showArmorSettings = () => {
+    fillAttributesTable(modifiedArmorSpawnSettings, document.getElementById('content'), 'armor');
 };
 
 const showPrimary = ()=>{
@@ -261,12 +292,17 @@ const showPrimary = ()=>{
 
 const showSecondary = ()=>{
     let infoElement = document.createElement('div');
-    infoElement.innerHTML = 'Secondary weapons are not implemented yet';
+    infoElement.innerHTML = 'Changing secondary weapons are not implemented yet (they are works in game?)';
 
     document.getElementById('content').appendChild(infoElement);
 };
 
 const showArmor = ()=>{
+    if (currentFaction === 'Generic_settings'){
+        showArmorSettings();
+        return;
+    }
+
     let GeneralSettings = 'GeneralNPC_'+currentFaction;
     let ArmorSettings = modifiedArmorSettings[GeneralSettings];
     fillChancesTable(ArmorSettings, document.getElementById('content'));
@@ -281,14 +317,14 @@ const showArmor = ()=>{
 
 const showArtifacts = ()=>{
     let infoElement = document.createElement('div');
-    infoElement.innerHTML = 'Artifacts are not implemented yet (and game uses Artifact class to generate grenades)';
+    infoElement.innerHTML = 'Lootable artifact settings are not implemented yet (and game uses Artifact class to generate grenades)';
 
     document.getElementById('content').appendChild(infoElement);
 };
 
 const showConsumables = ()=>{
     let infoElement = document.createElement('div');
-    infoElement.innerHTML = 'Consumables are not implemented yet. Use preheader, that have consumables settings';
+    infoElement.innerHTML = 'Consumables loot settings are not implemented yet.';
 
     document.getElementById('content').appendChild(infoElement);
 };
@@ -301,6 +337,8 @@ const showAmmo = ()=>{
     for (let i = 0; i < elements.length; i++) {
         elements[i].addEventListener('change', onAmmoChanceChange);
     }
+
+    document.getElementById('content').appendChild(drawAttentionDiv());
 };
 
 const showGrenades = ()=>{
@@ -311,6 +349,8 @@ const showGrenades = ()=>{
     for (let i = 0; i < elements.length; i++) {
         elements[i].addEventListener('change', onGrenadeChanceChange);
     }
+
+    document.getElementById('content').appendChild(drawAttentionDiv());
 };
 
 
@@ -404,9 +444,9 @@ const drawFileSettings = () => `
 `;
 
 const subscribeFileSettingsEvents = () => {
-    let FPComp = document.getElementById('copm_FP');
-    FPComp.addEventListener('change', function(e) {
-        modsCompatibility.Faction_Patches = e.target.checked;
+    let SHAComp = document.getElementById('copm_SHA');
+    SHAComp.addEventListener('change', function(e) {
+        modsCompatibility.SHA = e.target.checked;
     });
 
     let dropArmor = document.getElementById('drop_armor');
@@ -422,17 +462,17 @@ const subscribeFileSettingsEvents = () => {
 
     let armorChance = document.getElementById('armor_chance');
     armorChance.addEventListener('change', function(e) {
-        modifiedDropConfigs.ArmorDrop.Chance = e.target.value;
+        modifiedDropConfigs.nLootChance = e.target.value;
     });
 
     let minCondition = document.getElementById('min_condition');
     minCondition.addEventListener('change', function(e) {
-        modifiedDropConfigs.ArmorDrop.MinCondition = e.target.value;
+        modifiedDropConfigs.nMinDurability = e.target.value;
     });
 
     let maxCondition = document.getElementById('max_condition');
     maxCondition.addEventListener('change', function(e) {
-        modifiedDropConfigs.ArmorDrop.MaxCondition = e.target.value;
+        modifiedDropConfigs.nMaxDurability = e.target.value;
     });
 
 
@@ -463,7 +503,9 @@ const exportToJSON = () => {
         AmmoSettings: modifiedAmmoByWeaponClass,
         WeaponList: modifiedWeaponList,
         DropConfigs: modifiedDropConfigs,
-        Compatibility: modsCompatibility
+        Compatibility: modsCompatibility,
+        ArmorSpawnSettings: modifiedArmorSpawnSettings,
+        HelmetsSettings: modifiedHelmetSettings
     };
 
     let configName = document.getElementById('config_name').value || 'config';
@@ -493,6 +535,8 @@ const importFromJSON = () => {
             modifiedWeaponList = data.WeaponList;
             modifiedDropConfigs = data.DropConfigs;
             modsCompatibility = data.Compatibility;
+            modifiedArmorSpawnSettings = data.ArmorSpawnSettings;
+            modifiedHelmetSettings = data.HelmetsSettings;
             document.getElementById('content').innerHTML = '';
             oCategoryToEvent[currentCategory]();
         };
@@ -504,12 +548,12 @@ const importFromJSON = () => {
 const TODOList = [
     "Adding and removing items",
     "Local storage of settings",
-    "Separated helmets and armor compatibility",
-    "Helmets drops",
+    "Site localization",
     "Create as splitted files and override",
+    "Helmets drops",
+    "Public presets",
     "Armor Loot chances by player rank",
     "Ammo count by player rank",
-    "Helmet and suit settings",
     "Consumables settings",
     "Artifacts settings",
     "Secondary weapons settings",

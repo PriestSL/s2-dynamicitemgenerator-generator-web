@@ -253,3 +253,11 @@ input.chance{
     font-size: 16px;
     font-weight: normal;
 }
+
+.attention{
+    font-weight: bold;
+}
+
+.attributes_grid>select{
+    width: 200px;
+}
