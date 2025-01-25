@@ -93,6 +93,25 @@ const addRow = (parentElement, item, classification, chances) => {
         }
         
     }
+
+    if ((currentCategory === 'Primary' || currentCategory === 'Armor') && currentFaction !== 'Generic_settings') {
+        let deleteButton = document.createElement('button');
+        deleteButton.innerHTML = 'Delete';
+        deleteButton.classList.add('deleteButton');
+        deleteButton.addEventListener('click', function() {
+            let GeneralSettings = 'GeneralNPC_'+currentFaction;
+            if (currentCategory === 'Primary') {
+                delete modifiedWeaponSettings[GeneralSettings][classification][item];
+                updateAllLabels(modifiedWeaponSettings[GeneralSettings][classification], classification);
+            }else if (currentCategory === 'Armor') {
+                delete modifiedArmorSettings[GeneralSettings][item];
+                updateAllLabels(modifiedArmorSettings[GeneralSettings]);
+            }
+            row.remove();
+        });
+        row.appendChild(deleteButton);
+    }
+
     parentElement.appendChild(row);
     return aChances;
 };
@@ -134,9 +153,7 @@ const addArmor = (parentEl, armor) => {
 
 const showAddSelection = (type, classification) => {
     let addDiv = document.getElementById('addItemButton');
-    console.log(addDiv);
     addDiv.style.display = 'none';
-
     
     let otherSelEl = document.getElementById('addSelection');
     if (otherSelEl) {
@@ -182,6 +199,11 @@ const drawAttentionDiv = () => {
 };
 
 const drawAddDiv = (onClick) => {
+    let existsDiv = document.getElementById('addItemButton');
+    if (existsDiv) {
+        existsDiv.remove();
+    }
+
     let div = document.createElement('div');
     div.classList.add('addDiv');
     div.id = 'addItemButton';
@@ -661,7 +683,7 @@ const importFromJSON = () => {
 };
 
 const TODOList = [
-    "Adding and removing items",
+    "Guard configuration",
     "Local storage of settings",
     "Site localization",
     "Separate site for more files",
