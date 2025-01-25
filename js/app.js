@@ -94,7 +94,7 @@ const addRow = (parentElement, item, classification, chances) => {
         
     }
 
-    if ((currentCategory === 'Primary' || currentCategory === 'Armor') && currentFaction !== 'Generic_settings') {
+    if ((currentCategory === 'Primary' || currentCategory === 'Armor') && currentFaction !== 'Generic_settings' && item !== '') {
         let deleteButton = document.createElement('button');
         deleteButton.innerHTML = 'Delete';
         deleteButton.classList.add('deleteButton');
