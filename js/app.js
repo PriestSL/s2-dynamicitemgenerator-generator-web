@@ -683,6 +683,7 @@ const importFromJSON = () => {
 };
 
 const TODOList = [
+    "Script versions (to load newest versions, not from cache)",
     "Guard configuration",
     "Local storage of settings",
     "Site localization",
