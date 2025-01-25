@@ -1,4 +1,6 @@
 import { generateConfig } from './fileStreamGenerator.js';
+
+/*ugliest code that I wrote*/
 import * as configs from './configs.js'; 
 import { deepCopy } from './utils.js';
 
@@ -20,13 +22,175 @@ const typeToTable = {
     armor: modifiedArmorSpawnSettings
 };
 
+const createChances = (item, summary, chances, classification = '', attr = 'chances') => {
+    let aChances = [];
+    let chancesElement = document.createElement('div');
+    chancesElement.classList.add('chances_row');
+    for (let i=0; i<chances.length; i++) {
+        let resultElement = document.createElement('div'); //container to show real chance
+            resultElement.classList.add('chance');
+            
+        if (isNaN(parseFloat(chances[i]))) { //for static text
+            resultElement.innerHTML = chances[i];
+        }else{ //inputs
+            let faction = currentFaction;
+            let itemType = currentCategory;
+
+            let chanceElement = document.createElement('input');
+                chanceElement.type = 'number';
+                chanceElement.classList.add('chance');
+                chanceElement.value = chances[i];
+                chanceElement.setAttribute('to_faction', faction);
+                chanceElement.setAttribute('to_classification', classification);
+                chanceElement.setAttribute('to_item_type', itemType);
+                chanceElement.setAttribute('to_item', item);
+                chanceElement.setAttribute('to_attr', attr);
+                chanceElement.setAttribute('to_level', i);
+
+                //chanceElement.id = faction + ' - ' + itemType + '-' +itemName + '-' + attrName + '-' + i;
+            resultElement.appendChild(chanceElement);
+
+            let chanceLabel = document.createElement('div');
+                chanceLabel.id = classification + '-' + item + '-' + attr + '-' + i + '_label';
+                chanceLabel.classList.add('chance_label');
+            resultElement.appendChild(chanceLabel);
+
+            aChances.push(chanceElement); //bruuuuuuuuuuh
+
+        }
+        chancesElement.appendChild(resultElement);
+    }
+
+    summary.appendChild(chancesElement);
+
+    return aChances;
+};
+
+const addRow = (parentElement, item, classification, chances) => {
+    let row = document.createElement('div');
+    row.classList.add(typeof chances=== 'object' && chances.length?'item_row':'item_column');
+    let itemElement = document.createElement('div');
+    itemElement.classList.add('chances_item');
+    itemElement.innerHTML = item;
+    row.appendChild(itemElement);
+
+    let aChances;
+
+    if (typeof chances === 'object'){
+        if (chances.length){
+            aChances = createChances(item, row, chances, classification);
+        }else{
+            for (let attr in chances) {
+                let innerRow = document.createElement('div');
+                innerRow.classList.add('attr_row');
+                row.appendChild(innerRow);
+                let attrNameElement = document.createElement('div');
+                attrNameElement.classList.add('attr_item');
+                attrNameElement.innerHTML = attr;
+                innerRow.appendChild(attrNameElement);
+                aChances = createChances(item, innerRow, chances[attr], classification, attr);
+            }
+        }
+        
+    }
+    parentElement.appendChild(row);
+    return aChances;
+};
+
+const addWeaponToClass = (parentEl, classification, weapon) => {
+    let GeneralSettings = 'GeneralNPC_'+currentFaction;
+    let WeaponSettings = modifiedWeaponSettings[GeneralSettings];
+    if (WeaponSettings[classification][weapon]) return;
+
+    let aChances = addRow(parentEl, weapon, classification, [0, 0, 0, 0]);
+
+    if (aChances && aChances.length) {
+        for (let i = 0; i < aChances.length; i++) {
+            aChances[i].addEventListener('change', onWeaponChanceChange);
+        }
+    };
+
+    WeaponSettings[classification][weapon] = [0, 0, 0, 0];
+
+    updateAllLabels(WeaponSettings[classification], classification);
+};
+
+const addArmor = (parentEl, armor) => {
+    let GeneralSettings = 'GeneralNPC_'+currentFaction;
+    let ArmorSettings = modifiedArmorSettings[GeneralSettings];
+    if (ArmorSettings[armor]) return;
+
+    let aChances = addRow(parentEl, armor, '', [0, 0, 0, 0]);
+
+    if (aChances && aChances.length) {
+        for (let i = 0; i < aChances.length; i++) {
+            aChances[i].addEventListener('change', onArmorChanceChange);
+        }
+    };
+
+    ArmorSettings[armor] = [0, 0, 0, 0];
+    updateAllLabels(ArmorSettings);
+};
+
+const showAddSelection = (type, classification) => {
+    let addDiv = document.getElementById('addItemButton');
+    console.log(addDiv);
+    addDiv.style.display = 'none';
+
+    
+    let otherSelEl = document.getElementById('addSelection');
+    if (otherSelEl) {
+        otherSelEl.remove();
+    }
+
+    let selection = document.createElement('div');
+    selection.classList.add('addSelection');
+    let select = document.createElement('select');
+    select.id = 'addSelection';
+    let option = document.createElement('option');
+    option.value = '';
+    option.text = 'Select item';
+    select.appendChild(option);
+    for (let item in typeToTable[type]) {
+        let option = document.createElement('option');
+        option.value = item;
+        option.text = item;
+        select.appendChild(option);
+    }
+    selection.appendChild(select);
+    selection.addEventListener('change', function(e) {
+        let item = e.target.value;
+        if (type === 'weapon') {
+            addWeaponToClass(e.target.parentElement.parentElement, classification, item);
+        }else if (type === 'armor') {
+            addArmor(e.target.parentElement.parentElement, item);
+        }
+
+        e.target.remove();
+        addDiv.style.display = 'block';
+    });
+
+    return selection;
+};
+
 const drawAttentionDiv = () => {
     let text = 'This section is for all factions, settings for specific factions are not implemented yet';
     let div = document.createElement('div');
     div.classList.add('attention');
     div.innerHTML = text;
     return div;
-}
+};
+
+const drawAddDiv = (onClick) => {
+    let div = document.createElement('div');
+    div.classList.add('addDiv');
+    div.id = 'addItemButton';
+    let button = document.createElement('button');
+    button.innerHTML = '+';
+    button.addEventListener('click', onClick);
+    div.appendChild(button);
+    return div;
+};
 
 const updateLabels = (oSettings, level, classification = '') => {
     let total = 0;
@@ -45,7 +209,7 @@ const updateAllLabels = (oSettings, classification = '') => {
     for (let level = 0; level < 4; level++) {
         updateLabels(oSettings, level, classification);
     }
-}
+};
 
 function onWeaponChanceChange(e) {
     //TODO rewrite to use typeToTable
@@ -97,81 +261,32 @@ function onAttributeChange(e) {
     typeToTable[type][item][attr] = value;
 };
 
+
+
 //TODO rewrite to use typeToTable
-const fillChancesTable = (oSettings, parentElement, newRowReplace, classification = '') => {
+const fillChancesTable = (oSettings, parentElement, newRowReplace, tableType, classification = '') => {
     let chancesTable = document.createElement('div');
-
-    const createChances = (item, summary, chances, attr = 'chances') => {
-        let chancesElement = document.createElement('div');
-        chancesElement.classList.add('chances_row');
-        for (let i=0; i<chances.length; i++) {
-            let resultElement = document.createElement('div'); //container to show real chance
-                resultElement.classList.add('chance');
-            if (isNaN(parseFloat(chances[i]))) { //for static text
-                resultElement.innerHTML = chances[i];
-            }else{ //inputs
-                let faction = currentFaction;
-                let itemType = currentCategory;
-
-                let chanceElement = document.createElement('input');
-                    chanceElement.type = 'number';
-                    chanceElement.classList.add('chance');
-                    chanceElement.value = chances[i];
-                    chanceElement.setAttribute('to_faction', faction);
-                    chanceElement.setAttribute('to_classification', classification);
-                    chanceElement.setAttribute('to_item_type', itemType);
-                    chanceElement.setAttribute('to_item', item);
-                    chanceElement.setAttribute('to_attr', attr);
-                    chanceElement.setAttribute('to_level', i);
-
-                    //chanceElement.id = faction + ' - ' + itemType + '-' +itemName + '-' + attrName + '-' + i;
-                resultElement.appendChild(chanceElement);
-
-                let chanceLabel = document.createElement('div');
-                    chanceLabel.id = classification + '-' + item + '-' + attr + '-' + i + '_label';
-                    chanceLabel.classList.add('chance_label');
-                resultElement.appendChild(chanceLabel);
-
-            }
-            chancesElement.appendChild(resultElement);
-        }
-
-        summary.appendChild(chancesElement);
-    }
-
-    const addRow = (parentElement, item, chances) => {
-        let row = document.createElement('div');
-        row.classList.add(typeof chances=== 'object' && chances.length?'item_row':'item_column');
-        let itemElement = document.createElement('div');
-        itemElement.classList.add('chances_item');
-        itemElement.innerHTML = item;
-        row.appendChild(itemElement);
-
-        if (typeof chances === 'object'){
-            if (chances.length){
-                createChances(item, row, chances);
-            }else{
-                for (let attr in chances) {
-                    let innerRow = document.createElement('div');
-                    innerRow.classList.add('attr_row');
-                    row.appendChild(innerRow);
-                    let attrNameElement = document.createElement('div');
-                    attrNameElement.classList.add('attr_item');
-                    attrNameElement.innerHTML = attr;
-                    innerRow.appendChild(attrNameElement);
-                    createChances(item, innerRow, chances[attr], attr);
-                }
-            }
-            
-        }
-        parentElement.appendChild(row);
-    };
-
     chancesTable.classList.add('chances_table');
-    addRow(chancesTable, '', newRowReplace || ['Newbie', 'Experienced', 'Veteran', 'Master']);
+    addRow(chancesTable, '', classification, newRowReplace || ['Newbie', 'Experienced', 'Veteran', 'Master']);
 
     for (let item in oSettings) {
-        addRow(chancesTable, item, oSettings[item]);
+        addRow(chancesTable, item, classification, oSettings[item]);
+    }
+
+    if (tableType) {
+        chancesTable.addEventListener('mouseenter', function() {
+            chancesTable.appendChild(drawAddDiv(()=>{
+                chancesTable.appendChild(showAddSelection(tableType, classification));
+            }));
+        });
+
+        chancesTable.addEventListener('mouseleave', function() {
+            let elements = document.getElementsByClassName('addDiv');
+            for (let i = 0; i < elements.length; i++) {
+                chancesTable.removeChild(elements[i]);
+            }
+
+        });
     }
 
     parentElement.appendChild(chancesTable);
@@ -278,7 +393,7 @@ const showPrimary = ()=>{
         classElement.classList.add('item_level1');
         document.getElementById('content').appendChild(classElement);
 
-        fillChancesTable(WeaponSettings[classification], classElement, null, classification);
+        fillChancesTable(WeaponSettings[classification], classElement, null, 'weapon', classification);
 
         window.setTimeout(()=>{updateAllLabels(WeaponSettings[classification], classification);}, 100);
     }
@@ -305,7 +420,7 @@ const showArmor = ()=>{
 
     let GeneralSettings = 'GeneralNPC_'+currentFaction;
     let ArmorSettings = modifiedArmorSettings[GeneralSettings];
-    fillChancesTable(ArmorSettings, document.getElementById('content'));
+    fillChancesTable(ArmorSettings, document.getElementById('content'), null, 'armor', '');
 
     let elements = document.getElementsByClassName('chance');
     for (let i = 0; i < elements.length; i++) {
@@ -549,9 +664,11 @@ const TODOList = [
     "Adding and removing items",
     "Local storage of settings",
     "Site localization",
+    "Separate site for more files",
     "Create as splitted files and override",
     "Helmets drops",
     "Public presets",
+    "Rewrite it all...",
     "Armor Loot chances by player rank",
     "Ammo count by player rank",
     "Consumables settings",
@@ -575,6 +692,18 @@ const showToDoWindow = () => {
     closeButton.addEventListener('click', ()=>removeMessageBox('todo'));
 };
 
+const showInfo = () => {
+    let text = 'This site is created by <a href="https://next.nexusmods.com/profile/TechPriestSL" target="_blank">PriestSL</a>';
+    text += '<br>Source code is available on <a href="https://github.com/PriestSL/s2-dynamicitemgenerator-generator-web" target="_blank">GitHub</a>';
+    text += '<br>For any questions or suggestions you can contact me on NexusMods or Discord (priestsl)';
+    text += '<br>You free to use sources or colaborate';
+    text += '<br>If you want to rewrite it all (because front end is absolutely crap, and all site created without any design documents), you are welcome. If you need help with it, you can ask me =)';
+    text += '<br>All planning features you can see in TODO list';
+
+    createMessageBox('info', text);
+    let closeButton = document.getElementById('btn_close_msg_info');
+    closeButton.addEventListener('click', ()=>removeMessageBox('info'));
+};
 
 
 let button = document.getElementById('btn_save');
@@ -598,3 +727,5 @@ button.addEventListener('click', function() {
 });
 button = document.getElementById('btn_todo');
 button.addEventListener('click', showToDoWindow);
+button = document.getElementById('btn_info');
+button.addEventListener('click', showInfo);

@@ -261,3 +261,14 @@ input.chance{
 .attributes_grid>select{
     width: 200px;
 }
+
+.addDiv>button{
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background-color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+}
