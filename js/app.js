@@ -565,8 +565,6 @@ const drawFileSettings = () => `
         <label for="copm_SHA">Separeted Helmets and Armors</label>
         <input type="checkbox" id="copm_SHA" ${modsCompatibility.SHA ? 'checked' : ''}>
         <hr>
-        <h2>Armor drop settings<h2>
-        <hr>
         <label for="drop_armor">Enable armor droping</label>
         <input type="checkbox" id="drop_armor" ${modifiedDropConfigs.createDroppableArmor ? 'checked' : ''}>
         <div class="armor_drop_settings" style="display:${modifiedDropConfigs.createDroppableArmor ? 'grid' : 'none'}">
