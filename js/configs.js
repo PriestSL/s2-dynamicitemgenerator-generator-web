@@ -1,16 +1,16 @@
 export const oDropConfigs = {
-    createDroppableArmor: true,
-    nMinDurability:0.25,
-    nMaxDurability:1.0,
-    nLootChance:0.5
+    createDroppableArmor: false,
+    nMinDurability:0.2,
+    nMaxDurability:0.8,
+    nLootChance:0.1
 };
 
 export const oWeaponList = {
     GunObrez_SG: {
-        maxAmmo: 2
+        maxAmmo: 4
     },
     GunTOZ_SG: {
-        maxAmmo: 2
+        maxAmmo: 4
     },
     GunM860_SG: {},
     GunSPSA_SG: {},
