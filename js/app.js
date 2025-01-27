@@ -562,7 +562,7 @@ const drawFileSettings = () => `
         <hr>
         <h2>Compatibility settings</h2>
         <hr>
-        <label for="copm_SHA">Separeted Helmets and Armors</label>
+        <label for="copm_SHA">ated Helmets and Armor</label>
         <input type="checkbox" id="copm_SHA" ${modsCompatibility.SHA ? 'checked' : ''}>
         <hr>
         <label for="drop_armor">Enable armor droping</label>
@@ -716,6 +716,7 @@ const showToDoWindow = () => {
 
 const showInfo = () => {
     let text = 'This site is created by <a href="https://next.nexusmods.com/profile/TechPriestSL" target="_blank">PriestSL</a>';
+    text += '<br>Website ugly as shit, I know. But I tried to write it on pure JS to made it litest as it can be. '
     text += '<br>Source code is available on <a href="https://github.com/PriestSL/s2-dynamicitemgenerator-generator-web" target="_blank">GitHub</a>';
     text += '<br>For any questions or suggestions you can contact me on NexusMods or Discord (priestsl)';
     text += '<br>You free to use sources or colaborate';
