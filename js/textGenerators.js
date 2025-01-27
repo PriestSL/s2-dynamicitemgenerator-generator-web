@@ -394,7 +394,7 @@ const createProjectItemization = ()=>{
 
 
 export const createLoadout = async ()=>{
-    let cRet = '';
+    let cRet = '//Generated with https://s2-loadout-creator.cc/ \n\n';
 
     oArmorLoadoutSettings = modifiedArmorSettings;
     oWeaponLoadoutSettings = modifiedWeaponSettings;
