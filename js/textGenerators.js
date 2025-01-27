@@ -28,6 +28,8 @@ const createArmorItemGenerator = (cArmorName)=>{
         const cHelmet = modifiedArmorSpawnSettings[cArmorName].helmet;
         const oHelmet = modifiedHelmetSettings[cHelmet];
 
+        if (!oHelmet) return '';
+
         let cRet = '';
         for (let rank in oHelmet.spawn){
             cRet +=`      [*] : struct.begin\n`;
