@@ -341,7 +341,7 @@ const getModdedItemGenerators = async ()=>{
             cRet += moddedItemGenerators;
             cRet += '\n';
         } else {
-            console.log("Ошибка HTTP: " + response.status);
+            console.error("Ошибка HTTP: " + response.status);
         }
     }
 
@@ -358,8 +358,6 @@ const createFactionPatches = (faction)=>{
     let cRet = '';
 
     faction = faction.replace(faction.substring(0, 8) === 'GuardNPC'?'GuardNPC':'GeneralNPC', 'CL');
-
-    console.log(faction, oFactionToPatch[faction]);
     
     cRet += `      [*] : struct.begin\n`;
     cRet += `         Category = EItemGenerationCategory::SubItemGenerator\n`;
