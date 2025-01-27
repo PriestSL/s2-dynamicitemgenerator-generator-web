@@ -13,7 +13,7 @@ export const generateConfig = async ()=>{
     zip.file("Stalker2/Content/GameLite/GameData/ItemGeneratorPrototypes/New_NPC_Loadouts.cfg", cArmorGenerators);
     zip.generateAsync({type:"blob"})
     .then(function(content) {
-        saveAs(content, `zzzz_${zipName}_1_P.zip`);
+        saveAs(content, `zzzz_${zipName}_P.zip`);
     });
 
 }
