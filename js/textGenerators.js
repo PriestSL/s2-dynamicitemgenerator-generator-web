@@ -38,7 +38,7 @@ const createArmorItemGenerator = (cArmorName)=>{
             cRet +=`         PossibleItems : struct.begin\n`;
             cRet +=`            [0] : struct.begin\n`;
             cRet +=`               ItemPrototypeSID = ${cHelmet}\n`;
-            cRet +=`               Chance = ${(oHelmet.helmetSpawn && oHelmet.spawn[rank]) || 1}\n`;
+            cRet +=`               Chance = ${(modifiedArmorSpawnSettings[cArmorName].helmetSpawn && oHelmet.spawn[rank]) || 1}\n`;
             cRet +=`            struct.end\n`;
             cRet +=`         struct.end\n`;
             cRet +=`      struct.end\n`;
