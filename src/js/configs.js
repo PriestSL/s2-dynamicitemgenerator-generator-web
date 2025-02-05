@@ -36,6 +36,7 @@ export const oWeaponList = {
     GunM701_SP: {},
     GunGauss_SP: {},
     GunM10_HG: {},
+    GunPM_HG: {},
     GunPKP_MG: {},
     GunRpg7_GL: {},
 };
@@ -1009,6 +1010,11 @@ export const oSecondaryLoadoutSettings = {
     }
 };
 
+export const oPistolLoadoutSettings = {
+    GeneralNPC_Neutral: {
+        GunM10_HG: [100, 100, 100, 100]
+    }
+};
 
 export const oGrenadesSettings = {
     Default: {

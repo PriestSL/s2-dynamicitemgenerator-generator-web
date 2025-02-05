@@ -1,4 +1,5 @@
 import { generateConfig } from './fileStreamGenerator.js';
+import { showFreezeDiv, hideFreezeDiv } from './utils.js';
 
 /*ugliest code that I wrote*/
 import * as configs from './configs.js'; 
@@ -16,11 +17,23 @@ export var modifiedAmmoByWeaponClass = deepCopy(configs.oAmmoByWeaponClass);
 export var modifiedWeaponList = deepCopy(configs.oWeaponList);
 export var modsCompatibility = {SHA: false}
 export var modifiedDropConfigs = deepCopy(configs.oDropConfigs);
+export var modifiedPistolSettings = deepCopy(configs.oPistolLoadoutSettings);
 
 const typeToTable = {
     weapon: modifiedWeaponList,
-    armor: modifiedArmorSpawnSettings
+    armor: modifiedArmorSpawnSettings,
+    pistol: null
 };
+
+{
+    let oTemp = {};
+    for (let key in modifiedWeaponList){
+        if (key.substring(key.length-2) === 'HG') {
+            oTemp[key] = modifiedWeaponList[key];
+        }
+    }
+    typeToTable.pistol = oTemp;   
+}
 
 const createChances = (item, summary, chances, classification = '', attr = 'chances') => {
     let chancesElement = document.createElement('div');
@@ -137,7 +150,63 @@ const addArmor = (parentEl, armor) => {
     updateAllLabels(ArmorSettings);
 };
 
-const showAddSelection = (type, classification) => {
+const addPistol = (parentEl, item) => {
+    let GeneralSettings = 'GeneralNPC_'+currentFaction;
+    let PistolSettings = modifiedPistolSettings[GeneralSettings];
+    if (PistolSettings[item]) return;
+
+    let eChances = addRow(parentEl, item, '', [0, 0, 0, 0]);
+    eChances.addEventListener('change', onPistolChanceChange);
+
+    PistolSettings[item] = [0, 0, 0, 0];
+    updateAllLabels(PistolSettings);
+};
+
+const showAddSelection = (target, type, classification) => {
+    showFreezeDiv();
+    let fullscreenDiv = document.createElement('div');
+    fullscreenDiv.classList.add('fullscreen_select');
+    let divContent = document.createElement('div');
+    divContent.classList.add('fullscreen_select_content');
+
+    for (let item in typeToTable[type]) {
+        let option = document.createElement('div');
+        option.classList.add('fullscreen_select_item');
+        option.textContent = item;
+        option.value = item;
+        divContent.appendChild(option);
+    }
+
+    divContent.querySelectorAll('.fullscreen_select_item').forEach((el) => {
+        el.addEventListener('click', function(e) {
+            let item = e.target.value;
+            if (type === 'weapon') {
+                addWeaponToClass(target, classification, item);
+            }else if (type === 'armor') {
+                addArmor(target, item);
+            }else if (type === 'pistol') {
+                addPistol(target, item);
+            }
+
+            fullscreenDiv.remove();
+            hideFreezeDiv();
+        });
+    });
+
+    let closeButton = document.createElement('button');
+    closeButton.innerHTML = 'Close';
+    closeButton.classList.add('fullscreen_select_close');
+    closeButton.addEventListener('click', function() {
+        fullscreenDiv.remove();
+        hideFreezeDiv();
+    });
+
+    fullscreenDiv.appendChild(divContent);
+    fullscreenDiv.appendChild(closeButton);
+    document.body.appendChild(fullscreenDiv);
+};
+
+/*const showAddSelection = (type, classification) => {
     let addDiv = document.getElementById('addItemButton');
     addDiv.style.display = 'none';
     
@@ -167,6 +236,8 @@ const showAddSelection = (type, classification) => {
             addWeaponToClass(e.target.parentElement.parentElement, classification, item);
         }else if (type === 'armor') {
             addArmor(e.target.parentElement.parentElement, item);
+        }else if (type === 'pistol') {
+            addPistol(e.target.parentElement.parentElement, item);
         }
 
         e.target.remove();
@@ -174,7 +245,7 @@ const showAddSelection = (type, classification) => {
     });
 
     return selection;
-};
+};*/
 
 const drawAttentionDiv = () => {
     let text = 'This section is for all factions, settings for specific factions are not implemented yet';
@@ -246,6 +317,16 @@ function onArmorChanceChange(e) {
     updateLabels(ArmorSettings, dataset.level);
 };
 
+function onPistolChanceChange(e) {
+    let dataset = e.target.dataset;
+    let value = e.target.value;
+    let GeneralSettings = 'GeneralNPC_'+dataset.faction;
+    let PistolSettings = modifiedPistolSettings[GeneralSettings];
+    PistolSettings[dataset.item][dataset.level] = value;
+
+    updateLabels(PistolSettings, dataset.level);
+};
+
 function onAmmoChanceChange(e){
     let dataset = e.target.dataset;
     let value = e.target.value;
@@ -273,8 +354,8 @@ const fillChancesTable = (oSettings, newRowReplace, tableType, classification = 
 
     if (tableType) {
         chancesTable.addEventListener('mouseenter', function() {
-            chancesTable.appendChild(drawAddDiv(()=>{
-                chancesTable.appendChild(showAddSelection(tableType, classification));
+            chancesTable.appendChild(drawAddDiv((e)=>{
+                showAddSelection(e.target.parentElement.parentElement, tableType, classification);
             }));
         });
 
@@ -407,6 +488,17 @@ const showSecondary = ()=>{
     document.getElementById('content').appendChild(infoElement);
 };
 
+const showPistols = ()=>{
+    let GeneralSettings = 'GeneralNPC_'+currentFaction;
+    let PistolSettings = modifiedPistolSettings[GeneralSettings];
+    let chances = fillChancesTable(PistolSettings, null, 'pistol', '');
+    chances.addEventListener('change', onPistolChanceChange);
+
+    document.getElementById('content').appendChild(chances);
+
+    window.setTimeout(()=>{updateAllLabels(PistolSettings);}, 100);
+};
+
 const showArmor = ()=>{
     if (currentFaction === 'Generic_settings'){
         showArmorSettings();
@@ -460,6 +552,7 @@ const showGrenades = ()=>{
 const oCategoryToEvent = {
     "Primary": showPrimary,
     "Secondary": showSecondary,
+    "Pistols": showPistols,
     "Armor": showArmor,
     "Artifacts": showArtifacts,
     "Consumables": showConsumables,
