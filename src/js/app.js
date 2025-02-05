@@ -23,7 +23,6 @@ const typeToTable = {
 };
 
 const createChances = (item, summary, chances, classification = '', attr = 'chances') => {
-    let aChances = [];
     let chancesElement = document.createElement('div');
     chancesElement.classList.add('chances_row');
     for (let i=0; i<chances.length; i++) {
@@ -40,14 +39,13 @@ const createChances = (item, summary, chances, classification = '', attr = 'chan
                 chanceElement.type = 'number';
                 chanceElement.classList.add('chance');
                 chanceElement.value = chances[i];
-                chanceElement.setAttribute('to_faction', faction);
-                chanceElement.setAttribute('to_classification', classification);
-                chanceElement.setAttribute('to_item_type', itemType);
-                chanceElement.setAttribute('to_item', item);
-                chanceElement.setAttribute('to_attr', attr);
-                chanceElement.setAttribute('to_level', i);
+                chanceElement.dataset.faction = faction;
+                chanceElement.dataset.classification = classification;
+                chanceElement.dataset.type = itemType;
+                chanceElement.dataset.item = item;
+                chanceElement.dataset.attr = attr;
+                chanceElement.dataset.level = i;
 
-                //chanceElement.id = faction + ' - ' + itemType + '-' +itemName + '-' + attrName + '-' + i;
             resultElement.appendChild(chanceElement);
 
             let chanceLabel = document.createElement('div');
@@ -55,15 +53,13 @@ const createChances = (item, summary, chances, classification = '', attr = 'chan
                 chanceLabel.classList.add('chance_label');
             resultElement.appendChild(chanceLabel);
 
-            aChances.push(chanceElement); //bruuuuuuuuuuh
-
         }
         chancesElement.appendChild(resultElement);
     }
 
     summary.appendChild(chancesElement);
 
-    return aChances;
+    return chancesElement;
 };
 
 const addRow = (parentElement, item, classification, chances) => {
@@ -74,11 +70,11 @@ const addRow = (parentElement, item, classification, chances) => {
     itemElement.innerHTML = item;
     row.appendChild(itemElement);
 
-    let aChances;
+    let eChances;
 
     if (typeof chances === 'object'){
         if (chances.length){
-            aChances = createChances(item, row, chances, classification);
+            eChances = createChances(item, row, chances, classification);
         }else{
             for (let attr in chances) {
                 let innerRow = document.createElement('div');
@@ -88,7 +84,7 @@ const addRow = (parentElement, item, classification, chances) => {
                 attrNameElement.classList.add('attr_item');
                 attrNameElement.innerHTML = attr;
                 innerRow.appendChild(attrNameElement);
-                aChances = createChances(item, innerRow, chances[attr], classification, attr);
+                eChances = createChances(item, innerRow, chances[attr], classification, attr);
             }
         }
         
@@ -113,7 +109,7 @@ const addRow = (parentElement, item, classification, chances) => {
     }
 
     parentElement.appendChild(row);
-    return aChances;
+    return eChances;
 };
 
 const addWeaponToClass = (parentEl, classification, weapon) => {
@@ -121,13 +117,8 @@ const addWeaponToClass = (parentEl, classification, weapon) => {
     let WeaponSettings = modifiedWeaponSettings[GeneralSettings];
     if (WeaponSettings[classification][weapon]) return;
 
-    let aChances = addRow(parentEl, weapon, classification, [0, 0, 0, 0]);
-
-    if (aChances && aChances.length) {
-        for (let i = 0; i < aChances.length; i++) {
-            aChances[i].addEventListener('change', onWeaponChanceChange);
-        }
-    };
+    let eChances = addRow(parentEl, weapon, classification, [0, 0, 0, 0]);
+    eChances.addEventListener('change', onWeaponChanceChange);
 
     WeaponSettings[classification][weapon] = [0, 0, 0, 0];
 
@@ -139,13 +130,8 @@ const addArmor = (parentEl, armor) => {
     let ArmorSettings = modifiedArmorSettings[GeneralSettings];
     if (ArmorSettings[armor]) return;
 
-    let aChances = addRow(parentEl, armor, '', [0, 0, 0, 0]);
-
-    if (aChances && aChances.length) {
-        for (let i = 0; i < aChances.length; i++) {
-            aChances[i].addEventListener('change', onArmorChanceChange);
-        }
-    };
+    let eChances = addRow(parentEl, armor, '', [0, 0, 0, 0]);
+    eChances.addEventListener('change', onArmorChanceChange);
 
     ArmorSettings[armor] = [0, 0, 0, 0];
     updateAllLabels(ArmorSettings);
@@ -235,58 +221,48 @@ const updateAllLabels = (oSettings, classification = '') => {
 
 function onWeaponChanceChange(e) {
     //TODO rewrite to use typeToTable
-    let faction = e.target.getAttribute('to_faction');
-    let classification = e.target.getAttribute('to_classification');
-    let item = e.target.getAttribute('to_item');
-    let level = e.target.getAttribute('to_level');
+    let dataset = e.target.dataset;
     let value = e.target.value;
-    let GeneralSettings = 'GeneralNPC_'+faction;
+    let GeneralSettings = 'GeneralNPC_'+dataset.faction;
     let WeaponSettings = modifiedWeaponSettings[GeneralSettings];
-    WeaponSettings[classification][item][level] = value;
+    WeaponSettings[dataset.classification][dataset.item][dataset.level] = value;
 
-    updateLabels(WeaponSettings[classification], level, classification);
+    updateLabels(WeaponSettings[dataset.classification], dataset.level, dataset.classification);
 };
 
 function onGrenadeChanceChange (e) {
-    let item = e.target.getAttribute('to_item');
-    let attr = e.target.getAttribute('to_attr');
-    let level = e.target.getAttribute('to_level');
+    let dataset = e.target.dataset;
     let value = e.target.value;
-    modifiedGrenadeSettings.Default[item][attr][level] = value;
+    modifiedGrenadeSettings.Default[dataset.item][dataset.attr][dataset.level] = value;
 };
 
 function onArmorChanceChange(e) {
-    let faction = e.target.getAttribute('to_faction');
-    let item = e.target.getAttribute('to_item');
-    let level = e.target.getAttribute('to_level');
+    let dataset = e.target.dataset;
     let value = e.target.value;
-    let GeneralSettings = 'GeneralNPC_'+faction;
+    let GeneralSettings = 'GeneralNPC_'+dataset.faction;
     let ArmorSettings = modifiedArmorSettings[GeneralSettings];
-    ArmorSettings[item][level] = value;
+    ArmorSettings[dataset.item][dataset.level] = value;
 
-    updateLabels(ArmorSettings, level);
+    updateLabels(ArmorSettings, dataset.level);
 };
 
 function onAmmoChanceChange(e){
-    let item = e.target.getAttribute('to_item');
-    let level = e.target.getAttribute('to_level');
+    let dataset = e.target.dataset;
     let value = e.target.value;
     let AmmoSettings = modifiedAmmoByWeaponClass;
-    AmmoSettings[item][level] = value;
+    AmmoSettings[dataset.item][dataset.level] = value;
 }
 
 function onAttributeChange(e) {
-    let item = e.target.getAttribute('to_item');
-    let attr = e.target.getAttribute('to_attr');
-    let type = e.target.getAttribute('item_type');
+    let dataset = e.target.dataset;
     let value = e.target.value;
-    typeToTable[type][item][attr] = value;
+    typeToTable[dataset.type][dataset.item][dataset.attr] = value;
 };
 
 
 
 //TODO rewrite to use typeToTable
-const fillChancesTable = (oSettings, parentElement, newRowReplace, tableType, classification = '') => {
+const fillChancesTable = (oSettings, newRowReplace, tableType, classification = '') => {
     let chancesTable = document.createElement('div');
     chancesTable.classList.add('chances_table');
     addRow(chancesTable, '', classification, newRowReplace || ['Newbie', 'Experienced', 'Veteran', 'Master']);
@@ -311,7 +287,7 @@ const fillChancesTable = (oSettings, parentElement, newRowReplace, tableType, cl
         });
     }
 
-    parentElement.appendChild(chancesTable);
+    return chancesTable;
 }
 
 const fillAttributesTable = (oSettings, parentElement, type) => {
@@ -336,9 +312,9 @@ const fillAttributesTable = (oSettings, parentElement, type) => {
             let attrElement = null;
             if (thisAttr[1] === 'select') {
                 attrElement = document.createElement('select');
-                attrElement.setAttribute('item_type', type);
-                attrElement.setAttribute('to_item', item);
-                attrElement.setAttribute('to_attr', thisAttr[0]);
+                attrElement.dataset.type = type;
+                attrElement.dataset.to_item = item;
+                attrElement.dataset.to_attr = thisAttr[0];
                 let itemList = type==='armor'?thisAttr[0]=='helmet'?modifiedHelmetSettings:modifiedArmorSpawnSettings:modifiedWeaponList; //bruh
                 for (let item in itemList) {
                     let option = document.createElement('option');
@@ -347,20 +323,20 @@ const fillAttributesTable = (oSettings, parentElement, type) => {
                     attrElement.appendChild(option);
                 }
                 attrElement.value = oAttr[thisAttr[0]];
-                attrElement.addEventListener('change', onAttributeChange);
             }else{
                 attrElement = document.createElement('input');
+
                 attrElement.type = thisAttr[1];
                 attrElement.value = oAttr[thisAttr[0]];
                 if (thisAttr[1] === 'checkbox') {
                     attrElement.checked = oAttr[thisAttr[0]];
                 }
-                attrElement.setAttribute('item_type', type);
-                attrElement.setAttribute('to_item', item);
-                attrElement.setAttribute('to_attr', thisAttr[0]);
-                attrElement.addEventListener('change', onAttributeChange);
+                attrElement.dataset.type = type;
+                attrElement.dataset.to_item = item;
+                attrElement.dataset.to_attr = thisAttr[0];
             }
 
+            attrElement.classList.add('attribute_field');
             attributesElement.appendChild(labelEl);
             attributesElement.appendChild(attrElement);
         }
@@ -385,6 +361,7 @@ const fillAttributesTable = (oSettings, parentElement, type) => {
         addRow(attributesTable, item, oSettings[item]);
     }
 
+    attributesTable.addEventListener('change', onAttributeChange);
     parentElement.appendChild(attributesTable);
 }
 
@@ -409,20 +386,16 @@ const showPrimary = ()=>{
         classElement.setAttribute('open', 'open');
         let classSummary = document.createElement('summary');
         classSummary.innerHTML = classification;
-        classElement.setAttribute('classification', classification);
+        classElement.dataset.classification = classification;
         classSummary.classList.add('item_level1');
         classElement.appendChild(classSummary);
         classElement.classList.add('item_level1');
         document.getElementById('content').appendChild(classElement);
 
-        fillChancesTable(WeaponSettings[classification], classElement, null, 'weapon', classification);
-
+        let chances = fillChancesTable(WeaponSettings[classification], null, 'weapon', classification);
+        chances.addEventListener('change', onWeaponChanceChange);
+        classElement.appendChild(chances);
         window.setTimeout(()=>{updateAllLabels(WeaponSettings[classification], classification);}, 100);
-    }
-
-    let elements = document.getElementsByClassName('chance');
-    for (let i = 0; i < elements.length; i++) {
-        elements[i].addEventListener('change', onWeaponChanceChange);
     }
 
 }
@@ -442,12 +415,10 @@ const showArmor = ()=>{
 
     let GeneralSettings = 'GeneralNPC_'+currentFaction;
     let ArmorSettings = modifiedArmorSettings[GeneralSettings];
-    fillChancesTable(ArmorSettings, document.getElementById('content'), null, 'armor', '');
+    let chances = fillChancesTable(ArmorSettings, null, 'armor', '');
+    chances.addEventListener('change', onArmorChanceChange);
 
-    let elements = document.getElementsByClassName('chance');
-    for (let i = 0; i < elements.length; i++) {
-        elements[i].addEventListener('change', onArmorChanceChange);
-    }
+    document.getElementById('content').appendChild(chances);
 
     window.setTimeout(()=>{updateAllLabels(ArmorSettings);}, 100);
 };
@@ -468,24 +439,18 @@ const showConsumables = ()=>{
 
 const showAmmo = ()=>{
     let AmmoSettings = modifiedAmmoByWeaponClass;
-    fillChancesTable(AmmoSettings, document.getElementById('content'), ['MinAmmo', 'MaxAmmo']);
-
-    let elements = document.getElementsByClassName('chance');
-    for (let i = 0; i < elements.length; i++) {
-        elements[i].addEventListener('change', onAmmoChanceChange);
-    }
+    let chances = fillChancesTable(AmmoSettings, ['MinAmmo', 'MaxAmmo']);
+    chances.addEventListener('change', onAmmoChanceChange);
+    document.getElementById('content').appendChild(chances);
 
     document.getElementById('content').appendChild(drawAttentionDiv());
 };
 
 const showGrenades = ()=>{
     let GrenadeSettings = modifiedGrenadeSettings;
-    fillChancesTable(GrenadeSettings.Default, document.getElementById('content'));
-
-    let elements = document.getElementsByClassName('chance');
-    for (let i = 0; i < elements.length; i++) {
-        elements[i].addEventListener('change', onGrenadeChanceChange);
-    }
+    let chances = fillChancesTable(GrenadeSettings.Default);
+    chances.addEventListener('change', onGrenadeChanceChange);
+    document.getElementById('content').appendChild(chances);
 
     document.getElementById('content').appendChild(drawAttentionDiv());
 };
