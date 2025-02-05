@@ -1,3 +1,4 @@
+/* global JSZip, saveAs */
 import { createLoadout } from './textGenerators.js';
 
 export const generateConfig = async ()=>{
