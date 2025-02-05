@@ -4,26 +4,26 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dynamic Item Generator by PriestSL</title>
-    <link rel="icon" type="image/x-icon" href="/img/favicon.ico">
+    <link rel="icon" type="image/x-icon" href="src/img/favicon.ico">
 
-    <link rel="stylesheet" href="css/style.css">
-    <script src="js/jszip.js"></script>
-    <script src="js/FileSaver.js"></script>
-    <script type="module" src="js/app.js"></script>
+    <link rel="stylesheet" href="src/css/style.css">
+    <script src="src/js/jszip.js"></script>
+    <script src="src/js/FileSaver.js"></script>
+    <script type="module" src="src/js/app.js"></script>
 </head>
 <body>
     <div id="canvas">
         <div id="categories_bar">
-            <img id="Primary" src="img/assault-rifle.png" alt="Weapon" class="category_item">
-            <img id="Secondary" src="img/shotgun.png" alt="Weapon" class="category_item">
-            <img id="Armor" src="img/body.png" alt="Armor" class="category_item">
-            <img id="Artifacts" src="img/space.png" alt="Artifact" class="category_item">
-            <img id="Consumables" src="img/healthy-drink.png" alt="Consumable" class="category_item">
-            <img id="Ammo" src="img/bullet.png" alt="Ammo" class="category_item">
-            <img id="Grenades" src="img/grenade.png" alt="Grenade" class="category_item">
+            <img id="Primary" src="src/img/assault-rifle.png" alt="Weapon" class="category_item">
+            <img id="Secondary" src="src/img/shotgun.png" alt="Weapon" class="category_item">
+            <img id="Armor" src="src/img/body.png" alt="Armor" class="category_item">
+            <img id="Artifacts" src="src/img/space.png" alt="Artifact" class="category_item">
+            <img id="Consumables" src="src/img/healthy-drink.png" alt="Consumable" class="category_item">
+            <img id="Ammo" src="src/img/bullet.png" alt="Ammo" class="category_item">
+            <img id="Grenades" src="src/img/grenade.png" alt="Grenade" class="category_item">
         </div>
         <div id="factions_bar">
-            <img id="Generic_settings" src="img/setting.png" alt="settings" class="faction_item">
+            <img id="Generic_settings" src="src/img/setting.png" alt="settings" class="faction_item">
             <!--Should be changed to local images!!! IDK what guys can do with img on links-->
             <img id="Neutral" src="https://img.game8.co/4043980/f033d4a6ef48679043f7b860a780bd1a.png/show" alt="Generic settings" class="faction_item">
             <img id="Bandit" src="https://img.game8.co/4044042/fd64a2189b3093a88da8681be77f8766.png/show" alt="Bandit" class="faction_item">
@@ -40,14 +40,14 @@
         </div>
         <div id="toolbar">
             <input id="config_name" type="text" placeholder="Config name" value="My new loadout" class="toolbar_item">
-            <img id="btn_file_settings" src="img/setting.png" alt="file_settings" title="File Settings" class="toolbar_item">
-            <img id="btn_save" src="img/file.png" alt="download_zip" title="Download ZIP" class="toolbar_item">
-            <img id="btn_help" src="img/question.png" alt="help" title="How to install"class="toolbar_item">
-            <img id="btn_export" src="img/export.png" alt="export" title="Export as JSON" class="toolbar_item">
-            <img id="btn_import" src="img/import.png" alt="import" title="Import from JSON" class="toolbar_item">
-            <img id="btn_todo" src="img/to-do-list.png" alt="todo" title="To do list" class="toolbar_item">
-            <a href="https://github.com/PriestSL/s2-dynamicitemgenerator-generator-web" target="_blank"><img id="github_link" src="img/github.png" alt="github" title="GitHub" class="toolbar_item" style="height: 45px;"></a>
-            <img id="btn_info" src="img/info.png" alt="info" title="Info" class="toolbar_item">
+            <img id="btn_file_settings" src="src/img/setting.png" alt="file_settings" title="File Settings" class="toolbar_item">
+            <img id="btn_save" src="src/img/file.png" alt="download_zip" title="Download ZIP" class="toolbar_item">
+            <img id="btn_help" src="src/img/question.png" alt="help" title="How to install" class="toolbar_item">
+            <img id="btn_export" src="src/img/export.png" alt="export" title="Export as JSON" class="toolbar_item">
+            <img id="btn_import" src="src/img/import.png" alt="import" title="Import from JSON" class="toolbar_item">
+            <img id="btn_todo" src="src/img/to-do-list.png" alt="todo" title="To do list" class="toolbar_item">
+            <a href="https://github.com/PriestSL/s2-dynamicitemgenerator-generator-web" target="_blank"><img id="github_link" src="src/img/github.png" alt="github" title="GitHub" class="toolbar_item" style="height: 45px;"></a>
+            <img id="btn_info" src="src/img/info.png" alt="info" title="Info" class="toolbar_item">
         </div>
         <div id="content"></div>
     </div>
