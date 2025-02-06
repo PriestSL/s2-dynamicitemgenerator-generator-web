@@ -128,8 +128,8 @@ const createWeaponStruct = (oWeapon, faction)=>{
         cRet += `            [${iterator}] : struct.begin\n`;
         cRet += `               ItemPrototypeSID = ${(faction.substring(0, 8) == 'GuardNPC'? 'Guard':'') + weapon}\n`;
         cRet += `               Weight = ${oWeapon[weapon]}\n`;
-        cRet += `               MinDurability = ${oWeaponList[weapon].minCondition || nMinWeaponDurability}\n`;
-        cRet += `               MaxDurability = ${oWeaponList[weapon].maxCondition || nMaxWeaponDurability}\n`;
+        cRet += `               MinDurability = ${( [weapon].minCondition || nMinWeaponDurability)/100}\n`;
+        cRet += `               MaxDurability = ${(oWeaponList[weapon].maxCondition || nMaxWeaponDurability)/100}\n`;
         cRet += `               AmmoMinCount = ${oWeaponList[weapon].minAmmo ? oWeaponList[weapon].minAmmo : oAmmoByWeaponClass[weaponClass][0]}\n`;
         cRet += `               AmmoMaxCount = ${oWeaponList[weapon].maxAmmo ? oWeaponList[weapon].maxAmmo : oAmmoByWeaponClass[weaponClass][1]}\n`;
         cRet += `            struct.end\n`;
@@ -229,8 +229,8 @@ const createPistolsItemGenerators = ()=>{
                 cPistolGenerators += `            [${iterator}] : struct.begin\n`;
                 cPistolGenerators += `               ItemPrototypeSID = ${pistol}\n`;
                 cPistolGenerators += `               Weight = ${oPrepared[faction][rank][pistol]}\n`;
-                cPistolGenerators += `               MinDurability = ${oWeaponList[pistol].minCondition || nMinWeaponDurability}\n`;
-                cPistolGenerators += `               MaxDurability = ${oWeaponList[pistol].maxCondition || nMaxWeaponDurability}\n`;
+                cPistolGenerators += `               MinDurability = ${(oWeaponList[pistol].minCondition || nMinWeaponDurability)/100}\n`;
+                cPistolGenerators += `               MaxDurability = ${(oWeaponList[pistol].maxCondition || nMaxWeaponDurability)/100}\n`;
                 cPistolGenerators += `               AmmoMinCount = ${oAmmoByWeaponClass['HG'][0]}\n`;
                 cPistolGenerators += `               AmmoMaxCount = ${oAmmoByWeaponClass['HG'][1]}\n`;
                 cPistolGenerators += `            struct.end\n`;
