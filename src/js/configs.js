@@ -1053,8 +1053,8 @@ export const oGrenadesSettings = {
 
 export const nPistolLootChance = 30;
 
-export const nMinWeaponDurability = 0.25;
-export const nMaxWeaponDurability = 0.5;
+export const nMinWeaponDurability = 25;
+export const nMaxWeaponDurability = 50;
 
 export const oAmmoByWeaponClass = {
     SG: [0, 7],
