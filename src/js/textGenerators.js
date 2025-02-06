@@ -4,6 +4,9 @@ import {modifiedMinWeaponDurability, modifiedMaxWeaponDurability, modifiedPistol
     modifiedGrenadeSettings, modsCompatibility, modifiedDropConfigs, modifiedArmorSpawnSettings,
     modifiedHelmetSpawnSettings, modifiedPistolSettings} from './app.js';
 
+import FactionPatchesCompatibility from '../Mods/FactionPatches.cfg?raw';
+import ProjectItemizationCompatibility from '../Mods/ProjectItemization.cfg?raw';
+
 var oArmorLoadoutSettings;
 var oWeaponLoadoutSettings;
 var oWeaponList;
@@ -386,22 +389,11 @@ const createGrenades = (clas)=>{
 
 const getModdedItemGenerators = async ()=>{
     let cRet = '';
-    let aExistedFiles = [
-        "FactionPatches",
-        "ProjectItemization"
-    ];
 
-    for (let i = 0; i<aExistedFiles.length; i++){
-        let response = await fetch(`Mods/${aExistedFiles[i]}.cfg`);
-
-        if (response.ok) { 
-            let moddedItemGenerators = await response.text();
-            cRet += moddedItemGenerators;
-            cRet += '\n';
-        } else {
-            console.error("Ошибка HTTP: " + response.status);
-        }
-    }
+    cRet += FactionPatchesCompatibility;
+    cRet += '\n';
+    cRet += ProjectItemizationCompatibility;
+    cRet += '\n';
 
     return cRet;
 };

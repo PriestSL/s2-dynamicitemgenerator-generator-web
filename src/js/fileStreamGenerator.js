@@ -1,5 +1,6 @@
-/* global JSZip, saveAs */
 import { createLoadout } from './textGenerators.js';
+import JSZip from 'jszip';
+import { saveAs } from 'file-saver';
 
 export const generateConfig = async ()=>{
     let cArmorGenerators = "";

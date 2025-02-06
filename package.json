@@ -17,5 +17,9 @@
     "lint": "eslint"
   },
   "author": "PriestSL",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "file-saver": "^2.0.5",
+    "jszip": "^3.10.1"
+  }
 }
