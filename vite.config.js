@@ -7,4 +7,5 @@ export default {
         host: true,
         allowedHosts: true
     },
+    root: 'dist'
 }
