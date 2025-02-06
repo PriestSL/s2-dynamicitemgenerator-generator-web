@@ -785,7 +785,9 @@ const importFromJSON = () => {
 };
 
 const TODOList = [
-    "Filters",
+    "Alphabetical sorting",
+    "Create some beauty",
+    "Search",
     "Full item list from game",
     "Weapon condition",
     "Tutorial",
