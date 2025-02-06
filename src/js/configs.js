@@ -37,9 +37,48 @@ export const oWeaponList = {
     GunGauss_SP: {},
     GunM10_HG: {},
     GunPM_HG: {},
+    GunUDP_HG: {},
+    GunAPB_HG: {},
+    GunRhino_HG: {},
     GunPKP_MG: {},
     GunRpg7_GL: {},
 };
+
+export const oUniqueList = { //to future
+    GunAK74_Korshunov_ST: {},
+    GunAK74_Strelok_ST: {},
+    Gun_ProjectY_HG: {},
+    Gun_Deadeye_HG: {},
+    GunPKP_Korshunov_MG: {},
+    Gun_Krivenko_HG: {},
+    Gun_Star_HG: {},
+    Gun_Encourage_HG: {},
+    Gun_GStreet_HG: {},
+    Gun_Shakh_SMG: {},
+    Gun_Spitter_SMG: {},
+    Gun_Silence_SMG: {},
+    Gun_RatKiller_SMG: {},
+    Gun_Spitfire_SMG: {},
+    Gun_Combatant_AR: {},
+    Gun_Drowned_AR: {},
+    Gun_Lummox_AR: {},
+    Gun_Decider_AR: {},
+    Gun_Merc_AR: {},
+    Gun_Sotnyk_AR: {},
+    Gun_Sharpshooter_AR: {},
+    Gun_Unknown_AR: {},
+    Gun_Trophy_AR: {},
+    Gun_SOFMOD_AR: {},
+    Gun_S15_AR: {},
+    Gun_Predator_SG: {},
+    Gun_Sledgehammer_SG: {},
+    Gun_Texas_SG: {},
+    Gun_Tank_MG: {},
+    Gun_Lynx_SR: {},
+    Gun_Partner_SR: {},
+    Gun_Whip_SR: {},
+    Gun_Cavalier_SR: {}
+}
 
 export let oArmorSpawnSettings = {
     Jemmy_Neutral_Armor: {
@@ -1012,7 +1051,54 @@ export const oSecondaryLoadoutSettings = {
 
 export const oPistolLoadoutSettings = {
     GeneralNPC_Neutral: {
-        GunM10_HG: [100, 100, 100, 100]
+        GunPM_HG: [100, 47.5, 20, 19],
+        GunUDP_HG: [0, 47.5, 40, 38.5],
+        GunM10_HG: [0, 5, 40, 38.5],
+        GunAPB_HG: [0, 0, 0, 4]
+    },
+    GeneralNPC_Bandit: {
+        GunPM_HG: [100, 100, 100, 100]
+    },
+    GeneralNPC_Mercenaries: {
+        GunUDP_HG: [100, 100, 50, 50],
+        GunM10_HG: [0, 0, 50, 50]
+    },
+    GeneralNPC_Scientists: {
+        GunUDP_HG: [100, 100, 100, 100]
+    },
+    GeneralNPC_Militaries: {
+        GunPM_HG: [100, 100, 90.9, 50],
+        GunAPB_HG: [0, 0, 9.1, 50]
+    },
+    GeneralNPC_Monolith: {
+        GunUDP_HG: [100, 100, 90.9, 50],
+        GunAPB_HG: [0, 0, 9.1, 50]
+    },
+    GeneralNPC_Duty: {
+        GunPM_HG: [100, 100, 90.9, 50],
+        GunAPB_HG: [0, 0, 9.1, 50]
+    },
+    GeneralNPC_Freedom: {
+        GunUDP_HG: [100, 100, 90.9, 50],
+        GunM10_HG: [0, 0, 9.1, 50]
+    },
+    GeneralNPC_Varta: {
+        GunPM_HG: [90.9, 50, 0, 0],
+        GunUDP_HG: [9.1, 50, 90.9, 50],
+        GunAPB_HG: [0, 0, 9.1, 50]
+    },
+    GeneralNPC_Noon: {
+        GunPM_HG: [90.9, 0, 0, 0],
+        GunUDP_HG: [9.1, 100, 100, 100],
+    },
+    GeneralNPC_Spark: {
+        GunUDP_HG: [90.9, 90.9, 47.6, 47.6],
+        GunM10_HG: [9.1, 9.1, 47.6, 47.6],
+        GunAPB_HG: [0, 0, 4.8, 4.8]
+    },
+    GeneralNPC_Corpus: {
+        GunPM_HG: [90.9, 90.9, 90.9, 50],
+        GunAPB_HG: [9.1, 9.1, 9.1, 50],
     }
 };
 
