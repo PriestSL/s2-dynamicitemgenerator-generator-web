@@ -1,5 +1,5 @@
 import * as config from './configs.js';
-import {modifiedWeaponSettings, modifiedArmorSettings, modifiedWeaponList, modifiedAmmoByWeaponClass, modifiedGrenadeSettings, modsCompatibility, modifiedDropConfigs, modifiedArmorSpawnSettings, modifiedHelmetSettings, modifiedPistolSettings} from './app.js';
+import {modifiedWeaponSettings, modifiedArmorSettings, modifiedWeaponList, modifiedAmmoByWeaponClass, modifiedGrenadeSettings, modsCompatibility, modifiedDropConfigs, modifiedArmorSpawnSettings, modifiedHelmetSpawnSettings, modifiedPistolSettings} from './app.js';
 
 var oArmorLoadoutSettings;
 var oWeaponLoadoutSettings;
@@ -26,19 +26,19 @@ const createArmorItemGenerator = (cArmorName)=>{
     const createHelmet = ()=>{
         if (!modifiedArmorSpawnSettings[cArmorName].helmetSpawn && !modsCompatibility.SHA) return '';
         const cHelmet = modifiedArmorSpawnSettings[cArmorName].helmet;
-        const oHelmet = modifiedHelmetSettings[cHelmet];
+        const oHelmet = modifiedHelmetSpawnSettings[cHelmet];
 
         if (!oHelmet) return '';
 
         let cRet = '';
-        for (let rank in oHelmet.spawn){
+        for (let i = 0; i<4; i++){
             cRet +=`      [*] : struct.begin\n`;
             cRet +=`         Category = EItemGenerationCategory::Head\n`;
-            cRet +=`         PlayerRank = ERank::${rank}\n`;
+            cRet +=`         PlayerRank = ERank::${ranks[i]}\n`;
             cRet +=`         PossibleItems : struct.begin\n`;
             cRet +=`            [0] : struct.begin\n`;
             cRet +=`               ItemPrototypeSID = ${cHelmet}\n`;
-            cRet +=`               Chance = ${(modifiedArmorSpawnSettings[cArmorName].helmetSpawn && oHelmet.spawn[rank]) || 1}\n`;
+            cRet +=`               Chance = ${(modifiedArmorSpawnSettings[cArmorName].helmetSpawn && oHelmet[i]/100) || 1}\n`;
             cRet +=`            struct.end\n`;
             cRet +=`         struct.end\n`;
             cRet +=`      struct.end\n`;

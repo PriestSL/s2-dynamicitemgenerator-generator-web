@@ -11,13 +11,15 @@ var currentCategory = "Primary";
 export var modifiedWeaponSettings = deepCopy(configs.oWeaponLoadoutSettings);
 export var modifiedArmorSettings = deepCopy(configs.oArmorLoadoutSettings);
 export var modifiedArmorSpawnSettings = deepCopy(configs.oArmorSpawnSettings); 
-export var modifiedHelmetSettings = deepCopy(configs.oHelmetsSettings);
+export var modifiedHelmetSpawnSettings = deepCopy(configs.oHelmetsGlobalSpawnSettings);
 export var modifiedGrenadeSettings = deepCopy(configs.oGrenadesSettings);
 export var modifiedAmmoByWeaponClass = deepCopy(configs.oAmmoByWeaponClass);
 export var modifiedWeaponList = deepCopy(configs.oWeaponList);
 export var modsCompatibility = {SHA: false}
 export var modifiedDropConfigs = deepCopy(configs.oDropConfigs);
 export var modifiedPistolSettings = deepCopy(configs.oPistolLoadoutSettings);
+
+const contentEl = document.getElementById('content');
 
 const typeToTable = {
     weapon: modifiedWeaponList,
@@ -206,49 +208,7 @@ const showAddSelection = (target, type, classification) => {
     document.body.appendChild(fullscreenDiv);
 };
 
-/*const showAddSelection = (type, classification) => {
-    let addDiv = document.getElementById('addItemButton');
-    addDiv.style.display = 'none';
-    
-    let otherSelEl = document.getElementById('addSelection');
-    if (otherSelEl) {
-        otherSelEl.remove();
-    }
-
-    let selection = document.createElement('div');
-    selection.classList.add('addSelection');
-    let select = document.createElement('select');
-    select.id = 'addSelection';
-    let option = document.createElement('option');
-    option.value = '';
-    option.text = 'Select item';
-    select.appendChild(option);
-    for (let item in typeToTable[type]) {
-        let option = document.createElement('option');
-        option.value = item;
-        option.text = item;
-        select.appendChild(option);
-    }
-    selection.appendChild(select);
-    selection.addEventListener('change', function(e) {
-        let item = e.target.value;
-        if (type === 'weapon') {
-            addWeaponToClass(e.target.parentElement.parentElement, classification, item);
-        }else if (type === 'armor') {
-            addArmor(e.target.parentElement.parentElement, item);
-        }else if (type === 'pistol') {
-            addPistol(e.target.parentElement.parentElement, item);
-        }
-
-        e.target.remove();
-        addDiv.style.display = 'block';
-    });
-
-    return selection;
-};*/
-
-const drawAttentionDiv = () => {
-    let text = 'This section is for all factions, settings for specific factions are not implemented yet';
+const drawAttentionDiv = (text = 'This section is for all factions, settings for specific factions are not implemented yet') => {
     let div = document.createElement('div');
     div.classList.add('attention');
     div.innerHTML = text;
@@ -327,6 +287,12 @@ function onPistolChanceChange(e) {
     updateLabels(PistolSettings, dataset.level);
 };
 
+function onHelmetChanceChange(e) {
+    let dataset = e.target.dataset;
+    let value = e.target.value;
+    modifiedHelmetSpawnSettings[dataset.item][dataset.level] = value;
+};
+
 function onAmmoChanceChange(e){
     let dataset = e.target.dataset;
     let value = e.target.value;
@@ -396,7 +362,13 @@ const fillAttributesTable = (oSettings, parentElement, type) => {
                 attrElement.dataset.type = type;
                 attrElement.dataset.to_item = item;
                 attrElement.dataset.to_attr = thisAttr[0];
-                let itemList = type==='armor'?thisAttr[0]=='helmet'?modifiedHelmetSettings:modifiedArmorSpawnSettings:modifiedWeaponList; //bruh
+                let itemList = type==='armor'?thisAttr[0]=='helmet'?modifiedHelmetSpawnSettings:modifiedArmorSpawnSettings:modifiedWeaponList; //bruh
+                {
+                    let option = document.createElement('option');
+                    option.value = '';
+                    option.text = '';
+                    attrElement.appendChild(option);
+                }
                 for (let item in itemList) {
                     let option = document.createElement('option');
                     option.value = item;
@@ -447,11 +419,11 @@ const fillAttributesTable = (oSettings, parentElement, type) => {
 }
 
 const showPrimarySettings = () => {
-    fillAttributesTable(modifiedWeaponList, document.getElementById('content'), 'weapon');
+    fillAttributesTable(modifiedWeaponList, contentEl, 'weapon');
 };
 
 const showArmorSettings = () => {
-    fillAttributesTable(modifiedArmorSpawnSettings, document.getElementById('content'), 'armor');
+    fillAttributesTable(modifiedArmorSpawnSettings, contentEl, 'armor');
 };
 
 const showPrimary = ()=>{
@@ -471,7 +443,7 @@ const showPrimary = ()=>{
         classSummary.classList.add('item_level1');
         classElement.appendChild(classSummary);
         classElement.classList.add('item_level1');
-        document.getElementById('content').appendChild(classElement);
+        contentEl.appendChild(classElement);
 
         let chances = fillChancesTable(WeaponSettings[classification], null, 'weapon', classification);
         chances.addEventListener('change', onWeaponChanceChange);
@@ -485,7 +457,7 @@ const showSecondary = ()=>{
     let infoElement = document.createElement('div');
     infoElement.innerHTML = 'Changing secondary weapons are not implemented yet (they are works in game?)';
 
-    document.getElementById('content').appendChild(infoElement);
+    contentEl.appendChild(infoElement);
 };
 
 const showPistols = ()=>{
@@ -494,9 +466,18 @@ const showPistols = ()=>{
     let chances = fillChancesTable(PistolSettings, null, 'pistol', '');
     chances.addEventListener('change', onPistolChanceChange);
 
-    document.getElementById('content').appendChild(chances);
+    contentEl.appendChild(chances);
 
     window.setTimeout(()=>{updateAllLabels(PistolSettings);}, 100);
+};
+
+const showHelmetSettings = ()=>{
+    let chances = fillChancesTable(modifiedHelmetSpawnSettings);
+    chances.addEventListener('change', onHelmetChanceChange);
+
+    contentEl.appendChild(chances);
+
+    contentEl.appendChild(drawAttentionDiv('Values in percent. Global values for all factions. Specific spawn settings in armor section.'));
 };
 
 const showArmor = ()=>{
@@ -510,7 +491,7 @@ const showArmor = ()=>{
     let chances = fillChancesTable(ArmorSettings, null, 'armor', '');
     chances.addEventListener('change', onArmorChanceChange);
 
-    document.getElementById('content').appendChild(chances);
+    contentEl.appendChild(chances);
 
     window.setTimeout(()=>{updateAllLabels(ArmorSettings);}, 100);
 };
@@ -519,32 +500,32 @@ const showArtifacts = ()=>{
     let infoElement = document.createElement('div');
     infoElement.innerHTML = 'Lootable artifact settings are not implemented yet (and game uses Artifact class to generate grenades)';
 
-    document.getElementById('content').appendChild(infoElement);
+    contentEl.appendChild(infoElement);
 };
 
 const showConsumables = ()=>{
     let infoElement = document.createElement('div');
     infoElement.innerHTML = 'Consumables loot settings are not implemented yet.';
 
-    document.getElementById('content').appendChild(infoElement);
+    contentEl.appendChild(infoElement);
 };
 
 const showAmmo = ()=>{
     let AmmoSettings = modifiedAmmoByWeaponClass;
     let chances = fillChancesTable(AmmoSettings, ['MinAmmo', 'MaxAmmo']);
     chances.addEventListener('change', onAmmoChanceChange);
-    document.getElementById('content').appendChild(chances);
+    contentEl.appendChild(chances);
 
-    document.getElementById('content').appendChild(drawAttentionDiv());
+    contentEl.appendChild(drawAttentionDiv());
 };
 
 const showGrenades = ()=>{
     let GrenadeSettings = modifiedGrenadeSettings;
     let chances = fillChancesTable(GrenadeSettings.Default);
     chances.addEventListener('change', onGrenadeChanceChange);
-    document.getElementById('content').appendChild(chances);
+    contentEl.appendChild(chances);
 
-    document.getElementById('content').appendChild(drawAttentionDiv());
+    contentEl.appendChild(drawAttentionDiv());
 };
 
 
@@ -553,6 +534,7 @@ const oCategoryToEvent = {
     "Primary": showPrimary,
     "Secondary": showSecondary,
     "Pistols": showPistols,
+    "Helmets": showHelmetSettings,
     "Armor": showArmor,
     "Artifacts": showArtifacts,
     "Consumables": showConsumables,
@@ -564,7 +546,7 @@ const subscribeToEvents = () => {
     let elements = document.getElementsByClassName('faction_item');
     for (let i = 0; i < elements.length; i++) {
         elements[i].addEventListener('click', function(e) {
-            document.getElementById('content').innerHTML = '';
+            contentEl.innerHTML = '';
             currentFaction = e.target.id;
             e.target.classList.add('active');
             let els = document.getElementsByClassName('faction_item');
@@ -581,7 +563,7 @@ const subscribeToEvents = () => {
     elements = document.getElementsByClassName('category_item');
     for (let i = 0; i < elements.length; i++) {
         elements[i].addEventListener('click', function(e) {
-            document.getElementById('content').innerHTML = '';
+            contentEl.innerHTML = '';
             currentCategory = e.target.id;
             e.target.classList.add('active');
             let els = document.getElementsByClassName('category_item');
@@ -698,7 +680,7 @@ const exportToJSON = () => {
         DropConfigs: modifiedDropConfigs,
         Compatibility: modsCompatibility,
         ArmorSpawnSettings: modifiedArmorSpawnSettings,
-        HelmetsSettings: modifiedHelmetSettings
+        HelmetsSettings: modifiedHelmetSpawnSettings
     };
 
     let configName = document.getElementById('config_name').value || 'config';
@@ -729,8 +711,8 @@ const importFromJSON = () => {
             modifiedDropConfigs = data.DropConfigs;
             modsCompatibility = data.Compatibility;
             modifiedArmorSpawnSettings = data.ArmorSpawnSettings;
-            modifiedHelmetSettings = data.HelmetsSettings;
-            document.getElementById('content').innerHTML = '';
+            modifiedHelmetSpawnSettings = data.HelmetsSettings;
+            contentEl.innerHTML = '';
             oCategoryToEvent[currentCategory]();
         };
         reader.readAsText(file);

@@ -337,6 +337,9 @@ export let oArmorSpawnSettings = {
         drop: true,
         dropItem: 'Exoskeleton_Neutral_Armor',
         helmet: 'Battle_Military_Helmet'
+    },
+    SEVA_Monolith_Armor:{ //preorder item, but monolith seva bois wear it
+        drop: false
     }
 };
 
@@ -424,86 +427,17 @@ export let oArmorLoadoutSettings = {
     }
 };
 
-export let oHelmetsSettings = {
-    Light_Neutral_Helmet: {
-        drop: true,
-        spawn: {
-            Newbie: 0.3,
-            Experienced: 0.5,
-            Veteran: 0.6,
-            Master: 0.7
-        }
-    },
-    Light_Bandit_Helmet: {
-        drop: true,
-        spawn: {
-            Experienced: 0.5,
-            Veteran: 0.6,
-            Master: 0.7
-        }
-    },
-    Light_Mercenaries_Helmet: {
-        drop: true,
-        spawn: {
-            Newbie: 0.3,
-            Experienced: 0.5,
-            Veteran: 0.6,
-            Master: 0.7
-        }
-    },
-    Light_Military_Helmet: {
-        drop: true,
-        spawn: {
-            Newbie: 0.3
-        }
-    },
-    Battle_Military_Helmet: {
-        drop: true,
-        spawn: {
-            Experienced: 0.5,
-            Veteran: 0.6,
-            Master: 0.7
-        }
-    },
-    Light_Duty_Helmet: {
-        drop: true,
-        spawn: {
-            Newbie: 0.3
-        }
-    },
-    Heavy_Duty_Helmet: {
-        drop: true,
-        spawn: {
-            Experienced: 0.5,
-            Veteran: 0.6,
-            Master: 0.7
-        }
-    },
-    Heavy_Svoboda_Helmet: {
-        drop: true,
-        spawn: {
-            Newbie: 0.2,
-            Experienced: 0.5,
-            Veteran: 0.6,
-            Master: 0.7
-        }
-    },
-    Heavy_Varta_Helmet: {
-        drop: true,
-        spawn: {
-            Newbie: 0.3,
-            Experienced: 0.5,
-            Veteran: 0.6,
-            Master: 0.7
-        }
-    },
-    Heavy_Military_Helmet: {
-        drop: true,
-        spawn: {
-            Veteran: 0.6,
-            Master: 0.7
-        }
-    }
+export let oHelmetsGlobalSpawnSettings = {
+    Light_Neutral_Helmet: [30, 50, 60, 70],
+    Light_Bandit_Helmet: [0, 50, 60, 70],
+    Light_Mercenaries_Helmet: [30, 50, 60, 70],
+    Light_Military_Helmet: [30, 0, 0, 0],
+    Battle_Military_Helmet: [0, 50, 60, 70],
+    Light_Duty_Helmet: [30, 0, 0, 0],
+    Heavy_Duty_Helmet: [0, 50, 60, 70],
+    Heavy_Svoboda_Helmet: [20, 50, 60, 70],
+    Heavy_Varta_Helmet: [30, 50, 60, 70],
+    Heavy_Military_Helmet: [0, 0, 60, 70]
 }
 
 export let oWeaponLoadoutSettings = {
