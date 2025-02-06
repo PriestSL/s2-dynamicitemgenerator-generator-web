@@ -5,9 +5,6 @@ export default {
     server: {
         port: process.env.PORT || 3000,
         host: true,
+        allowedHosts: true
     },
-    preview: {
-        port: process.env.PORT || 3000,
-        host: true,
-    }
 }
