@@ -7,5 +7,9 @@ export default {
         host: true,
         allowedHosts: true
     },
-    root: 'dist'
+    preview: {
+        host: true,
+        port: process.env.PORT || 3000, 
+        allowedHosts: true
+    },
 }

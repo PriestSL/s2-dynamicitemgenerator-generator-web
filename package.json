@@ -13,7 +13,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "start": "vite serve",
+    "start": "vite preview",
     "lint": "eslint"
   },
   "author": "PriestSL",
