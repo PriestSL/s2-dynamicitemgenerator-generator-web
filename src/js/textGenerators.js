@@ -1,5 +1,8 @@
 import * as config from './configs.js';
-import {modifiedMinWeaponDurability, modifiedMaxWeaponDurability, modifiedPistolSpawnChance, modifiedWeaponSettings, modifiedArmorSettings, modifiedWeaponList, modifiedAmmoByWeaponClass, modifiedGrenadeSettings, modsCompatibility, modifiedDropConfigs, modifiedArmorSpawnSettings, modifiedHelmetSpawnSettings, modifiedPistolSettings} from './app.js';
+import {modifiedMinWeaponDurability, modifiedMaxWeaponDurability, modifiedPistolSpawnChance, 
+    modifiedWeaponSettings, modifiedArmorSettings, modifiedWeaponList, modifiedAmmoByWeaponClass, 
+    modifiedGrenadeSettings, modsCompatibility, modifiedDropConfigs, modifiedArmorSpawnSettings,
+    modifiedHelmetSpawnSettings, modifiedPistolSettings} from './app.js';
 
 var oArmorLoadoutSettings;
 var oWeaponLoadoutSettings;
