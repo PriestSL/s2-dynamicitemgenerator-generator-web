@@ -1,5 +1,5 @@
 import * as config from './configs.js';
-import {modifiedWeaponSettings, modifiedArmorSettings, modifiedWeaponList, modifiedAmmoByWeaponClass, modifiedGrenadeSettings, modsCompatibility, modifiedDropConfigs, modifiedArmorSpawnSettings, modifiedHelmetSettings} from './app.js';
+import {modifiedWeaponSettings, modifiedArmorSettings, modifiedWeaponList, modifiedAmmoByWeaponClass, modifiedGrenadeSettings, modsCompatibility, modifiedDropConfigs, modifiedArmorSpawnSettings, modifiedHelmetSettings, modifiedPistolSettings} from './app.js';
 
 var oArmorLoadoutSettings;
 var oWeaponLoadoutSettings;
@@ -189,6 +189,60 @@ const prepareWeaponStruct = (oWeapons)=>{
     }
 
     return oPrepared;
+};
+
+const preparePistolStruct = (oPistols)=>{
+    let oPrepared = {};
+    for (let faction in oPistols){
+        oPrepared[faction] = {};
+        for (let i = 0; i < ranks.length; i++){
+            oPrepared[faction][ranks[i]] = {};
+            for (let pistol in oPistols[faction]){
+                oPrepared[faction][ranks[i]][pistol] = oPistols[faction][pistol][i];
+            }
+        }
+    }
+
+    return oPrepared;
+};
+
+const createPistolsItemGenerators = ()=>{
+    let oPrepared = preparePistolStruct(modifiedPistolSettings);
+
+    let cPistolGenerators = '';
+
+    for (let faction in oPrepared){
+        cPistolGenerators += `${faction}_WeaponPistol_Override : struct.begin {refurl=../ItemGeneratorPrototypes.cfg;refkey=[0]}\n`;
+        cPistolGenerators += `   SID = ${faction}_WeaponPistol\n`;
+        cPistolGenerators += `   ItemGenerator : struct.begin\n`;
+        for (let rank in oPrepared[faction]){
+            cPistolGenerators += `      [*] : struct.begin\n`;
+            cPistolGenerators += `         Category = EItemGenerationCategory::WeaponSecondary\n`;
+            cPistolGenerators += `         PlayerRank = ERank::${rank}\n`;
+            cPistolGenerators += `         PossibleItems : struct.begin\n`;
+            let iterator = 0;
+            for (let pistol in oPrepared[faction][rank]){
+                if (oPrepared[faction][rank][pistol] === 0){
+                    continue;
+                }
+                cPistolGenerators += `            [${iterator}] : struct.begin\n`;
+                cPistolGenerators += `               ItemPrototypeSID = ${pistol}\n`;
+                cPistolGenerators += `               Weight = ${oPrepared[faction][rank][pistol]}\n`;
+                cPistolGenerators += `               MinDurability = ${nMinWeaponDurability}\n`;
+                cPistolGenerators += `               MaxDurability = ${nMaxWeaponDurability}\n`;
+                cPistolGenerators += `               AmmoMinCount = ${oAmmoByWeaponClass['HG'][0]}\n`;
+                cPistolGenerators += `               AmmoMaxCount = ${oAmmoByWeaponClass['HG'][1]}\n`;
+                cPistolGenerators += `            struct.end\n`;
+                iterator++;
+            }
+            cPistolGenerators += `         struct.end\n`;
+            cPistolGenerators += `      struct.end\n`;
+        }
+        cPistolGenerators += `   struct.end\n`;
+        cPistolGenerators += `struct.end\n`;
+    }
+
+    return cPistolGenerators;
 };
 
 const createArmorAndPistol = (faction)=>{
@@ -409,6 +463,9 @@ export const createLoadout = async ()=>{
     for (let armor in modifiedArmorSpawnSettings){
         cRet += createArmorItemGenerator(armor);
     }
+
+    cRet += `//Pistols itemgenerators\n`;
+    cRet += createPistolsItemGenerators();
 
     cRet += `//Grenades itemgenerators\n`;
     cRet += createGrenadesItemGenerators();
