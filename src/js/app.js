@@ -18,6 +18,7 @@ export var modifiedWeaponList = deepCopy(configs.oWeaponList);
 export var modsCompatibility = {SHA: false}
 export var modifiedDropConfigs = deepCopy(configs.oDropConfigs);
 export var modifiedPistolSettings = deepCopy(configs.oPistolLoadoutSettings);
+export var modifiedPistolSpawnChance = configs.nPistolLootChance;
 
 const contentEl = document.getElementById('content');
 
@@ -340,7 +341,7 @@ const fillChancesTable = (oSettings, newRowReplace, tableType, classification = 
 const fillAttributesTable = (oSettings, parentElement, type) => {
     const typeToAttributeList = {
         weapon: [['minAmmo', 'number'], ['maxAmmo','number']],
-        armor: [['drop', 'checkbox'], ['dropItem', 'select'], ['helmet', 'select'], ['helmetSpawn', 'checkbox']]
+        armor: [['drop', 'checkbox'], ['dropItem', 'select'], ['helmet', 'select'], ['helmetSpawn', 'number']]
     };
 
 
@@ -462,13 +463,31 @@ const showSecondary = ()=>{
 
 const showPistols = ()=>{
     let GeneralSettings = 'GeneralNPC_'+currentFaction;
-    let PistolSettings = modifiedPistolSettings[GeneralSettings];
-    let chances = fillChancesTable(PistolSettings, null, 'pistol', '');
-    chances.addEventListener('change', onPistolChanceChange);
+    if (currentFaction === 'Generic_settings'){
+        let pistolSpawnChance = document.createElement('div');
+        let pistolSpawnChanceLabel = document.createElement('label');
+        pistolSpawnChanceLabel.innerHTML = 'Pistol kit spawn chance, %';
+        pistolSpawnChance.appendChild(pistolSpawnChanceLabel);
+        let pistolSpawnChanceInput = document.createElement('input');
+        pistolSpawnChanceInput.type = 'number';
+        pistolSpawnChanceInput.value = modifiedPistolSpawnChance;
 
-    contentEl.appendChild(chances);
+        pistolSpawnChanceInput.addEventListener('change', function(e) {
+            modifiedPistolSpawnChance = e.target.value;
+        });
 
-    window.setTimeout(()=>{updateAllLabels(PistolSettings);}, 100);
+        pistolSpawnChance.appendChild(pistolSpawnChanceInput);
+
+        contentEl.appendChild(pistolSpawnChance);
+    }else{
+        let PistolSettings = modifiedPistolSettings[GeneralSettings];
+        let chances = fillChancesTable(PistolSettings, null, 'pistol', '');
+        chances.addEventListener('change', onPistolChanceChange);
+
+        contentEl.appendChild(chances);
+
+        window.setTimeout(()=>{updateAllLabels(PistolSettings);}, 100);
+    }
 };
 
 const showHelmetSettings = ()=>{
@@ -721,7 +740,6 @@ const importFromJSON = () => {
 };
 
 const TODOList = [
-    "Pistol settings",
     "Full item list from game",
     "Weapon condition",
     "Tutorial",

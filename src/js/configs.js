@@ -1051,7 +1051,7 @@ export const oGrenadesSettings = {
     }
 };
 
-export const nPistolLootChance = 0.3;
+export const nPistolLootChance = 30;
 
 export const nMinWeaponDurability = 0.25;
 export const nMaxWeaponDurability = 0.5;
