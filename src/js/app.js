@@ -19,6 +19,8 @@ export var modsCompatibility = {SHA: false}
 export var modifiedDropConfigs = deepCopy(configs.oDropConfigs);
 export var modifiedPistolSettings = deepCopy(configs.oPistolLoadoutSettings);
 export var modifiedPistolSpawnChance = configs.nPistolLootChance;
+export var modifiedMinWeaponDurability = configs.nMinWeaponDurability;
+export var modifiedMaxWeaponDurability = configs.nMaxWeaponDurability;
 
 const contentEl = document.getElementById('content');
 
@@ -420,6 +422,49 @@ const fillAttributesTable = (oSettings, parentElement, type) => {
 }
 
 const showPrimarySettings = () => {
+    let globalAttributes = document.createElement('details');
+    globalAttributes.setAttribute('open', 'open');
+    globalAttributes.classList.add('item_level1');
+    let globalSummary = document.createElement('summary');
+    globalSummary.innerHTML = 'Global settings';
+    globalSummary.classList.add('item_level1');
+    globalAttributes.appendChild(globalSummary);
+
+    {
+        let attrLabel = document.createElement('label');
+        attrLabel.innerHTML = 'Minimal condition, %';
+        globalAttributes.appendChild(attrLabel);
+        let attrElement = document.createElement('input');
+        attrElement.type = 'number';
+        attrElement.value = modifiedMinWeaponDurability;
+        
+        attrElement.addEventListener('change', function(e) {
+            modifiedMinWeaponDurability = e.target.value;
+        });
+
+        globalAttributes.appendChild(attrElement);
+    }
+
+    {
+        let attrLabel = document.createElement('label');
+        attrLabel.innerHTML = 'Maximal condition, %';
+        globalAttributes.appendChild(attrLabel);
+        let attrElement = document.createElement('input');
+        attrElement.type = 'number';
+        attrElement.value = modifiedMaxWeaponDurability;
+
+        attrElement.addEventListener('change', function(e) {
+            modifiedMaxWeaponDurability = e.target.value;
+        });
+
+        globalAttributes.appendChild(attrElement);
+    }
+
+
+
+    contentEl.appendChild(globalAttributes);
+
+
     fillAttributesTable(modifiedWeaponList, contentEl, 'weapon');
 };
 
@@ -740,6 +785,7 @@ const importFromJSON = () => {
 };
 
 const TODOList = [
+    "Filters",
     "Full item list from game",
     "Weapon condition",
     "Tutorial",

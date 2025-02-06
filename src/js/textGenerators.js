@@ -1,13 +1,11 @@
 import * as config from './configs.js';
-import {modifiedPistolSpawnChance, modifiedWeaponSettings, modifiedArmorSettings, modifiedWeaponList, modifiedAmmoByWeaponClass, modifiedGrenadeSettings, modsCompatibility, modifiedDropConfigs, modifiedArmorSpawnSettings, modifiedHelmetSpawnSettings, modifiedPistolSettings} from './app.js';
+import {modifiedMinWeaponDurability, modifiedMaxWeaponDurability, modifiedPistolSpawnChance, modifiedWeaponSettings, modifiedArmorSettings, modifiedWeaponList, modifiedAmmoByWeaponClass, modifiedGrenadeSettings, modsCompatibility, modifiedDropConfigs, modifiedArmorSpawnSettings, modifiedHelmetSpawnSettings, modifiedPistolSettings} from './app.js';
 
 var oArmorLoadoutSettings;
 var oWeaponLoadoutSettings;
 var oWeaponList;
 const oSecondaryLoadoutSettings = config.oSecondaryLoadoutSettings;
 var oAmmoByWeaponClass;
-const nMinWeaponDurability = config.nMinWeaponDurability;
-const nMaxWeaponDurability = config.nMaxWeaponDurability;
 
 
 let ranks = ['Newbie', 'Experienced', 'Veteran', 'Master'];
@@ -128,8 +126,8 @@ const createWeaponStruct = (oWeapon, faction)=>{
         cRet += `            [${iterator}] : struct.begin\n`;
         cRet += `               ItemPrototypeSID = ${(faction.substring(0, 8) == 'GuardNPC'? 'Guard':'') + weapon}\n`;
         cRet += `               Weight = ${oWeapon[weapon]}\n`;
-        cRet += `               MinDurability = ${( [weapon].minCondition || nMinWeaponDurability)/100}\n`;
-        cRet += `               MaxDurability = ${(oWeaponList[weapon].maxCondition || nMaxWeaponDurability)/100}\n`;
+        cRet += `               MinDurability = ${( [weapon].minCondition || modifiedMinWeaponDurability)/100}\n`;
+        cRet += `               MaxDurability = ${(oWeaponList[weapon].maxCondition || modifiedMaxWeaponDurability)/100}\n`;
         cRet += `               AmmoMinCount = ${oWeaponList[weapon].minAmmo ? oWeaponList[weapon].minAmmo : oAmmoByWeaponClass[weaponClass][0]}\n`;
         cRet += `               AmmoMaxCount = ${oWeaponList[weapon].maxAmmo ? oWeaponList[weapon].maxAmmo : oAmmoByWeaponClass[weaponClass][1]}\n`;
         cRet += `            struct.end\n`;
@@ -229,8 +227,8 @@ const createPistolsItemGenerators = ()=>{
                 cPistolGenerators += `            [${iterator}] : struct.begin\n`;
                 cPistolGenerators += `               ItemPrototypeSID = ${pistol}\n`;
                 cPistolGenerators += `               Weight = ${oPrepared[faction][rank][pistol]}\n`;
-                cPistolGenerators += `               MinDurability = ${(oWeaponList[pistol].minCondition || nMinWeaponDurability)/100}\n`;
-                cPistolGenerators += `               MaxDurability = ${(oWeaponList[pistol].maxCondition || nMaxWeaponDurability)/100}\n`;
+                cPistolGenerators += `               MinDurability = ${(oWeaponList[pistol].minCondition || modifiedMinWeaponDurability)/100}\n`;
+                cPistolGenerators += `               MaxDurability = ${(oWeaponList[pistol].maxCondition || modifiedMaxWeaponDurability)/100}\n`;
                 cPistolGenerators += `               AmmoMinCount = ${oAmmoByWeaponClass['HG'][0]}\n`;
                 cPistolGenerators += `               AmmoMaxCount = ${oAmmoByWeaponClass['HG'][1]}\n`;
                 cPistolGenerators += `            struct.end\n`;
