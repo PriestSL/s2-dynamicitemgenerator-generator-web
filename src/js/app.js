@@ -785,6 +785,7 @@ const importFromJSON = () => {
 };
 
 const TODOList = [
+    "Optimize space by merging same ranks",
     "Alphabetical sorting",
     "Create some beauty",
     "Search",
