@@ -3,6 +3,7 @@ import {modifiedMinWeaponDurability, modifiedMaxWeaponDurability, modifiedPistol
     modifiedWeaponSettings, modifiedArmorSettings, modifiedWeaponList, modifiedAmmoByWeaponClass, 
     modifiedGrenadeSettings, modsCompatibility, modifiedDropConfigs, modifiedArmorSpawnSettings,
     modifiedHelmetSpawnSettings, modifiedPistolSettings} from './app.js';
+import { objCompare } from './utils.js';
 
 import FactionPatchesCompatibility from '../Mods/FactionPatches.cfg?raw';
 import ProjectItemizationCompatibility from '../Mods/ProjectItemization.cfg?raw';
@@ -13,10 +14,26 @@ var oWeaponList;
 const oSecondaryLoadoutSettings = config.oSecondaryLoadoutSettings;
 var oAmmoByWeaponClass;
 
+const aERanks = ['ERank::Newbie', 'ERank::Experienced', 'ERank::Veteran', 'ERank::Master'];
+const aRanks = ['Newbie', 'Experienced', 'Veteran', 'Master']; //TODO temp
 
-let ranks = ['Newbie', 'Experienced', 'Veteran', 'Master'];
 
 const createArmorItemGenerator = (cArmorName)=>{
+    const compressChancesToRanks = (aChances)=>{
+        let oTemp = {};
+        for (let i = 0; i < 4; i++){
+            if (!oTemp[aChances[i]]){
+                oTemp[aChances[i]] = [];
+            }
+            oTemp[aChances[i]].push('ERank::'+aERanks[i]);
+        }
+    
+        let oRet = {};
+        for (let ranks in oTemp){
+            oRet[oTemp[ranks]] = ranks;
+        }
+        return oRet;
+    };
     //TODO Lootable chances by player rank
     const createLootable = ()=>
     `            [1] : struct.begin
@@ -28,25 +45,32 @@ const createArmorItemGenerator = (cArmorName)=>{
 
     const createHelmet = ()=>{
         const armorSettins = modifiedArmorSpawnSettings[cArmorName];
-        if (!armorSettins.helmetSpawn && !modsCompatibility.SHA) return '';
         const cHelmet = modifiedArmorSpawnSettings[cArmorName].helmet;
         const oHelmet = modifiedHelmetSpawnSettings[cHelmet];
-
         if (!oHelmet) return '';
 
         let cRet = '';
-        for (let i = 0; i<4; i++){
-            let helmetChance = armorSettins.helmetSpawn || oHelmet[i] || 100;
+        const fillHelmet = (rank, chance)=>{
             cRet +=`      [*] : struct.begin\n`;
             cRet +=`         Category = EItemGenerationCategory::Head\n`;
-            cRet +=`         PlayerRank = ERank::${ranks[i]}\n`;
+            cRet +=`         PlayerRank = ${rank}\n`;
             cRet +=`         PossibleItems : struct.begin\n`;
             cRet +=`            [0] : struct.begin\n`;
             cRet +=`               ItemPrototypeSID = ${cHelmet}\n`;
-            cRet +=`               Chance = ${helmetChance / 100 }\n`;
+            cRet +=`               Chance = ${chance / 100 }\n`;
             cRet +=`            struct.end\n`;
             cRet +=`         struct.end\n`;
             cRet +=`      struct.end\n`;
+        };
+
+        if (armorSettins.helmetSpawn>0){
+            fillHelmet('ERank::Newbie, ERank::Experienced, ERank::Veteran, ERank::Master', armorSettins.helmetSpawn);
+        }else{
+            let oCompressed = compressChancesToRanks(oHelmet);
+            for (let ranks in oCompressed){
+                if (oCompressed[ranks] == 0) continue;
+                fillHelmet(ranks, oCompressed[ranks]);
+            }
         }
 
         return cRet;
@@ -76,15 +100,48 @@ const prepareArmorStruct = (oArmor)=>{
     let oPrepared = {};
     for (let faction in oArmor){
         oPrepared[faction] = {};
-        for (let i = 0; i < ranks.length; i++){
-            oPrepared[faction][ranks[i]] = {};
+        for (let i = 0; i < aERanks.length; i++){
+            oPrepared[faction][aERanks[i]] = {};
             for (let armor in oArmor[faction]){
-                oPrepared[faction][ranks[i]][armor] = oArmor[faction][armor][i];
+                oPrepared[faction][aERanks[i]][armor] = oArmor[faction][armor][i];
             }
         }
     }
 
-    return oPrepared;
+    let oCompressed = {};
+    for (let faction in oPrepared){
+        oCompressed[faction] = {};
+        let prevRanks = [];
+        for (let i = 0; i < aERanks.length; i++){
+            let rank = aERanks[i];
+            if (!oPrepared[faction][rank]) continue;
+            if (prevRanks.length == 0){
+                prevRanks.push(rank);
+                oCompressed[faction][rank] = oPrepared[faction][rank];
+                continue;
+            }
+
+            let bFound = false;
+            for (let i = 0; i < prevRanks.length; i++){
+                if (objCompare(oPrepared[faction][rank], oCompressed[faction][prevRanks[i]])){
+                    oCompressed[faction][prevRanks[i]  + ', ' + rank] = oPrepared[faction][rank];
+                    delete oCompressed[faction][prevRanks[i]];
+                    bFound = true;
+                    prevRanks.push(prevRanks[i] + ', ' + rank);
+                    prevRanks.splice(i, 1);
+                    break;
+                }
+            }
+
+            if (!bFound){
+                prevRanks.push(rank);
+                oCompressed[faction][rank] = oPrepared[faction][rank];
+            }
+
+        }
+    }
+
+    return oCompressed;
 
 };
 
@@ -93,30 +150,30 @@ const createArmorLoadoutGenerators = ()=>{
 
     let cArmorGenerators = '';
     for (let faction in oPrepared){
-        cArmorGenerators += `${faction}_Armor_Override : struct.begin {refurl=../ItemGeneratorPrototypes.cfg;refkey=[0]}
-   SID = ${faction}_Armor 
-   ItemGenerator : struct.begin\n`;
+        cArmorGenerators += `${faction}_Armor_Override : struct.begin {refurl=../ItemGeneratorPrototypes.cfg;refkey=[0]}\n`;
+        cArmorGenerators += `   SID = ${faction}_Armor\n`;
+        cArmorGenerators += `   ItemGenerator : struct.begin\n`;
         for (let rank in oPrepared[faction]){
-            cArmorGenerators += `      [*] : struct.begin
-         Category = EItemGenerationCategory::SubItemGenerator
-         PlayerRank = ERank::${rank}
-         PossibleItems : struct.begin\n`;
+            cArmorGenerators += `      [*] : struct.begin\n`;
+            cArmorGenerators += `         Category = EItemGenerationCategory::SubItemGenerator\n`;
+            cArmorGenerators += `         PlayerRank = ${rank}\n`;
+            cArmorGenerators += `         PossibleItems : struct.begin\n`;
             let iterator = 0;
             for (let armor in oPrepared[faction][rank]){
                 if (oPrepared[faction][rank][armor] === 0){
                     continue;
                 }
-                cArmorGenerators += `            [${iterator}] : struct.begin
-               ItemGeneratorPrototypeSID = General${armor}
-               Weight = ${oPrepared[faction][rank][armor]}
-            struct.end\n`;
+                cArmorGenerators += `            [${iterator}] : struct.begin\n`;
+                cArmorGenerators += `               ItemGeneratorPrototypeSID = General${armor}\n`;
+                cArmorGenerators += `               Weight = ${oPrepared[faction][rank][armor]}\n`;
+                cArmorGenerators += `            struct.end\n`;
                 iterator++;
             }
-            cArmorGenerators += `         struct.end
-      struct.end\n`;
+            cArmorGenerators += `         struct.end\n`;
+            cArmorGenerators += `      struct.end\n`;
         }
-        cArmorGenerators += `   struct.end
-struct.end\n`;
+        cArmorGenerators += `   struct.end\n`;
+        cArmorGenerators += `struct.end\n`;
     }
     return cArmorGenerators;
 }
@@ -150,7 +207,7 @@ const createPrimaryWeapons = (oWeapons, faction, clas)=>{
     for (let rank in oWeapons){
         cRet += `      [*] : struct.begin\n`;
         cRet += `         Category = EItemGenerationCategory::WeaponPrimary\n`;
-        cRet += `         PlayerRank = ERank::${rank}\n`;
+        cRet += `         PlayerRank = ${rank}\n`;
         cRet += `         PossibleItems : struct.begin\n`;
         cRet += createWeaponStruct(oWeapons[rank], faction);
         cRet += `         struct.end\n`;
@@ -168,7 +225,7 @@ const createSecondaryWeapons = (oWeapons, faction, clas)=>{
     for (let rank in oWeapons){
         cRet += `      [*] : struct.begin\n`;
         cRet += `         Category = EItemGenerationCategory::WeaponSecondary\n`;
-        cRet += `         PlayerRank = ERank::${rank}\n`;
+        cRet += `         PlayerRank = ${rank}\n`;
         cRet += `         PossibleItems : struct.begin\n`;
         cRet += createWeaponStruct(oWeapons[rank], faction);
         cRet += `         struct.end\n`;
@@ -184,31 +241,100 @@ const prepareWeaponStruct = (oWeapons)=>{
         oPrepared[faction] = {};
         for (let clas in oWeapons[faction]){
             oPrepared[faction][clas] = {};
-            for (let i = 0; i < ranks.length; i++){
-                oPrepared[faction][clas][ranks[i]] = {};
+            for (let i = 0; i < aERanks.length; i++){
+                oPrepared[faction][clas][aERanks[i]] = {};
                 for (let weapon in oWeapons[faction][clas]){
-                    oPrepared[faction][clas][ranks[i]][weapon] = oWeapons[faction][clas][weapon][i];
+                    oPrepared[faction][clas][aERanks[i]][weapon] = oWeapons[faction][clas][weapon][i];
                 }
             }
         }
     }
 
-    return oPrepared;
+    let oCompressed = {};
+    for (let faction in oPrepared){
+        oCompressed[faction] = {};
+        for (let clas in oPrepared[faction]){
+            oCompressed[faction][clas] = {};
+            let prevRanks = [];
+            for (let i = 0; i < aERanks.length; i++){
+                let rank = aERanks[i];
+                if (!oPrepared[faction][clas][rank]) continue;
+                if (prevRanks.length == 0){
+                    prevRanks.push(rank);
+                    oCompressed[faction][clas][rank] = oPrepared[faction][clas][rank];
+                    continue;
+                }
+
+                let bFound = false;
+                for (let i = 0; i < prevRanks.length; i++){
+                    if (objCompare(oPrepared[faction][clas][rank], oCompressed[faction][clas][prevRanks[i]])){
+                        oCompressed[faction][clas][prevRanks[i] + ', ' + rank] = oPrepared[faction][clas][rank];
+                        delete oCompressed[faction][clas][prevRanks[i]];
+                        prevRanks.push(prevRanks[i] + ', ' + rank);
+                        prevRanks.splice(i, 1);
+                        bFound = true;
+                        break;
+                    }
+                }
+
+                if (!bFound){
+                    prevRanks.push(rank);
+                    oCompressed[faction][clas][rank] = oPrepared[faction][clas][rank];
+                }
+
+            }
+        }
+    }
+
+    return oCompressed;
 };
 
 const preparePistolStruct = (oPistols)=>{
     let oPrepared = {};
     for (let faction in oPistols){
         oPrepared[faction] = {};
-        for (let i = 0; i < ranks.length; i++){
-            oPrepared[faction][ranks[i]] = {};
+        for (let i = 0; i < aERanks.length; i++){
+            oPrepared[faction][aERanks[i]] = {};
             for (let pistol in oPistols[faction]){
-                oPrepared[faction][ranks[i]][pistol] = oPistols[faction][pistol][i];
+                oPrepared[faction][aERanks[i]][pistol] = oPistols[faction][pistol][i];
             }
         }
     }
 
-    return oPrepared;
+    let oCompressed = {};
+    for (let faction in oPrepared){
+        oCompressed[faction] = {};
+        let prevRanks = [];
+        for (let i = 0; i < aERanks.length; i++){
+            let rank = aERanks[i];
+            if (!oPrepared[faction][rank]) continue;
+            if (prevRanks.length == 0){
+                prevRanks.push(rank);
+                oCompressed[faction][rank] = oPrepared[faction][rank];
+                continue;
+            }
+
+            let bFound = false;
+            for (let i = 0; i < prevRanks.length; i++){
+                if (objCompare(oPrepared[faction][rank], oCompressed[faction][prevRanks[i]])){
+                    oCompressed[faction][prevRanks[i] + ', ' + rank] = oPrepared[faction][rank];
+                    delete oCompressed[faction][prevRanks[i]];
+                    prevRanks.push(prevRanks[i] + ', ' + rank);
+                    prevRanks.splice(i, 1);
+                    bFound = true;
+                    break;
+                }
+            }
+
+            if (!bFound){
+                prevRanks.push(rank);
+                oCompressed[faction][rank] = oPrepared[faction][rank];
+            }
+
+        }
+    }
+
+    return oCompressed;
 };
 
 const createPistolsItemGenerators = ()=>{
@@ -223,7 +349,7 @@ const createPistolsItemGenerators = ()=>{
         for (let rank in oPrepared[faction]){
             cPistolGenerators += `      [*] : struct.begin\n`;
             cPistolGenerators += `         Category = EItemGenerationCategory::WeaponSecondary\n`;
-            cPistolGenerators += `         PlayerRank = ERank::${rank}\n`;
+            cPistolGenerators += `         PlayerRank = ${rank}\n`;
             cPistolGenerators += `         PossibleItems : struct.begin\n`;
             let iterator = 0;
             for (let pistol in oPrepared[faction][rank]){
@@ -350,6 +476,7 @@ const createGrenadeStruct = (oGrenades, rank)=>{
 
 const createGrenadesItemGenerators = ()=>{
     let cGrenadeGenerators = '';
+    
 
     for (let clas in modifiedGrenadeSettings){
             cGrenadeGenerators += `${clas}_Grenades : struct.begin {refurl=../ItemGeneratorPrototypes.cfg;refkey=[0]}\n`;
@@ -358,7 +485,7 @@ const createGrenadesItemGenerators = ()=>{
         for (let rank =0; rank<4; rank++){
             cGrenadeGenerators += `      [*] : struct.begin\n`;
             cGrenadeGenerators += `         Category = EItemGenerationCategory::Artifact\n`;
-            cGrenadeGenerators += `         PlayerRank = ERank::${ranks[rank]}\n`;
+            cGrenadeGenerators += `         PlayerRank = ERank::${aRanks[rank]}\n`;
             cGrenadeGenerators += `         PossibleItems : struct.begin\n`;
             cGrenadeGenerators +=              createGrenadeStruct(modifiedGrenadeSettings[clas], rank)
             cGrenadeGenerators += `         struct.end\n`;

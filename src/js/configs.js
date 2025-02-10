@@ -89,22 +89,18 @@ export let oArmorSpawnSettings = {
     Newbee_Neutral_Armor:{
         drop: true,
         helmet: 'Light_Neutral_Helmet',
-        helmetSpawn: true
     },
     NPC_Sel_Neutral_Armor:{
         drop: false,
         helmet: 'Light_Neutral_Helmet',
-        helmetSpawn: true
     },
     Nasos_Neutral_Armor:{
         drop: true,
         helmet: 'Light_Neutral_Helmet',
-        helmetSpawn: true
     },
     Zorya_Neutral_Armor:{
         drop: true,
         helmet: 'Light_Neutral_Helmet',
-        helmetSpawn: true
     },
     SEVA_Neutral_Armor:{
         drop: true,
@@ -121,32 +117,26 @@ export let oArmorSpawnSettings = {
     SkinJacket_Bandit_Armor:{
         drop: true,
         helmet: 'Light_Bandit_Helmet',
-        helmetSpawn: true
     },
     NPC_SkinCloak_Bandit_Armor:{
         drop: false,
         helmet: 'Light_Bandit_Helmet',
-        helmetSpawn: true
     },
     Jacket_Bandit_Armor:{
         drop: true,
         helmet: 'Light_Bandit_Helmet',
-        helmetSpawn: true
     },
     Middle_Bandit_Armor:{
         drop: true,
         helmet: 'Light_Bandit_Helmet',
-        helmetSpawn: true
     },
     Light_Mercenaries_Armor:{
         drop: true,
         helmet: 'Light_Mercenaries_Helmet',
-        helmetSpawn: true
     },
     Heavy_Mercenaries_Armor:{
         drop: true,
         helmet: 'Light_Mercenaries_Helmet',
-        helmetSpawn: true
     },
     Exoskeleton_Mercenaries_Armor:{
         drop: true,
@@ -171,7 +161,6 @@ export let oArmorSpawnSettings = {
     Default_Military_Armor:{
         drop: true,
         helmet: 'Light_Military_Helmet',
-        helmetSpawn: true
     },
     NPC_Cloak_Heavy_Military_Armor:{
         drop: true,
@@ -190,7 +179,6 @@ export let oArmorSpawnSettings = {
     Battle_Monolith_Armor:{
         drop: true,
         helmet: 'Battle_Military_Helmet',
-        helmetSpawn: true
     },
     HeavyAnomaly_Monolith_Armor:{
         drop: true,
@@ -207,12 +195,10 @@ export let oArmorSpawnSettings = {
     Rook_Dolg_Armor:{
         drop: true,
         helmet: 'Light_Duty_Helmet',
-        helmetSpawn: true
     },
     Battle_Dolg_Armor:{
         drop: true,
         helmet: 'Heavy_Duty_Helmet',
-        helmetSpawn: true
     },
     SEVA_Dolg_Armor:{
         drop: true,
@@ -233,12 +219,10 @@ export let oArmorSpawnSettings = {
     Rook_Svoboda_Armor:{
         drop: true,
         helmet: 'Heavy_Svoboda_Helmet',
-        helmetSpawn: true
     },
     Battle_Svoboda_Armor:{
         drop: true,
         helmet: 'Heavy_Svoboda_Helmet',
-        helmetSpawn: true
     },
     SEVA_Svoboda_Armor:{
         drop: true,
@@ -259,7 +243,6 @@ export let oArmorSpawnSettings = {
     Battle_Varta_Armor:{
         drop: true,
         helmet: 'Heavy_Varta_Helmet',
-        helmetSpawn: true
     },
     BattleExoskeleton_Varta_Armor:{
         drop: true,
@@ -269,7 +252,6 @@ export let oArmorSpawnSettings = {
         drop: true,
         dropItem: 'Battle_Monolith_Armor',
         helmet: 'Battle_Military_Helmet',
-        helmetSpawn: true
     },
     NPC_HeavyAnomaly_Noon_Armor:{
         drop: true,
@@ -289,7 +271,6 @@ export let oArmorSpawnSettings = {
     Battle_Spark_Armor:{
         drop: true,
         helmet: 'Battle_Military_Helmet',
-        helmetSpawn: true
     },
     NPC_Anomaly_Spark_Armor:{
         drop: true,
