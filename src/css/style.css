@@ -145,7 +145,7 @@ details.attributes_item_row{
 
 .attributes_grid{
     display: grid;
-    grid-template-columns: 100px 80px; /*TODO better*/
+    grid-template-columns: minmax(min-content, 100px) minmax(min-content, 80px) minmax(min-content, 100px) minmax(min-content, 80px);
     row-gap: 5px;
     column-gap: 5px;
     background-color: rgb(157, 231, 228);
