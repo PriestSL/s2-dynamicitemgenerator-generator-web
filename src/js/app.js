@@ -785,20 +785,17 @@ const importFromJSON = () => {
 };
 
 const TODOList = [
-    "Optimize space by merging same ranks",
     "Alphabetical sorting",
-    "Create some beauty",
     "Search",
-    "Full item list from game",
-    "Weapon condition",
+    "Local storage of settings",
+    "Public presets",
     "Tutorial",
     "Guard configuration",
-    "Local storage of settings",
     "Site localization",
     "Separate site for more files",
     "Create as splitted files and override",
     "Helmets drops",
-    "Public presets",
+    "Full item list from game",
     "Rewrite it all...",
     "Armor Loot chances by player rank",
     "Ammo count by player rank",
