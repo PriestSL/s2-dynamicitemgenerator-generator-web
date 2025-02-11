@@ -785,12 +785,12 @@ const importFromJSON = () => {
 };
 
 const TODOList = [
-    "Alphabetical sorting",
-    "Search",
     "Local storage of settings",
     "Public presets",
     "Tutorial",
     "Guard configuration",
+    "Alphabetical sorting",
+    "Search",
     "Site localization",
     "Separate site for more files",
     "Create as splitted files and override",
