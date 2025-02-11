@@ -300,16 +300,13 @@ input.chance{
 }
 
 .fullscreen_select_content{
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
+    display: grid;
     height: 100%;
     width: 100%;
-    overflow-y: scroll;
+    overflow: scroll;
 }
 
-.fullscreen_select_item{
+.fullscreen_select_item{    
     display: block;
     cursor: pointer;
     background-color: #D9D7D4;
