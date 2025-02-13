@@ -847,9 +847,11 @@ const showInfo = () => {
 };
 
 const showAlertMessage = () =>{
-    let text = '<span style="color: red; font-size: 24px; font-weight: bold">Hi. This website was made for version under 1.2. I don\'t know what changed in 1.2';
-        text += ' and I don\'t have time to check it (hope will check on weekend). So, use it for 1.2 by your own risk!<br>';
-        text += 'Also, this version of site not tested by me, so it can be broken. </span>';
+    let text = '<span style="color: red; font-size: 24px; font-weight: bold">Hi. This website was made for version under 1.2, but ';
+        text += 'seems like nothing changed, that can do this mod obsolete or broken. I\'m not sure, that current version of website creating ';
+        text += 'correct files. I will test all on weekend (15.02-16.02), so if you see this message - use it on your own risk. You still can use ';
+        text += 'pregenerated files on https://www.nexusmods.com/stalker2heartofchornobyl/mods/596 or ';
+        text += 'similar mods (in mod description small list of analogs). '; 
 
     createMessageBox('ahtung', text);
     let closeButton = document.getElementById('btn_close_msg_ahtung');
