@@ -848,7 +848,7 @@ const showInfo = () => {
 
 const showAlertMessage = () =>{
     let text = '<span style="color: red; font-size: 24px; font-weight: bold">Hi. This website was made for version under 1.2. I don\'t know what changed in 1.2';
-        text += 'and I don\'t have time to check it. So, use it for 1.2 by your own risk!<br>';
+        text += ' and I don\'t have time to check it (hope will check on weekend). So, use it for 1.2 by your own risk!<br>';
         text += 'Also, this version of site not tested by me, so it can be broken. </span>';
 
     createMessageBox('ahtung', text);
