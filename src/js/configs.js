@@ -36,9 +36,49 @@ export const oWeaponList = {
     GunM701_SP: {},
     GunGauss_SP: {},
     GunM10_HG: {},
+    GunPM_HG: {},
+    GunUDP_HG: {},
+    GunAPB_HG: {},
+    GunRhino_HG: {},
     GunPKP_MG: {},
     GunRpg7_GL: {},
 };
+
+export const oUniqueList = { //to future
+    GunAK74_Korshunov_ST: {},
+    GunAK74_Strelok_ST: {},
+    Gun_ProjectY_HG: {},
+    Gun_Deadeye_HG: {},
+    GunPKP_Korshunov_MG: {},
+    Gun_Krivenko_HG: {},
+    Gun_Star_HG: {},
+    Gun_Encourage_HG: {},
+    Gun_GStreet_HG: {},
+    Gun_Shakh_SMG: {},
+    Gun_Spitter_SMG: {},
+    Gun_Silence_SMG: {},
+    Gun_RatKiller_SMG: {},
+    Gun_Spitfire_SMG: {},
+    Gun_Combatant_AR: {},
+    Gun_Drowned_AR: {},
+    Gun_Lummox_AR: {},
+    Gun_Decider_AR: {},
+    Gun_Merc_AR: {},
+    Gun_Sotnyk_AR: {},
+    Gun_Sharpshooter_AR: {},
+    Gun_Unknown_AR: {},
+    Gun_Trophy_AR: {},
+    Gun_SOFMOD_AR: {},
+    Gun_S15_AR: {},
+    Gun_Predator_SG: {},
+    Gun_Sledgehammer_SG: {},
+    Gun_Texas_SG: {},
+    Gun_Tank_MG: {},
+    Gun_Lynx_SR: {},
+    Gun_Partner_SR: {},
+    Gun_Whip_SR: {},
+    Gun_Cavalier_SR: {}
+}
 
 export let oArmorSpawnSettings = {
     Jemmy_Neutral_Armor: {
@@ -49,22 +89,18 @@ export let oArmorSpawnSettings = {
     Newbee_Neutral_Armor:{
         drop: true,
         helmet: 'Light_Neutral_Helmet',
-        helmetSpawn: true
     },
     NPC_Sel_Neutral_Armor:{
         drop: false,
         helmet: 'Light_Neutral_Helmet',
-        helmetSpawn: true
     },
     Nasos_Neutral_Armor:{
         drop: true,
         helmet: 'Light_Neutral_Helmet',
-        helmetSpawn: true
     },
     Zorya_Neutral_Armor:{
         drop: true,
         helmet: 'Light_Neutral_Helmet',
-        helmetSpawn: true
     },
     SEVA_Neutral_Armor:{
         drop: true,
@@ -81,32 +117,26 @@ export let oArmorSpawnSettings = {
     SkinJacket_Bandit_Armor:{
         drop: true,
         helmet: 'Light_Bandit_Helmet',
-        helmetSpawn: true
     },
     NPC_SkinCloak_Bandit_Armor:{
         drop: false,
         helmet: 'Light_Bandit_Helmet',
-        helmetSpawn: true
     },
     Jacket_Bandit_Armor:{
         drop: true,
         helmet: 'Light_Bandit_Helmet',
-        helmetSpawn: true
     },
     Middle_Bandit_Armor:{
         drop: true,
         helmet: 'Light_Bandit_Helmet',
-        helmetSpawn: true
     },
     Light_Mercenaries_Armor:{
         drop: true,
         helmet: 'Light_Mercenaries_Helmet',
-        helmetSpawn: true
     },
     Heavy_Mercenaries_Armor:{
         drop: true,
         helmet: 'Light_Mercenaries_Helmet',
-        helmetSpawn: true
     },
     Exoskeleton_Mercenaries_Armor:{
         drop: true,
@@ -131,7 +161,6 @@ export let oArmorSpawnSettings = {
     Default_Military_Armor:{
         drop: true,
         helmet: 'Light_Military_Helmet',
-        helmetSpawn: true
     },
     NPC_Cloak_Heavy_Military_Armor:{
         drop: true,
@@ -150,7 +179,6 @@ export let oArmorSpawnSettings = {
     Battle_Monolith_Armor:{
         drop: true,
         helmet: 'Battle_Military_Helmet',
-        helmetSpawn: true
     },
     HeavyAnomaly_Monolith_Armor:{
         drop: true,
@@ -167,12 +195,10 @@ export let oArmorSpawnSettings = {
     Rook_Dolg_Armor:{
         drop: true,
         helmet: 'Light_Duty_Helmet',
-        helmetSpawn: true
     },
     Battle_Dolg_Armor:{
         drop: true,
         helmet: 'Heavy_Duty_Helmet',
-        helmetSpawn: true
     },
     SEVA_Dolg_Armor:{
         drop: true,
@@ -193,12 +219,10 @@ export let oArmorSpawnSettings = {
     Rook_Svoboda_Armor:{
         drop: true,
         helmet: 'Heavy_Svoboda_Helmet',
-        helmetSpawn: true
     },
     Battle_Svoboda_Armor:{
         drop: true,
         helmet: 'Heavy_Svoboda_Helmet',
-        helmetSpawn: true
     },
     SEVA_Svoboda_Armor:{
         drop: true,
@@ -219,7 +243,6 @@ export let oArmorSpawnSettings = {
     Battle_Varta_Armor:{
         drop: true,
         helmet: 'Heavy_Varta_Helmet',
-        helmetSpawn: true
     },
     BattleExoskeleton_Varta_Armor:{
         drop: true,
@@ -229,7 +252,6 @@ export let oArmorSpawnSettings = {
         drop: true,
         dropItem: 'Battle_Monolith_Armor',
         helmet: 'Battle_Military_Helmet',
-        helmetSpawn: true
     },
     NPC_HeavyAnomaly_Noon_Armor:{
         drop: true,
@@ -249,7 +271,6 @@ export let oArmorSpawnSettings = {
     Battle_Spark_Armor:{
         drop: true,
         helmet: 'Battle_Military_Helmet',
-        helmetSpawn: true
     },
     NPC_Anomaly_Spark_Armor:{
         drop: true,
@@ -297,6 +318,9 @@ export let oArmorSpawnSettings = {
         drop: true,
         dropItem: 'Exoskeleton_Neutral_Armor',
         helmet: 'Battle_Military_Helmet'
+    },
+    SEVA_Monolith_Armor:{ //preorder item, but monolith seva bois wear it
+        drop: false
     }
 };
 
@@ -384,86 +408,17 @@ export let oArmorLoadoutSettings = {
     }
 };
 
-export let oHelmetsSettings = {
-    Light_Neutral_Helmet: {
-        drop: true,
-        spawn: {
-            Newbie: 0.3,
-            Experienced: 0.5,
-            Veteran: 0.6,
-            Master: 0.7
-        }
-    },
-    Light_Bandit_Helmet: {
-        drop: true,
-        spawn: {
-            Experienced: 0.5,
-            Veteran: 0.6,
-            Master: 0.7
-        }
-    },
-    Light_Mercenaries_Helmet: {
-        drop: true,
-        spawn: {
-            Newbie: 0.3,
-            Experienced: 0.5,
-            Veteran: 0.6,
-            Master: 0.7
-        }
-    },
-    Light_Military_Helmet: {
-        drop: true,
-        spawn: {
-            Newbie: 0.3
-        }
-    },
-    Battle_Military_Helmet: {
-        drop: true,
-        spawn: {
-            Experienced: 0.5,
-            Veteran: 0.6,
-            Master: 0.7
-        }
-    },
-    Light_Duty_Helmet: {
-        drop: true,
-        spawn: {
-            Newbie: 0.3
-        }
-    },
-    Heavy_Duty_Helmet: {
-        drop: true,
-        spawn: {
-            Experienced: 0.5,
-            Veteran: 0.6,
-            Master: 0.7
-        }
-    },
-    Heavy_Svoboda_Helmet: {
-        drop: true,
-        spawn: {
-            Newbie: 0.2,
-            Experienced: 0.5,
-            Veteran: 0.6,
-            Master: 0.7
-        }
-    },
-    Heavy_Varta_Helmet: {
-        drop: true,
-        spawn: {
-            Newbie: 0.3,
-            Experienced: 0.5,
-            Veteran: 0.6,
-            Master: 0.7
-        }
-    },
-    Heavy_Military_Helmet: {
-        drop: true,
-        spawn: {
-            Veteran: 0.6,
-            Master: 0.7
-        }
-    }
+export let oHelmetsGlobalSpawnSettings = {
+    Light_Neutral_Helmet: [30, 50, 60, 70],
+    Light_Bandit_Helmet: [0, 50, 60, 70],
+    Light_Mercenaries_Helmet: [30, 50, 60, 70],
+    Light_Military_Helmet: [30, 0, 0, 0],
+    Battle_Military_Helmet: [0, 50, 60, 70],
+    Light_Duty_Helmet: [30, 0, 0, 0],
+    Heavy_Duty_Helmet: [0, 50, 60, 70],
+    Heavy_Svoboda_Helmet: [20, 50, 60, 70],
+    Heavy_Varta_Helmet: [30, 50, 60, 70],
+    Heavy_Military_Helmet: [0, 0, 60, 70]
 }
 
 export let oWeaponLoadoutSettings = {
@@ -1009,6 +964,58 @@ export const oSecondaryLoadoutSettings = {
     }
 };
 
+export const oPistolLoadoutSettings = {
+    GeneralNPC_Neutral: {
+        GunPM_HG: [100, 47.5, 20, 19],
+        GunUDP_HG: [0, 47.5, 40, 38.5],
+        GunM10_HG: [0, 5, 40, 38.5],
+        GunAPB_HG: [0, 0, 0, 4]
+    },
+    GeneralNPC_Bandit: {
+        GunPM_HG: [100, 100, 100, 100]
+    },
+    GeneralNPC_Mercenaries: {
+        GunUDP_HG: [100, 100, 50, 50],
+        GunM10_HG: [0, 0, 50, 50]
+    },
+    GeneralNPC_Scientists: {
+        GunUDP_HG: [100, 100, 100, 100]
+    },
+    GeneralNPC_Militaries: {
+        GunPM_HG: [100, 100, 90.9, 50],
+        GunAPB_HG: [0, 0, 9.1, 50]
+    },
+    GeneralNPC_Monolith: {
+        GunUDP_HG: [100, 100, 90.9, 50],
+        GunAPB_HG: [0, 0, 9.1, 50]
+    },
+    GeneralNPC_Duty: {
+        GunPM_HG: [100, 100, 90.9, 50],
+        GunAPB_HG: [0, 0, 9.1, 50]
+    },
+    GeneralNPC_Freedom: {
+        GunUDP_HG: [100, 100, 90.9, 50],
+        GunM10_HG: [0, 0, 9.1, 50]
+    },
+    GeneralNPC_Varta: {
+        GunPM_HG: [90.9, 50, 0, 0],
+        GunUDP_HG: [9.1, 50, 90.9, 50],
+        GunAPB_HG: [0, 0, 9.1, 50]
+    },
+    GeneralNPC_Noon: {
+        GunPM_HG: [90.9, 0, 0, 0],
+        GunUDP_HG: [9.1, 100, 100, 100],
+    },
+    GeneralNPC_Spark: {
+        GunUDP_HG: [90.9, 90.9, 47.6, 47.6],
+        GunM10_HG: [9.1, 9.1, 47.6, 47.6],
+        GunAPB_HG: [0, 0, 4.8, 4.8]
+    },
+    GeneralNPC_Corpus: {
+        GunPM_HG: [90.9, 90.9, 90.9, 50],
+        GunAPB_HG: [9.1, 9.1, 9.1, 50],
+    }
+};
 
 export const oGrenadesSettings = {
     Default: {
@@ -1025,10 +1032,10 @@ export const oGrenadesSettings = {
     }
 };
 
-export const nPistolLootChance = 0.3;
+export const nPistolLootChance = 30;
 
-export const nMinWeaponDurability = 0.25;
-export const nMaxWeaponDurability = 0.5;
+export const nMinWeaponDurability = 25;
+export const nMaxWeaponDurability = 50;
 
 export const oAmmoByWeaponClass = {
     SG: [0, 7],

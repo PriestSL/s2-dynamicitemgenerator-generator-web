@@ -1,0 +1,25 @@
+{
+  "devDependencies": {
+    "@eslint/js": "^9.19.0",
+    "eslint": "^9.19.0",
+    "globals": "^15.14.0",
+    "vite": "^6.1.0"
+  },
+  "name": "s2-dynamicitemgenerator-generator-web",
+  "description": "Pure JS website to generating NPC Loadout mod to STALKER 2. That's all...\r Deployed: https://s2-loadout-creator.cc/",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "start": "vite preview",
+    "lint": "eslint"
+  },
+  "author": "PriestSL",
+  "license": "MIT",
+  "dependencies": {
+    "file-saver": "^2.0.5",
+    "jszip": "^3.10.1"
+  }
+}

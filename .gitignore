@@ -130,9 +130,4 @@ dist
 .pnp.*
 
 #generated files
-Output
-OutputTemp
-RawFiles
-package-lock.json
-package.json
 eslint.config.mjs
