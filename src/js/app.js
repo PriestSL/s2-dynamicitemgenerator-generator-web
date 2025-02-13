@@ -759,6 +759,17 @@ const exportToJSON = () => {
 };
 
 const importFromJSON = () => {
+    const adoptOldHelmetVersion = (oldVersion) => {
+        if (!oldVersion) return configs.oHelmetsGlobalSpawnSettings;
+        if (oldVersion.Light_Neutral_Helmet.length) return oldVersion;
+
+        let newVersion = {};
+        for (let key in oldVersion) {
+            newVersion[key] = oldVersion[key].spawn;
+        }
+        return newVersion;
+    };
+
     let input = document.createElement('input');
     input.type = 'file';
     input.accept = '.json';
@@ -775,7 +786,7 @@ const importFromJSON = () => {
             modifiedDropConfigs = data.DropConfigs;
             modsCompatibility = data.Compatibility;
             modifiedArmorSpawnSettings = data.ArmorSpawnSettings;
-            modifiedHelmetSpawnSettings = data.HelmetsSettings;
+            modifiedHelmetSpawnSettings = adoptOldHelmetVersion(data.HelmetsSettings);
             contentEl.innerHTML = '';
             oCategoryToEvent[currentCategory]();
         };
@@ -785,6 +796,7 @@ const importFromJSON = () => {
 };
 
 const TODOList = [
+    "Import config",
     "Local storage of settings",
     "Public presets",
     "Tutorial",
