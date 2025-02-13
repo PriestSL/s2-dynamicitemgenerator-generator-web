@@ -846,6 +846,16 @@ const showInfo = () => {
     closeButton.addEventListener('click', ()=>removeMessageBox('info'));
 };
 
+const showAlertMessage = () =>{
+    let text = '<span style="color: red; font-size: 24px; font-weight: bold">Hi. This website was made for version under 1.2. I don\'t know what changed in 1.2';
+        text += 'and I don\'t have time to check it. So, use it for 1.2 by your own risk!<br>';
+        text += 'Also, this version of site not tested by me, so it can be broken. </span>';
+
+    createMessageBox('ahtung', text);
+    let closeButton = document.getElementById('btn_close_msg_ahtung');
+    closeButton.addEventListener('click', ()=>removeMessageBox('ahtung'));
+};
+
 
 let button = document.getElementById('btn_save');
 button.addEventListener('click', generateConfig);
@@ -870,3 +880,5 @@ button = document.getElementById('btn_todo');
 button.addEventListener('click', showToDoWindow);
 button = document.getElementById('btn_info');
 button.addEventListener('click', showInfo);
+
+showAlertMessage();
