@@ -796,6 +796,7 @@ const importFromJSON = () => {
 };
 
 const TODOList = [
+    "Some style fixes",
     "Import config",
     "Local storage of settings",
     "Public presets",
@@ -846,18 +847,6 @@ const showInfo = () => {
     closeButton.addEventListener('click', ()=>removeMessageBox('info'));
 };
 
-const showAlertMessage = () =>{
-    let text = '<span style="color: red; font-size: 24px; font-weight: bold">Hi. This website was made for version under 1.2, but ';
-        text += 'seems like nothing changed, that can do this mod obsolete or broken. I\'m not sure, that current version of website creating ';
-        text += 'correct files. I will test all on weekend (15.02-16.02), so if you see this message - use it on your own risk. You still can use ';
-        text += 'pregenerated files on https://www.nexusmods.com/stalker2heartofchornobyl/mods/596 or ';
-        text += 'similar mods (in mod description small list of analogs). '; 
-
-    createMessageBox('ahtung', text);
-    let closeButton = document.getElementById('btn_close_msg_ahtung');
-    closeButton.addEventListener('click', ()=>removeMessageBox('ahtung'));
-};
-
 
 let button = document.getElementById('btn_save');
 button.addEventListener('click', generateConfig);
@@ -882,5 +871,3 @@ button = document.getElementById('btn_todo');
 button.addEventListener('click', showToDoWindow);
 button = document.getElementById('btn_info');
 button.addEventListener('click', showInfo);
-
-showAlertMessage();
