@@ -1,5 +1,6 @@
 import { generateConfig } from './fileStreamGenerator.js';
 import { showFreezeDiv, hideFreezeDiv } from './utils.js';
+import { fetchHeaders } from './restCalls.js';
 
 /*ugliest code that I wrote*/
 import * as configs from './configs.js'; 
@@ -871,3 +872,7 @@ button = document.getElementById('btn_todo');
 button.addEventListener('click', showToDoWindow);
 button = document.getElementById('btn_info');
 button.addEventListener('click', showInfo);
+
+fetchHeaders().then(headers => {
+    console.log(headers);
+});
