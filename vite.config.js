@@ -1,6 +1,6 @@
 export default {
     build: {
-        minify: true
+        minify: false
     },
     server: {
         port: process.env.PORT || 3000,
