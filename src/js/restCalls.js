@@ -1,6 +1,8 @@
+const RESTUrl = import.meta.env.VITE_RESTUrl
+
 export async function fetchHeaders() {
     try {
-        const response = await fetch(`${import.meta.env.RESTUrl}/headers`, {
+        const response = await fetch(`${RESTUrl}/headers`, {
             headers: {
                 'Accept': 'application/json',
             },
