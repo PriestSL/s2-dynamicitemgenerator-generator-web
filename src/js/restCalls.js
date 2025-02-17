@@ -1,11 +1,11 @@
 export async function fetchHeaders() {
     try {
-        const response = await fetch(`${process.env.RESTUrl}/headers`, {
+        const response = await fetch(`${import.meta.env.RESTUrl}/headers`, {
             headers: {
                 'Accept': 'application/json',
             },
         });
-        
+
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }

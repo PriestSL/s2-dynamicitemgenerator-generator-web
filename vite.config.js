@@ -12,4 +12,7 @@ export default {
         port: process.env.PORT || 3000, 
         allowedHosts: true
     },
+    define: {
+        'import.meta.env.RESTUrl': process.env.RESTUrl
+    }
 }
