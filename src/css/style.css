@@ -367,7 +367,7 @@ input.chance{
     width: 100%;
 }
 
-.preset-official.preset-name{
+.preset-official > .preset-name{
     grid-column: 1/4;
 }
 
@@ -383,6 +383,6 @@ input.chance{
     width: 100%;
 }
 
-.preset-public.preset-name{
+.preset-public > .preset-name{
     grid-column: 1/5;
 }

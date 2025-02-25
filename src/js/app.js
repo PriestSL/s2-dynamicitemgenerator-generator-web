@@ -868,6 +868,7 @@ const openPresetsWindow = () =>{
     closeButton.addEventListener('click', ()=>{document.body.removeChild(windEl); hideFreezeDiv();});
 
     fetchHeaders().then(headers => {
+        console.log(headers);
         let officialPresets = headers.officialPresets;
         let publicPresets = headers.publicPresets;
 
