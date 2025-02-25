@@ -848,6 +848,59 @@ const showInfo = () => {
     closeButton.addEventListener('click', ()=>removeMessageBox('info'));
 };
 
+const openPresetsWindow = () =>{
+
+    let wind = `
+        <div id="presetsToolbar" class="preset-toolbar">
+            <h2>Presets</h2>
+            <input type="text" id="presetFilter" placeholder="Filter presets...">
+            <button id="btn_close_presets">Close</button>
+        </div>
+        <div id="presetsBody" class="preset-body"></div>
+    `;
+
+    let windEl = document.createElement('div');
+    windEl.classList.add('preset-window');
+    windEl.innerHTML = wind;
+    document.body.appendChild(windEl);
+
+    let closeButton = document.getElementById('btn_close_presets');
+    closeButton.addEventListener('click', ()=>{document.body.removeChild(windEl);});
+
+    fetchHeaders().then(headers => {
+        let officialPresets = headers.officialPresets;
+        let publicPresets = headers.publicPresets;
+
+        let presetsBody = document.getElementById('presetsBody');
+        for (let preset of officialPresets) {
+            let presetElement = document.createElement('div');
+            presetElement.classList.add('preset-official');
+            let cEl = `
+                <div class="preset-name">${preset.name}</div>
+                <div class="preset-version">${preset.version}</div>
+                <div class="preset-views">${preset.views}</div>
+            `;
+            presetElement.innerHTML = cEl;
+            presetsBody.appendChild(presetElement);
+        }
+
+        for (let preset of publicPresets) {
+            let presetElement = document.createElement('div');
+            presetElement.classList.add('preset-public');
+            let cEl = `
+                <div class="preset-name">${preset.name}</div>
+                <div class="preset-version">${preset.version}</div>
+                <div class="preset-views">${preset.views}</div>
+                <div class="preset-author">${preset.author}</div>
+            `;
+            presetElement.innerHTML = cEl;
+            presetsBody.appendChild(presetElement);
+        }
+    });
+
+
+};
+
 
 let button = document.getElementById('btn_save');
 button.addEventListener('click', generateConfig);
@@ -873,6 +926,5 @@ button.addEventListener('click', showToDoWindow);
 button = document.getElementById('btn_info');
 button.addEventListener('click', showInfo);
 
-fetchHeaders().then(headers => {
-    console.log(headers);
-});
+button = document.getElementById('btn_presets');
+button.addEventListener('click', openPresetsWindow);
