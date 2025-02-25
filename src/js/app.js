@@ -849,6 +849,7 @@ const showInfo = () => {
 };
 
 const openPresetsWindow = () =>{
+    showFreezeDiv();
 
     let wind = `
         <div id="presetsToolbar" class="preset-toolbar">
@@ -865,7 +866,7 @@ const openPresetsWindow = () =>{
     document.body.appendChild(windEl);
 
     let closeButton = document.getElementById('btn_close_presets');
-    closeButton.addEventListener('click', ()=>{document.body.removeChild(windEl);});
+    closeButton.addEventListener('click', ()=>{document.body.removeChild(windEl); hideFreezeDiv();});
 
     fetchHeaders().then(headers => {
         let officialPresets = headers.officialPresets;
