@@ -361,10 +361,16 @@ input.chance{
 
 }
 
+.preset-name{
+    font-size: 18px;
+    font-weight: bold;
+    text-align: center;
+}
+
 .preset-official{
     display: grid;
     grid-template-rows: 1fr 1fr;
-    grid-template-columns: repeat(2, 1fr) 20px;
+    grid-template-columns: 100px 1fr 20px;
     row-gap: 10px;
     background-color: #c9c3b9;
     border: 1px solid #c7baa3;
@@ -380,7 +386,7 @@ input.chance{
 .preset-public{
     display: grid;
     grid-template-rows: 1fr 1fr;
-    grid-template-columns: repeat(3, 1fr) 20px;
+    grid-template-columns: 100px 1fr 100px 20px;
     row-gap: 10px;
     background-color: #cfcecd;
     border: 1px solid rgb(199, 181, 150);
