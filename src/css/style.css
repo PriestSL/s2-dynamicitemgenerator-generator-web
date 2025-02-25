@@ -361,6 +361,15 @@ input.chance{
 
 }
 
+.preset-item{
+    cursor: pointer;
+    display: grid;
+    row-gap: 10px;
+    box-sizing: border-box;
+    border-radius: 5px;
+    width: 100%;
+}
+
 .preset-name{
     font-size: 18px;
     font-weight: bold;
@@ -368,15 +377,14 @@ input.chance{
 }
 
 .preset-official{
-    display: grid;
     grid-template-rows: 1fr 1fr;
     grid-template-columns: 100px 1fr 20px;
-    row-gap: 10px;
     background-color: #c9c3b9;
     border: 1px solid #c7baa3;
-    box-sizing: border-box;
-    border-radius: 5px;
-    width: 100%;
+}
+
+.preset-official:hover{
+    background-color: #c4b191;
 }
 
 .preset-official > .preset-name{
@@ -384,15 +392,14 @@ input.chance{
 }
 
 .preset-public{
-    display: grid;
     grid-template-rows: 1fr 1fr;
     grid-template-columns: 100px 1fr 100px 20px;
-    row-gap: 10px;
     background-color: #cfcecd;
     border: 1px solid rgb(199, 181, 150);
-    border-radius: 5px;
-    box-sizing: border-box;
-    width: 100%;
+}
+
+.preset-public:hover{
+    background-color: rgb(202, 175, 127);
 }
 
 .preset-public > .preset-name{
