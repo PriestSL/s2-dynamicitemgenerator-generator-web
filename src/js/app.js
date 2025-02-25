@@ -928,6 +928,9 @@ const openPresetsWindow = () =>{
 
                 contentEl.innerHTML = '';
                 oCategoryToEvent[currentCategory]();
+
+                document.body.removeChild(windEl);
+                hideFreezeDiv();
             });
         }
     });
