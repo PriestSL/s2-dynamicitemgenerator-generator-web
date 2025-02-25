@@ -352,13 +352,19 @@ input.chance{
     display: flex;
     flex-direction: column;
     align-items: center;
+    row-gap: 10px;
 }
 
 .preset-official{
     display: grid;
     grid-template-rows: 1fr 1fr;
+    grid-template-columns: repeat(3, 1fr);
     row-gap: 10px;
     background-color: #c9c3b9;
+    border: 1px solid #c7baa3;
+    box-sizing: border-box;
+    border-radius: 5px;
+    width: 100%;
 }
 
 .preset-official.preset-name{
@@ -368,8 +374,13 @@ input.chance{
 .preset-public{
     display: grid;
     grid-template-rows: 1fr 1fr;
+    grid-template-columns: repeat(4, 1fr);
     row-gap: 10px;
     background-color: #cfcecd;
+    border: 1px solid rgb(199, 181, 150);
+    border-radius: 5px;
+    box-sizing: border-box;
+    width: 100%;
 }
 
 .preset-public.preset-name{

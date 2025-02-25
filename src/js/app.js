@@ -854,7 +854,6 @@ const openPresetsWindow = () =>{
     let wind = `
         <div id="presetsToolbar" class="preset-toolbar">
             <h2>Presets</h2>
-            <input type="text" id="presetFilter" placeholder="Filter presets...">
             <button id="btn_close_presets">Close</button>
         </div>
         <div id="presetsBody" class="preset-body"></div>
