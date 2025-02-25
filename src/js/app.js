@@ -892,9 +892,10 @@ const openPresetsWindow = () =>{
             let cEl = `
                 <div class="preset-name">${preset.name}</div>
                 <div class="preset-type">Community</div>
+                <div class="preset-author">${preset.author}</div>
                 <div class="preset-version">${preset.version}</div>
                 <div class="preset-views">${preset.views}</div>
-                <div class="preset-author">${preset.author}</div>
+                
             `;
             presetElement.innerHTML = cEl;
             presetsBody.appendChild(presetElement);
