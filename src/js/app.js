@@ -878,6 +878,7 @@ const openPresetsWindow = () =>{
             presetElement.classList.add('preset-official');
             let cEl = `
                 <div class="preset-name">${preset.name}</div>
+                <div class="preset-type">Official</div>
                 <div class="preset-version">${preset.version}</div>
                 <div class="preset-views">${preset.views}</div>
             `;
@@ -890,6 +891,7 @@ const openPresetsWindow = () =>{
             presetElement.classList.add('preset-public');
             let cEl = `
                 <div class="preset-name">${preset.name}</div>
+                <div class="preset-type">Community</div>
                 <div class="preset-version">${preset.version}</div>
                 <div class="preset-views">${preset.views}</div>
                 <div class="preset-author">${preset.author}</div>

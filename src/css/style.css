@@ -358,18 +358,20 @@ input.chance{
     display: grid;
     grid-template-rows: 1fr 1fr;
     row-gap: 10px;
+    background-color: #c9c3b9;
 }
 
 .preset-official.preset-name{
-    grid-column: 1/3;
+    grid-column: 1/4;
 }
 
 .preset-public{
     display: grid;
     grid-template-rows: 1fr 1fr;
     row-gap: 10px;
+    background-color: #cfcecd;
 }
 
 .preset-public.preset-name{
-    grid-column: 1/4;
+    grid-column: 1/5;
 }
