@@ -340,6 +340,8 @@ input.chance{
     z-index: 100;
     display: flex;
     flex-direction: column;
+    width: 80%;
+    height: 80%;
 }
 
 .preset-toolbar{
@@ -353,6 +355,10 @@ input.chance{
     flex-direction: column;
     align-items: center;
     row-gap: 10px;
+    overflow: scroll;
+    height: 100%;
+    width: 100%;
+    
 }
 
 .preset-official{
