@@ -1,4 +1,4 @@
-const RESTUrl = import.meta.env.VITE_RESTUrl
+const RESTUrl = `https://${import.meta.env.VITE_RESTUrl}`;
 
 export async function fetchHeaders() {
     try {
