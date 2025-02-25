@@ -667,7 +667,7 @@ const drawFileSettings = () => `
         <hr>
         <h2>Compatibility settings</h2>
         <hr>
-        <label for="copm_SHA">Integrated Helmets and Armor</label>
+        <label for="copm_SHA">Separated Helmets and Armor</label>
         <input type="checkbox" id="copm_SHA" ${modsCompatibility.SHA ? 'checked' : ''}>
         <hr>
         <label for="drop_armor">Enable armor droping</label>
