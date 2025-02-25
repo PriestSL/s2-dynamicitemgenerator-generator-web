@@ -17,3 +17,21 @@ export async function fetchHeaders() {
         console.error('Error fetching headers:', error);
     }
 }
+
+export async function getPreset (id, type) {
+    try {
+        const response = await fetch(`${RESTUrl}/preset/${type}/${id}`, {
+            headers: {
+                'Accept': 'application/json',
+            },
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error('Error fetching preset:', error);
+    }
+}

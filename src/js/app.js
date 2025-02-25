@@ -1,6 +1,6 @@
 import { generateConfig } from './fileStreamGenerator.js';
 import { showFreezeDiv, hideFreezeDiv } from './utils.js';
-import { fetchHeaders } from './restCalls.js';
+import { fetchHeaders, getPreset } from './restCalls.js';
 
 /*ugliest code that I wrote*/
 import * as configs from './configs.js'; 
@@ -875,7 +875,9 @@ const openPresetsWindow = () =>{
         let presetsBody = document.getElementById('presetsBody');
         for (let preset of officialPresets) {
             let presetElement = document.createElement('div');
-            presetElement.classList.add('preset-official');
+            presetElement.classList.add('preset-official', 'preset-item');
+            presetElement.dataset.id = preset._id;
+            presetElement.dataset.type = 'official';
             let cEl = `
                 <div class="preset-name">${preset.name}</div>
                 <div class="preset-type">Official</div>
@@ -888,7 +890,9 @@ const openPresetsWindow = () =>{
 
         for (let preset of publicPresets) {
             let presetElement = document.createElement('div');
-            presetElement.classList.add('preset-public');
+            presetElement.classList.add('preset-public', 'preset-item');
+            presetElement.dataset.id = preset._id;
+            presetElement.dataset.type = 'community';
             let cEl = `
                 <div class="preset-name">${preset.name}</div>
                 <div class="preset-type">Community</div>
@@ -902,7 +906,31 @@ const openPresetsWindow = () =>{
         }
     });
 
+    let presetBody = document.getElementById('presetsBody');
+    presetBody.addEventListener('click', function(e) {
+        if (e.target.classList.contains('preset-item')) {
+            let id = e.target.dataset.id;
+            let type = e.target.dataset.type;
+            
+            getPreset(id, type).then(preset => { //TODO check structure integrity
+                if (!preset) { alert('Ooops, error on loading preset'); return;}
+                modifiedWeaponSettings = preset.WeaponSettings;
+                modifiedArmorSettings = preset.ArmorSettings;
+                modifiedGrenadeSettings = preset.GrenadeSettings;
+                modifiedAmmoByWeaponClass = preset.AmmoSettings;
+                modifiedWeaponList = preset.WeaponList;
+                modifiedDropConfigs = preset.DropConfigs;
+                modsCompatibility = preset.Compatibility;
+                modifiedArmorSpawnSettings = preset.ArmorSpawnSettings;
+                modifiedHelmetSpawnSettings = preset.HelmetsSettings;
 
+                document.getElementById('config_name').value = preset.name;
+
+                contentEl.innerHTML = '';
+                oCategoryToEvent[currentCategory]();
+            });
+        }
+    });
 };
 
 
