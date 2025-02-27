@@ -65,7 +65,9 @@ const createArmorItemGenerator = (cArmorName)=>{
 
         if (armorSettins.helmetSpawn>0){
             fillHelmet('ERank::Newbie, ERank::Experienced, ERank::Veteran, ERank::Master', armorSettins.helmetSpawn);
-        }else{
+        }else if(modsCompatibility.SHA && armorSettins.helmetless){
+            fillHelmet('ERank::Newbie, ERank::Experienced, ERank::Veteran, ERank::Master', 100);
+        }else if(!armorSettins.helmetless){
             let oCompressed = compressChancesToRanks(oHelmet);
             for (let ranks in oCompressed){
                 if (oCompressed[ranks] == 0) continue;
