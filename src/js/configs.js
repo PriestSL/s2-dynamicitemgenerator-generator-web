@@ -84,7 +84,6 @@ export let oArmorSpawnSettings = {
     Jemmy_Neutral_Armor: {
         drop: true,
         helmet: 'Light_Neutral_Helmet',
-        helmetSpawn: true
     },
     Newbee_Neutral_Armor:{
         drop: true,
@@ -93,6 +92,7 @@ export let oArmorSpawnSettings = {
     NPC_Sel_Neutral_Armor:{
         drop: false,
         helmet: 'Light_Neutral_Helmet',
+        dropItem: 'Newbee_Neutral_Armor'
     },
     Nasos_Neutral_Armor:{
         drop: true,
@@ -104,15 +104,19 @@ export let oArmorSpawnSettings = {
     },
     SEVA_Neutral_Armor:{
         drop: true,
-        helmet: 'Light_Neutral_Helmet'
+        helmet: 'Light_Neutral_Helmet',
+        helmetless: true
     },
     NPC_Cloak_Heavy_Neutral_Armor:{
         drop: false,
-        helmet: 'Light_Neutral_Helmet'
+        helmet: 'Light_Neutral_Helmet',
+        dropItem: 'Zorya_Neutral_Armor',
+        helmetless: true
     },
     Exoskeleton_Neutral_Armor:{
         drop: true,
-        helmet: 'Light_Neutral_Helmet'
+        helmet: 'Light_Neutral_Helmet',
+        helmetless: true
     },
     SkinJacket_Bandit_Armor:{
         drop: true,
@@ -121,6 +125,7 @@ export let oArmorSpawnSettings = {
     NPC_SkinCloak_Bandit_Armor:{
         drop: false,
         helmet: 'Light_Bandit_Helmet',
+        dropItem: 'SkinJacket_Bandit_Armor',
     },
     Jacket_Bandit_Armor:{
         drop: true,
@@ -137,26 +142,32 @@ export let oArmorSpawnSettings = {
     Heavy_Mercenaries_Armor:{
         drop: true,
         helmet: 'Light_Mercenaries_Helmet',
+        helmetless: true
     },
     Exoskeleton_Mercenaries_Armor:{
         drop: true,
-        helmet: 'Light_Mercenaries_Helmet'
+        helmet: 'Light_Mercenaries_Helmet',
+        helmetless: true
     },
     NPC_HeavyExoskeleton_Mercenaries_Armor:{
         drop: true,
         dropItem: 'Exoskeleton_Mercenaries_Armor',
-        helmet: 'Light_Mercenaries_Helmet'
+        helmet: 'Light_Mercenaries_Helmet',
+        helmetless: true
     },
     Anomaly_Scientific_Armor: {
         drop: true,
-        helmet: 'Light_Mercenaries_Helmet'
+        helmet: 'Light_Mercenaries_Helmet',
+        helmetless: true
     },
     NPC_Sci_Armor:{
-        drop: false
+        drop: false,
+        helmetless: true
     },
     HeavyAnomaly_Scientific_Armor:{
         drop: true,
-        helmet: 'Light_Mercenaries_Helmet'
+        helmet: 'Light_Mercenaries_Helmet',
+        helmetless: true
     },
     Default_Military_Armor:{
         drop: true,
@@ -165,16 +176,19 @@ export let oArmorSpawnSettings = {
     NPC_Cloak_Heavy_Military_Armor:{
         drop: true,
         dropItem: 'Heavy2_Military_Armor',
-        helmet: 'Battle_Military_Helmet'
+        helmet: 'Battle_Military_Helmet',
+        helmetless: true
     },
     NPC_Heavy_Military_Armor:{
         drop: true,
         dropItem: 'Heavy2_Military_Armor',
-        helmet: 'Battle_Military_Helmet'
+        helmet: 'Battle_Military_Helmet',
+        helmetless: true
     },
     Heavy2_Military_Armor:{
         drop: true,
-        helmet: 'Battle_Military_Helmet'
+        helmet: 'Battle_Military_Helmet',
+        helmetless: true
     },
     Battle_Monolith_Armor:{
         drop: true,
@@ -182,15 +196,18 @@ export let oArmorSpawnSettings = {
     },
     HeavyAnomaly_Monolith_Armor:{
         drop: true,
-        helmet: 'Battle_Military_Helmet'
+        helmet: 'Battle_Military_Helmet',
+        helmetless: true
     },
     HeavyExoskeleton_Monolith_Armor:{
         drop: true,
-        helmet: 'Battle_Military_Helmet'
+        helmet: 'Battle_Military_Helmet',
+        helmetless: true
     },
     Exoskeleton_Monolith_Armor:{
         drop: true,
-        helmet: 'Battle_Military_Helmet'
+        helmet: 'Battle_Military_Helmet',
+        helmetless: true
     },
     Rook_Dolg_Armor:{
         drop: true,
@@ -206,15 +223,18 @@ export let oArmorSpawnSettings = {
     },
     Heavy_Dolg_Armor:{
         drop: true,
-        helmet: 'Heavy_Duty_Helmet'
+        helmet: 'Heavy_Duty_Helmet',
+        helmetless: true
     },
     Exoskeleton_Dolg_Armor:{
         drop: true,
-        helmet: 'Heavy_Duty_Helmet'
+        helmet: 'Heavy_Duty_Helmet',
+        helmetless: true
     },
     HeavyExoskeleton_Dolg_Armor:{
         drop: true,
-        helmet: 'Heavy_Duty_Helmet'
+        helmet: 'Heavy_Duty_Helmet',
+        helmetless: true
     },
     Rook_Svoboda_Armor:{
         drop: true,
@@ -226,19 +246,23 @@ export let oArmorSpawnSettings = {
     },
     SEVA_Svoboda_Armor:{
         drop: true,
-        helmet: 'Heavy_Svoboda_Helmet'
+        helmet: 'Heavy_Svoboda_Helmet',
+        helmetless: true
     },
     Heavy_Svoboda_Armor:{
         drop: true,
-        helmet: 'Heavy_Svoboda_Helmet'
+        helmet: 'Heavy_Svoboda_Helmet',
+        helmetless: true
     },
     Exoskeleton_Svoboda_Armor:{
         drop: true,
-        helmet: 'Heavy_Svoboda_Helmet'
+        helmet: 'Heavy_Svoboda_Helmet',
+        helmetless: true
     },
     HeavyExoskeleton_Svoboda_Armor:{
         drop: true,
-        helmet: 'Heavy_Svoboda_Helmet'
+        helmet: 'Heavy_Svoboda_Helmet',
+        helmetless: true
     },
     Battle_Varta_Armor:{
         drop: true,
@@ -246,7 +270,8 @@ export let oArmorSpawnSettings = {
     },
     BattleExoskeleton_Varta_Armor:{
         drop: true,
-        helmet: 'Heavy_Varta_Helmet'
+        helmet: 'Heavy_Varta_Helmet',
+        helmetless: true
     },
     NPC_Battle_Noon_Armor:{
         drop: true,
@@ -261,12 +286,14 @@ export let oArmorSpawnSettings = {
     NPC_Exoskeleton_Noon_Armor:{
         drop: true,
         dropItem: 'Exoskeleton_Monolith_Armor',
-        helmet: 'Battle_Military_Helmet'
+        helmet: 'Battle_Military_Helmet',
+        helmetless: true
     },
     NPC_HeavyExoskeleton_Noon_Armor:{
         drop: true,
         dropItem: 'HeavyExoskeleton_Monolith_Armor',
-        helmet: 'Battle_Military_Helmet'
+        helmet: 'Battle_Military_Helmet',
+        helmetless: true
     },
     Battle_Spark_Armor:{
         drop: true,
@@ -279,48 +306,58 @@ export let oArmorSpawnSettings = {
     },
     HeavyAnomaly_Spark_Armor:{
         drop: true,
-        helmet: 'Battle_Military_Helmet'
+        helmet: 'Battle_Military_Helmet',
+        helmetless: true
     },
     SEVA_Spark_Armor:{
         drop: true,
-        helmet: 'Battle_Military_Helmet'
+        helmet: 'Battle_Military_Helmet',
+        helmetless: true
     },
     HeavyBattle_Spark_Armor:{
         drop: true,
-        helmet: 'Battle_Military_Helmet'
+        helmet: 'Battle_Military_Helmet',
+        helmetless: true
     },
     NPC_HeavyExoskeleton_Spark_Armor:{
         drop: true,
         dropItem: 'Exoskeleton_Neutral_Armor',
-        helmet: 'Battle_Military_Helmet'
+        helmet: 'Battle_Military_Helmet',
+        helmetless: true
     },
     NPC_Heavy_Corps_Armor:{
         drop: true,
         dropItem: 'Heavy2_Military_Armor',
-        helmet: 'Battle_Military_Helmet'
+        helmet: 'Battle_Military_Helmet',
+        helmetless: true
     },
     NPC_Heavy2_Coprs_Armor:{
         drop: true,
         dropItem: 'Heavy2_Military_Armor',
-        helmet: 'Battle_Military_Helmet'
+        helmet: 'Battle_Military_Helmet',
+        helmetless: true
     },
     NPC_Heavy3_Corps_Armor:{
         drop: true,
         dropItem: 'Heavy2_Military_Armor',
-        helmet: 'Battle_Military_Helmet'
+        helmet: 'Battle_Military_Helmet',
+        helmetless: true
     },
     NPC_Heavy3Exoskeleton_Coprs_Armor:{
         drop: true,
         dropItem: 'Exoskeleton_Neutral_Armor',
-        helmet: 'Battle_Military_Helmet'
+        helmet: 'Battle_Military_Helmet',
+        helmetless: true
     },
     NPC_Exoskeleton_Coprs_Armor:{
         drop: true,
         dropItem: 'Exoskeleton_Neutral_Armor',
-        helmet: 'Battle_Military_Helmet'
+        helmet: 'Battle_Military_Helmet',
+        helmetless: true
     },
     SEVA_Monolith_Armor:{ //preorder item, but monolith seva bois wear it
-        drop: false
+        drop: false,
+        helmetless: true
     }
 };
 
