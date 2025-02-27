@@ -343,7 +343,7 @@ const fillChancesTable = (oSettings, newRowReplace, tableType, classification = 
 const fillAttributesTable = (oSettings, parentElement, type) => {
     const typeToAttributeList = {
         weapon: [['minAmmo', 'number'], ['maxAmmo','number'], ['minCondition', 'number'], ['maxCondition', 'number']],
-        armor: [['drop', 'checkbox'], ['dropItem', 'select'], ['helmet', 'select'], ['helmetSpawn', 'number']]
+        armor: [['drop', 'checkbox'], ['dropItem', 'select'], ['helmet', 'select'], ['helmetSpawn', 'number'], ['helmetless', 'checkbox']]
     };
 
 
