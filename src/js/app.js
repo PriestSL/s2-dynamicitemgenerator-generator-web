@@ -796,10 +796,11 @@ const importFromJSON = () => {
 };
 
 const TODOList = [
+    "Public presets",
+    "LNA Full compatibility",
     "Some style fixes",
     "Import config",
     "Local storage of settings",
-    "Public presets",
     "Tutorial",
     "Guard configuration",
     "Alphabetical sorting",
