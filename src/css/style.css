@@ -297,6 +297,7 @@ input.chance{
     border-top: 5px solid #AE9672;
     border-radius: 50%;
     animation: spin 1s linear infinite;
+    z-index: 999;
 }
 
 @keyframes spin {

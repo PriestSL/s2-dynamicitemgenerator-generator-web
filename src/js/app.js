@@ -849,6 +849,35 @@ const showInfo = () => {
 };
 
 const openPresetsWindow = () =>{
+    const onPresetClick = function(e) {
+        const parentDiv = e.target.closest('div[data-id]');
+        let id = parentDiv.dataset.id;
+        let type = parentDiv.dataset.type;
+        
+        showLoading();
+        getPreset(id, type).then(data => { //TODO check structure integrity
+            if (!data) { alert('Ooops, error on loading preset'); return;}
+            let preset = data.data;
+            modifiedWeaponSettings = preset.WeaponSettings;
+            modifiedArmorSettings = preset.ArmorSettings;
+            modifiedGrenadeSettings = preset.GrenadeSettings;
+            modifiedAmmoByWeaponClass = preset.AmmoSettings;
+            modifiedWeaponList = preset.WeaponList;
+            modifiedDropConfigs = preset.DropConfigs;
+            modsCompatibility = preset.Compatibility;
+            modifiedArmorSpawnSettings = preset.ArmorSpawnSettings;
+            modifiedHelmetSpawnSettings = preset.HelmetsSettings;
+            document.getElementById('config_name').value = parentDiv.dataset.name;
+
+            contentEl.innerHTML = '';
+            oCategoryToEvent[currentCategory]();
+
+            document.body.removeChild(windEl);
+            hideLoading();
+            hideFreezeDiv();
+        });
+    };
+
     showFreezeDiv();
 
     let wind = `
@@ -878,8 +907,10 @@ const openPresetsWindow = () =>{
         for (let preset of officialPresets) {
             let presetElement = document.createElement('div');
             presetElement.classList.add('preset-official', 'preset-item');
+            presetElement.addEventListener('click', onPresetClick);
             presetElement.dataset.id = preset._id;
             presetElement.dataset.type = 'official';
+            presetElement.dataset.name = preset.name;
             let cEl = `
                 <div class="preset-name">${preset.name}</div>
                 <div class="preset-type">Official</div>
@@ -893,8 +924,10 @@ const openPresetsWindow = () =>{
         for (let preset of publicPresets) {
             let presetElement = document.createElement('div');
             presetElement.classList.add('preset-public', 'preset-item');
+            presetElement.addEventListener('click', onPresetClick);
             presetElement.dataset.id = preset._id;
             presetElement.dataset.type = 'community';
+            presetElement.dataset.name = preset.name;
             let cEl = `
                 <div class="preset-name">${preset.name}</div>
                 <div class="preset-type">Community</div>
@@ -907,40 +940,6 @@ const openPresetsWindow = () =>{
             presetsBody.appendChild(presetElement);
         }
     });
-
-    const onPresetClick = function(e) {
-        let id = e.target.dataset.id;
-        let type = e.target.dataset.type;
-        
-        showLoading();
-        getPreset(id, type).then(data => { //TODO check structure integrity
-            if (!data) { alert('Ooops, error on loading preset'); return;}
-            let preset = data.data;
-            modifiedWeaponSettings = preset.WeaponSettings;
-            modifiedArmorSettings = preset.ArmorSettings;
-            modifiedGrenadeSettings = preset.GrenadeSettings;
-            modifiedAmmoByWeaponClass = preset.AmmoSettings;
-            modifiedWeaponList = preset.WeaponList;
-            modifiedDropConfigs = preset.DropConfigs;
-            modsCompatibility = preset.Compatibility;
-            modifiedArmorSpawnSettings = preset.ArmorSpawnSettings;
-            modifiedHelmetSpawnSettings = preset.HelmetsSettings;
-
-            document.getElementById('config_name').value = preset.name;
-
-            contentEl.innerHTML = '';
-            oCategoryToEvent[currentCategory]();
-
-            document.body.removeChild(windEl);
-            hideLoading();
-            hideFreezeDiv();
-        });
-    };
-
-    let presetItems = document.getElementsByClassName('preset-item');
-    for (let i = 0; i < presetItems.length; i++) {
-        presetItems[i].addEventListener('click', onPresetClick);
-    }
 };
 
 
