@@ -1,5 +1,5 @@
 import { generateConfig } from './fileStreamGenerator.js';
-import { showFreezeDiv, hideFreezeDiv } from './utils.js';
+import { showFreezeDiv, hideFreezeDiv, showLoading, hideLoading} from './utils.js';
 import { fetchHeaders, getPreset } from './restCalls.js';
 
 /*ugliest code that I wrote*/
@@ -867,7 +867,9 @@ const openPresetsWindow = () =>{
     let closeButton = document.getElementById('btn_close_presets');
     closeButton.addEventListener('click', ()=>{document.body.removeChild(windEl); hideFreezeDiv();});
 
+    showLoading();
     fetchHeaders().then(headers => {
+        hideLoading();
         console.log(headers);
         let officialPresets = headers.officialPresets;
         let publicPresets = headers.publicPresets;
@@ -906,34 +908,39 @@ const openPresetsWindow = () =>{
         }
     });
 
-    let presetBody = document.getElementById('presetsBody');
-    presetBody.addEventListener('click', function(e) {
-        if (e.target.classList.contains('preset-item')) {
-            let id = e.target.dataset.id;
-            let type = e.target.dataset.type;
-            
-            getPreset(id, type).then(preset => { //TODO check structure integrity
-                if (!preset) { alert('Ooops, error on loading preset'); return;}
-                modifiedWeaponSettings = preset.WeaponSettings;
-                modifiedArmorSettings = preset.ArmorSettings;
-                modifiedGrenadeSettings = preset.GrenadeSettings;
-                modifiedAmmoByWeaponClass = preset.AmmoSettings;
-                modifiedWeaponList = preset.WeaponList;
-                modifiedDropConfigs = preset.DropConfigs;
-                modsCompatibility = preset.Compatibility;
-                modifiedArmorSpawnSettings = preset.ArmorSpawnSettings;
-                modifiedHelmetSpawnSettings = preset.HelmetsSettings;
+    const onPresetClick = function(e) {
+        let id = e.target.dataset.id;
+        let type = e.target.dataset.type;
+        
+        showLoading();
+        getPreset(id, type).then(data => { //TODO check structure integrity
+            if (!data) { alert('Ooops, error on loading preset'); return;}
+            let preset = data.data;
+            modifiedWeaponSettings = preset.WeaponSettings;
+            modifiedArmorSettings = preset.ArmorSettings;
+            modifiedGrenadeSettings = preset.GrenadeSettings;
+            modifiedAmmoByWeaponClass = preset.AmmoSettings;
+            modifiedWeaponList = preset.WeaponList;
+            modifiedDropConfigs = preset.DropConfigs;
+            modsCompatibility = preset.Compatibility;
+            modifiedArmorSpawnSettings = preset.ArmorSpawnSettings;
+            modifiedHelmetSpawnSettings = preset.HelmetsSettings;
 
-                document.getElementById('config_name').value = preset.name;
+            document.getElementById('config_name').value = preset.name;
 
-                contentEl.innerHTML = '';
-                oCategoryToEvent[currentCategory]();
+            contentEl.innerHTML = '';
+            oCategoryToEvent[currentCategory]();
 
-                document.body.removeChild(windEl);
-                hideFreezeDiv();
-            });
-        }
-    });
+            document.body.removeChild(windEl);
+            hideLoading();
+            hideFreezeDiv();
+        });
+    };
+
+    let presetItems = document.getElementsByClassName('preset-item');
+    for (let i = 0; i < presetItems.length; i++) {
+        presetItems[i].addEventListener('click', onPresetClick);
+    }
 };
 
 
