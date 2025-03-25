@@ -672,11 +672,11 @@ const drawFileSettings = () => `
         <label for="drop_armor">Enable armor droping</label>
         <input type="checkbox" id="drop_armor" ${modifiedDropConfigs.createDroppableArmor ? 'checked' : ''}>
         <div class="armor_drop_settings" style="display:${modifiedDropConfigs.createDroppableArmor ? 'grid' : 'none'}">
-            <label for="armor_chance">Armor drop chance</label>
+            <label for="armor_chance">Armor drop chance(0.1=10%)</label>
             <input type="number" id="armor_chance" value="${modifiedDropConfigs.nLootChance}">
-            <label for="min_condition">Minimal armor condition</label>
+            <label for="min_condition">Minimal armor condition(0.1=10%)</label>
             <input type="number" id="min_condition" value="${modifiedDropConfigs.nMinDurability}">
-            <label for="max_condition">Maximal armor condition</label>
+            <label for="max_condition">Maximal armor condition(0.1=10%)</label>
             <input type="number" id="max_condition" value="${modifiedDropConfigs.nMaxDurability}">
         </div>
     </div>
