@@ -30,11 +30,13 @@ export const oWeaponList = {
     GunLavina_ST: {},
     GunDnipro_ST: {},
     GunKharod_ST: {},
+    GunThreeLine_SP: {},
     GunSVDM_SP: {},
     GunSVU_SP: {},
     GunMark_SP: {},
     GunM701_SP: {},
     GunGauss_SP: {},
+    GunKora_HG: {},
     GunM10_HG: {},
     GunPM_HG: {},
     GunUDP_HG: {},
@@ -473,11 +475,12 @@ export let oWeaponLoadoutSettings = {
             GunIntegral_PP: [0, 0, 5, 40]
         },
         Sniper:{
-            GunAK74_ST: [90, 27.7, 0, 0],
-            GunM16_ST: [10, 55.5, 0, 0],
-            GunFora_ST: [0, 5.6, 20, 10],
-            GunGvintar_ST: [0, 5.6, 30, 20],
-            GunSVDM_SP: [0, 5.6, 50, 70]
+            GunThreeLine_SP: [70, 75, 20, 10],
+            GunAK74_ST: [20, 5, 0, 0],
+            GunM16_ST: [10, 5, 0, 0],
+            GunFora_ST: [0, 5, 20, 10],
+            GunGvintar_ST: [0, 5, 20, 20],
+            GunSVDM_SP: [0, 5, 40, 60]
         },
         Stormtrooper:{
             GunAK74_ST: [50, 29.4, 0, 0],
@@ -515,9 +518,10 @@ export let oWeaponLoadoutSettings = {
             GunGrim_ST: [0, 0, 0, 10]
         },
         Heavy:{
-            GunViper_PP: [90, 0, 0, 0],
+            GunThreeLine_SP: [45, 20, 10, 5],
+            GunViper_PP: [45, 0, 0, 0],
             GunAKU_PP: [10, 0, 0, 0],
-            GunAK74_ST: [0, 70, 40, 29],
+            GunAK74_ST: [0, 50, 30, 24],
             GunM16_ST: [0, 10, 10, 4],
             GunFora_ST: [0, 10, 10, 4],
             GunGvintar_ST: [0, 0, 6, 8],
@@ -584,13 +588,15 @@ export let oWeaponLoadoutSettings = {
             GunDnipro_ST: [0, 0, 0, 30]
         },
         Sniper:{
-            GunAK74_ST: [100, 0, 0, 0],
-            GunGvintar_ST: [0, 10, 30, 20],
-            GunSVDM_SP: [0, 90, 70, 60],
-            GunSVU_SP: [0, 0, 0, 20]
+            GunThreeLine_SP: [50, 30, 15, 5],
+            GunAK74_ST: [50, 0, 0, 0],
+            GunGvintar_ST: [0, 10, 25, 20],
+            GunSVDM_SP: [0, 60, 60, 60],
+            GunSVU_SP: [0, 0, 0, 15]
         },
         Heavy:{
-            GunAK74_ST: [100, 83.3, 16, 10],
+            GunThreeLine_SP: [50, 0, 0, 0],
+            GunAK74_ST: [50, 83.3, 16, 10],
             GunGvintar_ST: [0, 16.7, 40, 25],
             GunGrim_ST: [0, 0, 40, 25],
             GunPKP_MG: [0, 0, 4, 40]
@@ -738,7 +744,8 @@ export let oWeaponLoadoutSettings = {
             GunM16_ST: [0, 23.1, 23.1, 23.1]
         },
         Sniper:{
-            GunAK74_ST: [100, 62.5, 62.5, 62.5],
+            GunThreeLine_SP: [50, 75, 20, 10],
+            GunAK74_ST: [50, 62.5, 62.5, 62.5],
             GunM16_ST: [0, 18.8, 18.8, 18.8],
             GunSVDM_SP: [0, 12.5, 12.5, 12.5],
             GunMark_SP: [0, 6.2, 6.2, 6.2]
@@ -769,6 +776,7 @@ export let oWeaponLoadoutSettings = {
             GunDnipro_ST: [0, 0, 0, 20]
         },
         Sniper:{
+            GunThreeLine_SP: [43.5, 43.5, 20, 10],
             GunAK74_ST: [43.5, 43.5, 0, 0],
             GunM16_ST: [43.5, 43.5, 0, 0],
             GunFora_ST: [4.4, 4.4, 0, 0],
@@ -1004,12 +1012,14 @@ export const oSecondaryLoadoutSettings = {
 export const oPistolLoadoutSettings = {
     GeneralNPC_Neutral: {
         GunPM_HG: [100, 47.5, 20, 19],
+        GunKora_HG: [0, 47.5, 20, 10],
         GunUDP_HG: [0, 47.5, 40, 38.5],
         GunM10_HG: [0, 5, 40, 38.5],
         GunAPB_HG: [0, 0, 0, 4]
     },
     GeneralNPC_Bandit: {
-        GunPM_HG: [100, 100, 100, 100]
+        GunPM_HG: [100, 50, 50, 50],
+        GunKora_HG: [0, 50, 50, 50]
     },
     GeneralNPC_Mercenaries: {
         GunUDP_HG: [100, 100, 50, 50],
@@ -1032,7 +1042,8 @@ export const oPistolLoadoutSettings = {
     },
     GeneralNPC_Freedom: {
         GunUDP_HG: [100, 100, 90.9, 50],
-        GunM10_HG: [0, 0, 9.1, 50]
+        GunM10_HG: [0, 0, 9.1, 50],
+        GunKora_HG: [0, 47.5, 20, 10],
     },
     GeneralNPC_Varta: {
         GunPM_HG: [90.9, 50, 0, 0],
@@ -1042,6 +1053,7 @@ export const oPistolLoadoutSettings = {
     GeneralNPC_Noon: {
         GunPM_HG: [90.9, 0, 0, 0],
         GunUDP_HG: [9.1, 100, 100, 100],
+        GunKora_HG: [0, 47.5, 20, 10]
     },
     GeneralNPC_Spark: {
         GunUDP_HG: [90.9, 90.9, 47.6, 47.6],
