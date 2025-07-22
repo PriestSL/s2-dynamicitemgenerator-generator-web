@@ -5,24 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dynamic Item Generator by PriestSL</title>
     <link rel="icon" type="image/x-icon" href="src/img/favicon.ico">
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Custom styles -->
     <link rel="stylesheet" href="src/css/style.css">
     <script type="module" src="src/js/app.js"></script>
 </head>
 <body>
-    <div id="canvas">
-        <div id="categories_bar">
-            <img id="Primary" title="Primary" src="src/img/assault-rifle.png" alt="Weapon" class="category_item">
-            <img id="Secondary" title="Secondary" src="src/img/shotgun.png" alt="Weapon" class="category_item">
-            <img id="Pistols" title="Pistols" src="src/img/pistol.png" alt="Weapon" class="category_item">
-            <img id="Helmets" title="Helmets" src="src/img/helmet.png" alt="Helmet" class="category_item">
-            <img id="Armor" title="Armor" src="src/img/body.png" alt="Armor" class="category_item">
-            <img id="Artifacts" title="Artifacts" src="src/img/space.png" alt="Artifact" class="category_item">
-            <img id="Consumables" title="Consumables" src="src/img/healthy-drink.png" alt="Consumable" class="category_item">
-            <img id="Ammo" title="Ammo" src="src/img/bullet.png" alt="Ammo" class="category_item">
-            <img id="Grenades" title="Grenades" src="src/img/grenade.png" alt="Grenade" class="category_item">
-        </div>
-        <div id="factions_bar">
+    <div id="canvas" class="d-flex h-100">
+        <!-- Factions sidebar - fixed width, full height -->
+        <div id="factions_bar" class="d-flex flex-column">
             <img id="Generic_settings" title="Generic" src="src/img/gear.png" alt="settings" class="faction_item">
             <!--TODO Should be changed to local images!!! IDK what guys can do with img on links-->
             <img id="Neutral" title="Neutrals" src="https://static.wikia.nocookie.net/stalker/images/3/31/T_icon_fraction_neutrals.png" alt="Generic settings" class="faction_item">
@@ -38,19 +32,69 @@
             <img id="Spark" title="Spark" src="https://static.wikia.nocookie.net/stalker/images/e/eb/T_icon_fraction_spark.png" alt="Spark" class="faction_item">
             <img id="Corpus" title="Corps" src="https://static.wikia.nocookie.net/stalker/images/8/8a/T_icon_fraction_corps.png" alt="Corpus" class="faction_item">
         </div>
-        <div id="toolbar">
-            <input id="config_name" type="text" placeholder="Config name" value="My new loadout" class="toolbar_item">
-            <img id="btn_file_settings" src="src/img/setting.png" alt="file_settings" title="File Settings" class="toolbar_item">
-            <img id="btn_presets" src="src/img/list.png" alt="presets" title="Presets" class="toolbar_item">
-            <img id="btn_save" src="src/img/file.png" alt="download_zip" title="Download ZIP" class="toolbar_item">
-            <img id="btn_help" src="src/img/question.png" alt="help" title="How to install" class="toolbar_item">
-            <img id="btn_export" src="src/img/export.png" alt="export" title="Export as JSON" class="toolbar_item">
-            <img id="btn_import" src="src/img/import.png" alt="import" title="Import from JSON" class="toolbar_item">
-            <img id="btn_todo" src="src/img/to-do-list.png" alt="todo" title="To do list" class="toolbar_item">
-            <a href="https://github.com/PriestSL/s2-dynamicitemgenerator-generator-web" target="_blank"><img id="github_link" src="src/img/github.png" alt="github" title="GitHub" class="toolbar_item" style="height: 45px;"></a>
-            <img id="btn_info" src="src/img/info.png" alt="info" title="Info" class="toolbar_item">
+        
+        <!-- Main content area - flexible width -->
+        <div class="d-flex flex-column flex-grow-1">
+            <!-- Top toolbar section -->
+            <div class="d-flex">
+                <!-- Categories bar -->
+                <div class="d-flex" id="categories_bar">
+                    <img id="Primary" title="Primary" src="src/img/assault-rifle.png" alt="Weapon" class="category_item">
+                    <img id="Secondary" title="Secondary" src="src/img/shotgun.png" alt="Weapon" class="category_item">
+                    <img id="Pistols" title="Pistols" src="src/img/pistol.png" alt="Weapon" class="category_item">
+                    <img id="Helmets" title="Helmets" src="src/img/helmet.png" alt="Helmet" class="category_item">
+                    <img id="Armor" title="Armor" src="src/img/body.png" alt="Armor" class="category_item">
+                    <img id="Artifacts" title="Artifacts" src="src/img/space.png" alt="Artifact" class="category_item">
+                    <img id="Consumables" title="Consumables" src="src/img/healthy-drink.png" alt="Consumable" class="category_item">
+                    <img id="Ammo" title="Ammo" src="src/img/bullet.png" alt="Ammo" class="category_item">
+                    <img id="Grenades" title="Grenades" src="src/img/grenade.png" alt="Grenade" class="category_item">
+                </div>
+                
+                <!-- Toolbar -->
+                <div class="d-flex align-items-center justify-content-end flex-grow-1 pe-3" id="toolbar">
+                    <div class="input-group input-group-sm me-2" style="max-width: 200px;">
+                        <input id="config_name" type="text" class="form-control" placeholder="Config name" value="My new loadout">
+                    </div>
+                    <div class="btn-group btn-group-sm" role="group" aria-label="Toolbar actions">
+                        <button type="button" class="btn btn-outline-secondary" id="btn_file_settings" title="File Settings">
+                            <img src="src/img/setting.png" alt="settings" style="width: 20px; height: 20px;">
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary" id="btn_presets" title="Presets">
+                            <img src="src/img/list.png" alt="presets" style="width: 20px; height: 20px;">
+                        </button>
+                        <button type="button" class="btn btn-outline-primary" id="btn_save" title="Download ZIP">
+                            <img src="src/img/file.png" alt="download" style="width: 20px; height: 20px;">
+                        </button>
+                        <button type="button" class="btn btn-outline-info" id="btn_help" title="How to install">
+                            <img src="src/img/question.png" alt="help" style="width: 20px; height: 20px;">
+                        </button>
+                        <button type="button" class="btn btn-outline-success" id="btn_export" title="Export as JSON">
+                            <img src="src/img/export.png" alt="export" style="width: 20px; height: 20px;">
+                        </button>
+                        <button type="button" class="btn btn-outline-warning" id="btn_import" title="Import from JSON">
+                            <img src="src/img/import.png" alt="import" style="width: 20px; height: 20px;">
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary" id="btn_todo" title="To do list">
+                            <img src="src/img/to-do-list.png" alt="todo" style="width: 20px; height: 20px;">
+                        </button>
+                        <a href="https://github.com/PriestSL/s2-dynamicitemgenerator-generator-web" target="_blank" class="btn btn-outline-dark" title="GitHub">
+                            <img src="src/img/github.png" alt="github" style="width: 20px; height: 20px;">
+                        </a>
+                        <button type="button" class="btn btn-outline-secondary" id="btn_info" title="Info">
+                            <img src="src/img/info.png" alt="info" style="width: 20px; height: 20px;">
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Content area -->
+            <div class="flex-grow-1 overflow-auto">
+                <div id="content" class="h-100 p-3"></div>
+            </div>
         </div>
-        <div id="content"></div>
     </div>
+    
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

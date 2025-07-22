@@ -1,10 +1,69 @@
 import { generateConfig } from './fileStreamGenerator.js';
-import { showFreezeDiv, hideFreezeDiv, showLoading, hideLoading} from './utils.js';
+import { showFreezeDiv, hideFreezeDiv } from './utils.js';
 import { fetchHeaders, getPreset, checkPin, createPreset, updatePreset, deletePreset } from './restCalls.js';
 
 /*ugliest code that I wrote*/
 import * as configs from './configs.js'; 
 import { deepCopy } from './utils.js';
+
+// Bootstrap fixes - merged from bootstrap-fixes.js
+// Function to show loading spinner
+function showLoadingSpinner() {
+    console.log('showLoadingSpinner called');
+    const spinner = document.getElementById('loadingSpinner');
+    if (spinner && spinner.style.display !== 'flex') {
+        console.log('Showing spinner');
+        spinner.style.display = 'flex';
+    }
+}
+
+// Function to hide loading spinner
+function hideLoadingSpinner() {
+    console.log('hideLoadingSpinner called');
+    const spinner = document.getElementById('loadingSpinner');
+    if (spinner && spinner.style.display !== 'none') {
+        console.log('Hiding spinner');
+        spinner.style.display = 'none';
+    }
+}
+
+// Helper function to ensure loading spinner is hidden after a promise resolves or rejects
+async function withLoadingSpinner(promiseFunction) {
+    showLoadingSpinner();
+    try {
+        return await promiseFunction();
+    } finally {
+        hideLoadingSpinner();
+    }
+}
+// End of bootstrap fixes
+
+// Get Bootstrap from window when the DOM is loaded
+let bootstrap;
+document.addEventListener('DOMContentLoaded', () => {
+    bootstrap = window.bootstrap;
+    // Ensure a global loading spinner exists outside of modals
+    if (!document.getElementById('loadingSpinner')) {
+        const spinnerDiv = document.createElement('div');
+        spinnerDiv.id = 'loadingSpinner';
+        spinnerDiv.style.position = 'fixed';
+        spinnerDiv.style.top = '0';
+        spinnerDiv.style.left = '0';
+        spinnerDiv.style.width = '100%';
+        spinnerDiv.style.height = '100%';
+        spinnerDiv.style.display = 'none';
+        spinnerDiv.style.justifyContent = 'center';
+        spinnerDiv.style.alignItems = 'center';
+        spinnerDiv.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+        spinnerDiv.style.zIndex = '9999';
+        spinnerDiv.innerHTML = '<div class="spinner-border text-light" style="width: 3rem; height: 3rem;" role="status"><span class="visually-hidden">Loading...</span></div>';
+        document.body.appendChild(spinnerDiv);
+        
+        // Explicitly ensure spinner is hidden after creation
+        spinnerDiv.style.display = 'none';
+        console.log('Spinner created and hidden on page load');
+    }
+});
 
 var currentFaction = "Neutral";
 var currentCategory = "Primary";
@@ -111,8 +170,9 @@ const addRow = (parentElement, item, classification, chances) => {
 
     if ((currentCategory === 'Primary' || currentCategory === 'Armor') && currentFaction !== 'Generic_settings' && item !== '') {
         let deleteButton = document.createElement('button');
-        deleteButton.innerHTML = 'Delete';
-        deleteButton.classList.add('deleteButton');
+        deleteButton.innerHTML = '<i class="fas fa-trash me-1"></i>Delete';
+        deleteButton.className = 'btn btn-danger btn-sm ms-2';
+        
         deleteButton.addEventListener('click', function() {
             let GeneralSettings = 'GeneralNPC_'+currentFaction;
             if (currentCategory === 'Primary') {
@@ -214,24 +274,8 @@ const showAddSelection = (target, type, classification) => {
 
 const drawAttentionDiv = (text = 'This section is for all factions, settings for specific factions are not implemented yet') => {
     let div = document.createElement('div');
-    div.classList.add('attention');
-    div.innerHTML = text;
-    return div;
-};
-
-const drawAddDiv = (onClick) => {
-    let existsDiv = document.getElementById('addItemButton');
-    if (existsDiv) {
-        existsDiv.remove();
-    }
-
-    let div = document.createElement('div');
-    div.classList.add('addDiv');
-    div.id = 'addItemButton';
-    let button = document.createElement('button');
-    button.innerHTML = '+';
-    button.addEventListener('click', onClick);
-    div.appendChild(button);
+    div.className = 'alert alert-info';
+    div.innerHTML = `<i class="fas fa-info-circle me-2"></i>${text}`;
     return div;
 };
 
@@ -314,32 +358,180 @@ function onAttributeChange(e) {
 
 //TODO rewrite to use typeToTable
 const fillChancesTable = (oSettings, newRowReplace, tableType, classification = '') => {
-    let chancesTable = document.createElement('div');
-    chancesTable.classList.add('chances_table');
-    addRow(chancesTable, '', classification, newRowReplace || ['Newbie', 'Experienced', 'Veteran', 'Master']);
-
+    // Create Bootstrap table structure
+    let tableContainer = document.createElement('div');
+    tableContainer.className = 'table-responsive mb-3';
+    
+    let table = document.createElement('table');
+    table.className = 'table table-striped table-hover table-sm';
+    
+    // Create header
+    let thead = document.createElement('thead');
+    thead.className = 'table-dark';
+    let headerRow = document.createElement('tr');
+    
+    // Add item name header
+    let itemHeader = document.createElement('th');
+    itemHeader.textContent = 'Item';
+    itemHeader.className = 'text-start';
+    headerRow.appendChild(itemHeader);
+    
+    // Add level headers
+    const levelHeaders = newRowReplace || ['Newbie', 'Experienced', 'Veteran', 'Master'];
+    levelHeaders.forEach(level => {
+        let levelHeader = document.createElement('th');
+        levelHeader.textContent = level;
+        levelHeader.className = 'text-center';
+        headerRow.appendChild(levelHeader);
+    });
+    
+    // Add actions header if needed
+    if ((currentCategory === 'Primary' || currentCategory === 'Armor') && currentFaction !== 'Generic_settings') {
+        let actionsHeader = document.createElement('th');
+        actionsHeader.textContent = 'Actions';
+        actionsHeader.className = 'text-center';
+        headerRow.appendChild(actionsHeader);
+    }
+    
+    thead.appendChild(headerRow);
+    table.appendChild(thead);
+    
+    // Create body
+    let tbody = document.createElement('tbody');
+    
+    // Add data rows
     for (let item in oSettings) {
-        addRow(chancesTable, item, classification, oSettings[item]);
-    }
-
-    if (tableType) {
-        chancesTable.addEventListener('mouseenter', function() {
-            chancesTable.appendChild(drawAddDiv((e)=>{
-                showAddSelection(e.target.parentElement.parentElement, tableType, classification);
-            }));
-        });
-
-        chancesTable.addEventListener('mouseleave', function() {
-            let elements = document.getElementsByClassName('addDiv');
-            for (let i = 0; i < elements.length; i++) {
-                chancesTable.removeChild(elements[i]);
+        let row = document.createElement('tr');
+        
+        // Item name cell
+        let itemCell = document.createElement('td');
+        itemCell.innerHTML = `<strong>${item}</strong>`;
+        itemCell.className = 'align-middle';
+        row.appendChild(itemCell);
+        
+        // Check if it's an object with attributes or array of chances
+        if (typeof oSettings[item] === 'object' && !Array.isArray(oSettings[item])) {
+            // Handle objects with attributes (like grenades)
+            for (let attr in oSettings[item]) {
+                let attrRow = document.createElement('tr');
+                attrRow.className = 'table-secondary';
+                
+                let attrCell = document.createElement('td');
+                attrCell.innerHTML = `&nbsp;&nbsp;${attr}`;
+                attrCell.className = 'align-middle ps-4';
+                attrRow.appendChild(attrCell);
+                
+                // Add chance inputs for this attribute
+                oSettings[item][attr].forEach((chance, index) => {
+                    let chanceCell = document.createElement('td');
+                    chanceCell.className = 'text-center position-relative';
+                    
+                    let input = document.createElement('input');
+                    input.type = 'number';
+                    input.className = 'form-control form-control-sm text-center';
+                    input.value = chance;
+                    input.dataset.faction = currentFaction;
+                    input.dataset.classification = classification;
+                    input.dataset.type = currentCategory;
+                    input.dataset.item = item;
+                    input.dataset.attr = attr;
+                    input.dataset.level = index;
+                    
+                    let label = document.createElement('small');
+                    label.className = 'text-muted position-absolute top-0 end-0 me-1';
+                    label.id = `${classification}-${item}-${attr}-${index}_label`;
+                    
+                    chanceCell.appendChild(input);
+                    chanceCell.appendChild(label);
+                    attrRow.appendChild(chanceCell);
+                });
+                
+                tbody.appendChild(attrRow);
             }
-
-        });
+        } else {
+            // Handle arrays of chances
+            const chances = Array.isArray(oSettings[item]) ? oSettings[item] : [oSettings[item]];
+            chances.forEach((chance, index) => {
+                let chanceCell = document.createElement('td');
+                chanceCell.className = 'text-center position-relative';
+                
+                if (isNaN(parseFloat(chance))) {
+                    // Static text
+                    chanceCell.innerHTML = `<span class="badge bg-secondary">${chance}</span>`;
+                } else {
+                    // Input field
+                    let input = document.createElement('input');
+                    input.type = 'number';
+                    input.className = 'form-control form-control-sm text-center';
+                    input.value = chance;
+                    input.dataset.faction = currentFaction;
+                    input.dataset.classification = classification;
+                    input.dataset.type = currentCategory;
+                    input.dataset.item = item;
+                    input.dataset.level = index;
+                    
+                    let label = document.createElement('small');
+                    label.className = 'text-muted position-absolute top-0 end-0 me-1';
+                    label.id = `${classification}-${item}-chances-${index}_label`;
+                    
+                    chanceCell.appendChild(input);
+                    chanceCell.appendChild(label);
+                }
+                
+                row.appendChild(chanceCell);
+            });
+            
+            // Add delete button if needed
+            if ((currentCategory === 'Primary' || currentCategory === 'Armor') && currentFaction !== 'Generic_settings' && item !== '') {
+                let actionsCell = document.createElement('td');
+                actionsCell.className = 'text-center';
+                
+                let deleteButton = document.createElement('button');
+                deleteButton.innerHTML = '<i class="fas fa-trash"></i>';
+                deleteButton.className = 'btn btn-danger btn-sm';
+                deleteButton.title = 'Delete';
+                
+                deleteButton.addEventListener('click', function() {
+                    let GeneralSettings = 'GeneralNPC_'+currentFaction;
+                    if (currentCategory === 'Primary') {
+                        delete modifiedWeaponSettings[GeneralSettings][classification][item];
+                        updateAllLabels(modifiedWeaponSettings[GeneralSettings][classification], classification);
+                    } else if (currentCategory === 'Armor') {
+                        delete modifiedArmorSettings[GeneralSettings][item];
+                        updateAllLabels(modifiedArmorSettings[GeneralSettings]);
+                    }
+                    row.remove();
+                });
+                
+                actionsCell.appendChild(deleteButton);
+                row.appendChild(actionsCell);
+            }
+            
+            tbody.appendChild(row);
+        }
     }
-
-    return chancesTable;
-}
+    
+    table.appendChild(tbody);
+    tableContainer.appendChild(table);
+    
+    // Add "Add Item" button if table type is specified
+    if (tableType) {
+        let addButtonContainer = document.createElement('div');
+        addButtonContainer.className = 'd-flex justify-content-center mb-3';
+        
+        let addButton = document.createElement('button');
+        addButton.className = 'btn btn-success btn-sm';
+        addButton.innerHTML = '<i class="fas fa-plus me-1"></i>Add Item';
+        addButton.addEventListener('click', () => {
+            showAddSelection(tableContainer, tableType, classification);
+        });
+        
+        addButtonContainer.appendChild(addButton);
+        tableContainer.appendChild(addButtonContainer);
+    }
+    
+    return tableContainer;
+};
 
 const fillAttributesTable = (oSettings, parentElement, type) => {
     const typeToAttributeList = {
@@ -354,15 +546,23 @@ const fillAttributesTable = (oSettings, parentElement, type) => {
 
     const addAttributes = (item, oAttr, parentElement) => {
         let attributesElement = document.createElement('div');
-        attributesElement.classList.add('attributes_grid');
+        attributesElement.className = 'row g-2';
+        
         for (let attr in typeToAttributeList[type]) {
             let thisAttr = typeToAttributeList[type][attr];
+            
+            // Create Bootstrap form group
+            let formGroup = document.createElement('div');
+            formGroup.className = 'col-md-6';
+            
             let labelEl = document.createElement('label');
-            labelEl.classList.add('attribute');
+            labelEl.className = 'form-label';
             labelEl.innerHTML = thisAttr[0];
+            
             let attrElement = null;
             if (thisAttr[1] === 'select') {
                 attrElement = document.createElement('select');
+                attrElement.className = 'form-select form-select-sm';
                 attrElement.dataset.type = type;
                 attrElement.dataset.to_item = item;
                 attrElement.dataset.to_attr = thisAttr[0];
@@ -380,38 +580,75 @@ const fillAttributesTable = (oSettings, parentElement, type) => {
                     attrElement.appendChild(option);
                 }
                 attrElement.value = oAttr[thisAttr[0]];
-            }else{
+            } else if (thisAttr[1] === 'checkbox') {
+                // Special handling for checkbox
+                let checkDiv = document.createElement('div');
+                checkDiv.className = 'form-check';
+                
                 attrElement = document.createElement('input');
-
+                attrElement.className = 'form-check-input';
+                attrElement.type = 'checkbox';
+                attrElement.checked = oAttr[thisAttr[0]];
+                attrElement.dataset.type = type;
+                attrElement.dataset.to_item = item;
+                attrElement.dataset.to_attr = thisAttr[0];
+                
+                labelEl.className = 'form-check-label';
+                
+                checkDiv.appendChild(attrElement);
+                checkDiv.appendChild(labelEl);
+                formGroup.appendChild(checkDiv);
+                attributesElement.appendChild(formGroup);
+                continue;
+            } else {
+                attrElement = document.createElement('input');
+                attrElement.className = 'form-control form-control-sm';
                 attrElement.type = thisAttr[1];
                 attrElement.value = oAttr[thisAttr[0]];
-                if (thisAttr[1] === 'checkbox') {
-                    attrElement.checked = oAttr[thisAttr[0]];
-                }
                 attrElement.dataset.type = type;
                 attrElement.dataset.to_item = item;
                 attrElement.dataset.to_attr = thisAttr[0];
             }
 
-            attrElement.classList.add('attribute_field');
-            attributesElement.appendChild(labelEl);
-            attributesElement.appendChild(attrElement);
+            formGroup.appendChild(labelEl);
+            formGroup.appendChild(attrElement);
+            attributesElement.appendChild(formGroup);
         }
             
-
         parentElement.appendChild(attributesElement);
     }
 
     const addRow = (parentElement, item, value) => {
-        let row = document.createElement('details');
-        row.classList.add('attributes_item_row');
-        row.setAttribute('open', 'open');
-        let summary = document.createElement('summary');
-        summary.classList.add('attributes_item_row');
-        summary.innerHTML = item;
-        row.appendChild(summary);
-        addAttributes(item, value, row);
-        parentElement.appendChild(row);        
+        // Create Bootstrap card for each item
+        let card = document.createElement('div');
+        card.className = 'card mb-2';
+        
+        let cardHeader = document.createElement('div');
+        cardHeader.className = 'card-header';
+        cardHeader.innerHTML = `
+            <h6 class="mb-0">
+                <button class="btn btn-link text-decoration-none p-0 text-start w-100" type="button" 
+                        data-bs-toggle="collapse" data-bs-target="#collapse-${item.replace(/\s+/g, '-')}" 
+                        aria-expanded="true" aria-controls="collapse-${item.replace(/\s+/g, '-')}">
+                    ${item}
+                    <i class="fas fa-chevron-down float-end"></i>
+                </button>
+            </h6>
+        `;
+        
+        let collapseDiv = document.createElement('div');
+        collapseDiv.className = 'collapse show';
+        collapseDiv.id = `collapse-${item.replace(/\s+/g, '-')}`;
+        
+        let cardBody = document.createElement('div');
+        cardBody.className = 'card-body';
+        
+        addAttributes(item, value, cardBody);
+        
+        collapseDiv.appendChild(cardBody);
+        card.appendChild(cardHeader);
+        card.appendChild(collapseDiv);
+        parentElement.appendChild(card);
     };
 
     for (let item in oSettings) {
@@ -423,48 +660,56 @@ const fillAttributesTable = (oSettings, parentElement, type) => {
 }
 
 const showPrimarySettings = () => {
-    let globalAttributes = document.createElement('details');
-    globalAttributes.setAttribute('open', 'open');
-    globalAttributes.classList.add('item_level1');
-    let globalSummary = document.createElement('summary');
-    globalSummary.innerHTML = 'Global settings';
-    globalSummary.classList.add('item_level1');
-    globalAttributes.appendChild(globalSummary);
-
-    {
-        let attrLabel = document.createElement('label');
-        attrLabel.innerHTML = 'Minimal condition, %';
-        globalAttributes.appendChild(attrLabel);
-        let attrElement = document.createElement('input');
-        attrElement.type = 'number';
-        attrElement.value = modifiedMinWeaponDurability;
-        
-        attrElement.addEventListener('change', function(e) {
-            modifiedMinWeaponDurability = e.target.value;
-        });
-
-        globalAttributes.appendChild(attrElement);
-    }
-
-    {
-        let attrLabel = document.createElement('label');
-        attrLabel.innerHTML = 'Maximal condition, %';
-        globalAttributes.appendChild(attrLabel);
-        let attrElement = document.createElement('input');
-        attrElement.type = 'number';
-        attrElement.value = modifiedMaxWeaponDurability;
-
-        attrElement.addEventListener('change', function(e) {
-            modifiedMaxWeaponDurability = e.target.value;
-        });
-
-        globalAttributes.appendChild(attrElement);
-    }
-
-
-
-    contentEl.appendChild(globalAttributes);
-
+    // Create Bootstrap card for global settings
+    let globalCard = document.createElement('div');
+    globalCard.className = 'card mb-3';
+    
+    let cardHeader = document.createElement('div');
+    cardHeader.className = 'card-header bg-info bg-opacity-10';
+    cardHeader.innerHTML = `
+        <h5 class="mb-0">
+            <i class="fas fa-cog me-2"></i>Global Weapon Settings
+        </h5>
+    `;
+    
+    let cardBody = document.createElement('div');
+    cardBody.className = 'card-body';
+    
+    let settingsRow = document.createElement('div');
+    settingsRow.className = 'row g-3';
+    
+    // Minimal condition setting
+    let minConditionCol = document.createElement('div');
+    minConditionCol.className = 'col-md-6';
+    minConditionCol.innerHTML = `
+        <label class="form-label">Minimal condition (%)</label>
+        <input type="number" class="form-control" id="minWeaponCondition" value="${modifiedMinWeaponDurability}">
+    `;
+    
+    // Maximal condition setting  
+    let maxConditionCol = document.createElement('div');
+    maxConditionCol.className = 'col-md-6';
+    maxConditionCol.innerHTML = `
+        <label class="form-label">Maximal condition (%)</label>
+        <input type="number" class="form-control" id="maxWeaponCondition" value="${modifiedMaxWeaponDurability}">
+    `;
+    
+    settingsRow.appendChild(minConditionCol);
+    settingsRow.appendChild(maxConditionCol);
+    cardBody.appendChild(settingsRow);
+    
+    globalCard.appendChild(cardHeader);
+    globalCard.appendChild(cardBody);
+    contentEl.appendChild(globalCard);
+    
+    // Add event listeners
+    document.getElementById('minWeaponCondition').addEventListener('change', function(e) {
+        modifiedMinWeaponDurability = e.target.value;
+    });
+    
+    document.getElementById('maxWeaponCondition').addEventListener('change', function(e) {
+        modifiedMaxWeaponDurability = e.target.value;
+    });
 
     fillAttributesTable(modifiedWeaponList, contentEl, 'weapon');
 };
@@ -480,31 +725,55 @@ const showPrimary = ()=>{
     }
     let GeneralSettings = 'GeneralNPC_'+currentFaction;
     let WeaponSettings = modifiedWeaponSettings[GeneralSettings];
+    
     for (let classification in WeaponSettings) {
-        let classElement = document.createElement('details');
-        classElement.id = classification;
-        classElement.setAttribute('open', 'open');
-        let classSummary = document.createElement('summary');
-        classSummary.innerHTML = classification;
-        classElement.dataset.classification = classification;
-        classSummary.classList.add('item_level1');
-        classElement.appendChild(classSummary);
-        classElement.classList.add('item_level1');
-        contentEl.appendChild(classElement);
-
+        // Create Bootstrap card for each weapon classification
+        let card = document.createElement('div');
+        card.className = 'card mb-3';
+        card.id = classification;
+        card.dataset.classification = classification;
+        
+        let cardHeader = document.createElement('div');
+        cardHeader.className = 'card-header bg-primary bg-opacity-10';
+        cardHeader.innerHTML = `
+            <h5 class="mb-0">
+                <button class="btn btn-link text-decoration-none p-0 text-start w-100" type="button" 
+                        data-bs-toggle="collapse" data-bs-target="#collapse-${classification}" 
+                        aria-expanded="true" aria-controls="collapse-${classification}">
+                    <i class="fas fa-gun me-2"></i>${classification}
+                    <i class="fas fa-chevron-down float-end"></i>
+                </button>
+            </h5>
+        `;
+        
+        let collapseDiv = document.createElement('div');
+        collapseDiv.className = 'collapse show';
+        collapseDiv.id = `collapse-${classification}`;
+        
+        let cardBody = document.createElement('div');
+        cardBody.className = 'card-body';
+        
         let chances = fillChancesTable(WeaponSettings[classification], null, 'weapon', classification);
         chances.addEventListener('change', onWeaponChanceChange);
-        classElement.appendChild(chances);
+        cardBody.appendChild(chances);
+        
+        collapseDiv.appendChild(cardBody);
+        card.appendChild(cardHeader);
+        card.appendChild(collapseDiv);
+        contentEl.appendChild(card);
+        
         window.setTimeout(()=>{updateAllLabels(WeaponSettings[classification], classification);}, 100);
     }
-
 }
 
 const showSecondary = ()=>{
-    let infoElement = document.createElement('div');
-    infoElement.innerHTML = 'Changing secondary weapons are not implemented yet (they are works in game?)';
-
-    contentEl.appendChild(infoElement);
+    let alertElement = document.createElement('div');
+    alertElement.className = 'alert alert-warning';
+    alertElement.innerHTML = `
+        <i class="fas fa-exclamation-triangle me-2"></i>
+        <strong>Not Implemented:</strong> Changing secondary weapons are not implemented yet (they are works in game?)
+    `;
+    contentEl.appendChild(alertElement);
 };
 
 const showPistols = ()=>{
@@ -562,17 +831,23 @@ const showArmor = ()=>{
 };
 
 const showArtifacts = ()=>{
-    let infoElement = document.createElement('div');
-    infoElement.innerHTML = 'Lootable artifact settings are not implemented yet (and game uses Artifact class to generate grenades)';
-
-    contentEl.appendChild(infoElement);
+    let alertElement = document.createElement('div');
+    alertElement.className = 'alert alert-warning';
+    alertElement.innerHTML = `
+        <i class="fas fa-exclamation-triangle me-2"></i>
+        <strong>Not Implemented:</strong> Lootable artifact settings are not implemented yet (and game uses Artifact class to generate grenades)
+    `;
+    contentEl.appendChild(alertElement);
 };
 
 const showConsumables = ()=>{
-    let infoElement = document.createElement('div');
-    infoElement.innerHTML = 'Consumables loot settings are not implemented yet.';
-
-    contentEl.appendChild(infoElement);
+    let alertElement = document.createElement('div');
+    alertElement.className = 'alert alert-warning';
+    alertElement.innerHTML = `
+        <i class="fas fa-exclamation-triangle me-2"></i>
+        <strong>Not Implemented:</strong> Consumables loot settings are not implemented yet.
+    `;
+    contentEl.appendChild(alertElement);
 };
 
 const showAmmo = ()=>{
@@ -645,43 +920,143 @@ const subscribeToEvents = () => {
 
 subscribeToEvents()
 
-const drawHelp = () => `
-    <div class="help">
-        <h2>Help</h2>
-        <p>After configuring all settings press download <img src="img/file.png" style="width:20px"></img> icon</p>
-        <p>Download <a href="https://www.nexusmods.com/stalker2heartofchornobyl/mods/398" target="_blank">packing tool</a> if you don't have it</p>
-        <p>Unzip into folder, named as zip archive, into <b>2-extracted-pak-files</b>(if you using software from link above)</p>
-        <p>Run <b>2-repack_pak.bat</b>, select your folder and wait until it finishes</p>
-        <p>Copy created .pak file from <b>3-repacked-pak-files</b> to <b>Stalker 2 Game Folder\\Stalker2\\Content\\Paks\\~mods\\</b></p>
-    </div>
-`;
-
-const drawCloseButton = (wind) => `
-    <div class="closeButton">
-        <button id="btn_close_msg_${wind}">Close</button>
-    </div>
-`;
-
-const drawFileSettings = () => `
-    <div class="fileSettings">
-        <hr>
-        <h2>Compatibility settings</h2>
-        <hr>
-        <label for="copm_SHA">Separated Helmets and Armor</label>
-        <input type="checkbox" id="copm_SHA" ${modsCompatibility.SHA ? 'checked' : ''}>
-        <hr>
-        <label for="drop_armor">Enable armor droping</label>
-        <input type="checkbox" id="drop_armor" ${modifiedDropConfigs.createDroppableArmor ? 'checked' : ''}>
-        <div class="armor_drop_settings" style="display:${modifiedDropConfigs.createDroppableArmor ? 'grid' : 'none'}">
-            <label for="armor_chance">Armor drop chance</label>
-            <input type="number" id="armor_chance" value="${modifiedDropConfigs.nLootChance}">
-            <label for="min_condition">Minimal armor condition</label>
-            <input type="number" id="min_condition" value="${modifiedDropConfigs.nMinDurability}">
-            <label for="max_condition">Maximal armor condition</label>
-            <input type="number" id="max_condition" value="${modifiedDropConfigs.nMaxDurability}">
+const drawHelp = () => {
+    return `
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-12">
+                    <h4 class="mb-4">
+                        <i class="fas fa-question-circle me-2"></i>Installation Guide
+                    </h4>
+                    
+                    <div class="card">
+                        <div class="card-body">
+                            <ol class="list-group list-group-numbered">
+                                <li class="list-group-item d-flex justify-content-between align-items-start">
+                                    <div class="ms-2 me-auto">
+                                        <div class="fw-bold">Configure Settings</div>
+                                        After configuring all settings press the download 
+                                        <img src="img/file.png" style="width:20px" class="mx-1" alt="download"> icon
+                                    </div>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between align-items-start">
+                                    <div class="ms-2 me-auto">
+                                        <div class="fw-bold">Download Packing Tool</div>
+                                        Download the 
+                                        <a href="https://www.nexusmods.com/stalker2heartofchornobyl/mods/398" target="_blank" class="btn btn-sm btn-outline-primary ms-1">
+                                            <i class="fas fa-external-link-alt me-1"></i>packing tool
+                                        </a> if you don't have it
+                                    </div>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between align-items-start">
+                                    <div class="ms-2 me-auto">
+                                        <div class="fw-bold">Extract Files</div>
+                                        Unzip into folder, named as zip archive, into 
+                                        <code class="bg-light p-1">2-extracted-pak-files</code>
+                                    </div>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between align-items-start">
+                                    <div class="ms-2 me-auto">
+                                        <div class="fw-bold">Repack Files</div>
+                                        Run <code class="bg-light p-1">2-repack_pak.bat</code>, select your folder and wait until it finishes
+                                    </div>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between align-items-start">
+                                    <div class="ms-2 me-auto">
+                                        <div class="fw-bold">Install Mod</div>
+                                        Copy created .pak file from <code class="bg-light p-1">3-repacked-pak-files</code> to<br>
+                                        <code class="bg-light p-1">Stalker 2 Game Folder\\Stalker2\\Content\\Paks\\~mods\\</code>
+                                    </div>
+                                </li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-    </div>
-`;
+    `;
+};
+
+const drawCloseButton = (wind) => {
+    return `
+        <div class="d-flex justify-content-end mt-3">
+            <button id="btn_close_msg_${wind}" class="btn btn-secondary">
+                <i class="fas fa-times me-1"></i>Close
+            </button>
+        </div>
+    `;
+};
+
+const drawFileSettings = () => {
+    // Use Bootstrap form styling
+    return `
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-12">
+                    <h4 class="mb-4">
+                        <i class="fas fa-cog me-2"></i>Compatibility Settings
+                    </h4>
+                    
+                    <form class="needs-validation" novalidate>
+                        <div class="card mb-3">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">
+                                    <i class="fas fa-puzzle-piece me-2"></i>Mod Compatibility
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="checkbox" id="copm_SHA" ${modsCompatibility.SHA ? 'checked' : ''}>
+                                    <label class="form-check-label" for="copm_SHA">
+                                        <strong>Separated Helmets and Armor</strong>
+                                        <small class="d-block text-muted">Enable if you're using mods that separate helmet and armor systems</small>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">
+                                    <i class="fas fa-shield-alt me-2"></i>Armor Drop Settings
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="checkbox" id="drop_armor" ${modifiedDropConfigs.createDroppableArmor ? 'checked' : ''}>
+                                    <label class="form-check-label" for="drop_armor">
+                                        <strong>Enable armor dropping</strong>
+                                        <small class="d-block text-muted">Allow NPCs to drop their armor when killed</small>
+                                    </label>
+                                </div>
+                                
+                                <div class="armor_drop_settings" style="display:${modifiedDropConfigs.createDroppableArmor ? 'block' : 'none'}">
+                                    <div class="row g-3">
+                                        <div class="col-md-4">
+                                            <label for="armor_chance" class="form-label">Armor drop chance (%)</label>
+                                            <input type="number" class="form-control" id="armor_chance" value="${modifiedDropConfigs.nLootChance}" min="0" max="100">
+                                            <div class="form-text">Percentage chance that armor will drop</div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label for="min_condition" class="form-label">Minimal condition (%)</label>
+                                            <input type="number" class="form-control" id="min_condition" value="${modifiedDropConfigs.nMinDurability}" min="0" max="100">
+                                            <div class="form-text">Minimum durability of dropped armor</div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label for="max_condition" class="form-label">Maximal condition (%)</label>
+                                            <input type="number" class="form-control" id="max_condition" value="${modifiedDropConfigs.nMaxDurability}" min="0" max="100">
+                                            <div class="form-text">Maximum durability of dropped armor</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    `;
+};
 
 const subscribeFileSettingsEvents = () => {
     let SHAComp = document.getElementById('copm_SHA');
@@ -692,11 +1067,13 @@ const subscribeFileSettingsEvents = () => {
     let dropArmor = document.getElementById('drop_armor');
     dropArmor.addEventListener('change', function(e) {
         modifiedDropConfigs.createDroppableArmor = e.target.checked;
-        if (e.target.checked) {
-            document.querySelector('.armor_drop_settings').style.display = 'grid';
-        }
-        else {
-            document.querySelector('.armor_drop_settings').style.display = 'none';
+        const settingsDiv = document.querySelector('.armor_drop_settings');
+        if (settingsDiv) {
+            if (e.target.checked) {
+                settingsDiv.style.display = 'block';
+            } else {
+                settingsDiv.style.display = 'none';
+            }
         }
     });
 
@@ -714,8 +1091,6 @@ const subscribeFileSettingsEvents = () => {
     maxCondition.addEventListener('change', function(e) {
         modifiedDropConfigs.nMaxDurability = e.target.value;
     });
-
-
 };
 
 const createMessageBox = (wind, message) => {
@@ -724,9 +1099,19 @@ const createMessageBox = (wind, message) => {
     }
 
     let messageBox = document.createElement('div');
-    messageBox.classList.add('messageBox');
+    
+    // Use Bootstrap modal-like styling
+    messageBox.className = 'position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center';
+    messageBox.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+    messageBox.style.zIndex = '1050';
+    messageBox.innerHTML = `
+        <div class="bg-white rounded shadow p-4" style="max-width: 90vw; max-height: 90vh; overflow-y: auto;">
+            ${message}
+            ${drawCloseButton(wind)}
+        </div>
+    `;
+    
     messageBox.id = 'messageBox_'+wind;
-    messageBox.innerHTML = message + drawCloseButton(wind);
     document.body.appendChild(messageBox);
 };
 
@@ -848,40 +1233,170 @@ const showInfo = () => {
     closeButton.addEventListener('click', ()=>removeMessageBox('info'));
 };
 
-const openPresetsWindow = () =>{
+const openPresetsWindow = async () => {
+    // Check if we already have Bootstrap modals in the document
+    if (!document.getElementById('presetsModal')) {
+        // Create and append the Bootstrap modals
+        const modalContainer = document.createElement('div');
+        modalContainer.innerHTML = `
+            <!-- Bootstrap Presets Modal -->
+            <div class="modal fade" id="presetsModal" tabindex="-1" aria-labelledby="presetsModalLabel" aria-hidden="true">
+              <div class="modal-dialog modal-xl modal-dialog-scrollable">
+                <div class="modal-content">
+                  <div class="modal-header bg-brown">
+                    <h5 class="modal-title text-white" id="presetsModalLabel">
+                      <i class="fas fa-list me-2"></i>Presets
+                    </h5>
+                    <div class="d-flex gap-2">
+                      <button id="btn_save_new_preset" class="btn btn-light btn-sm">
+                        <i class="fas fa-plus me-1"></i> Save as New
+                      </button>
+                      <button id="btn_update_preset" class="btn btn-light btn-sm" ${!localStorage.getItem('editingPresetId') ? 'disabled' : ''}>
+                        <i class="fas fa-save me-1"></i> Update Current
+                      </button>
+                      <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                  </div>
+                  <div class="modal-body p-3">
+                    <div class="row">
+                      <div class="col-12 mb-4">
+                        <div class="card">
+                          <div class="card-header bg-primary bg-opacity-10">
+                            <h5 class="mb-0"><i class="fas fa-star me-2"></i>Official Presets</h5>
+                          </div>
+                          <div class="card-body">
+                            <div id="officialPresetsList" class="row g-3">
+                              <!-- Official presets will be loaded here -->
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="col-12">
+                        <div class="card">
+                          <div class="card-header bg-warning bg-opacity-10">
+                            <h5 class="mb-0"><i class="fas fa-users me-2"></i>Community Presets</h5>
+                          </div>
+                          <div class="card-body">
+                            <div id="communityPresetsList" class="row g-3">
+                              <!-- Community presets will be loaded here -->
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Save Preset Modal -->
+            <div class="modal fade" id="savePresetModal" tabindex="-1" aria-labelledby="savePresetModalLabel" aria-hidden="true">
+              <div class="modal-dialog">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title" id="savePresetModalLabel">
+                      <i class="fas fa-save me-2"></i>Save Preset
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                  </div>
+                  <div class="modal-body">
+                    <form id="savePresetForm" class="needs-validation" novalidate>
+                      <div class="mb-3">
+                        <label for="preset-name" class="form-label">Preset Name</label>
+                        <input type="text" class="form-control" id="preset-name" value="${document.getElementById('config_name').value || ''}" required>
+                        <div class="invalid-feedback">
+                          Please enter a preset name.
+                        </div>
+                      </div>
+                      <div class="mb-3">
+                        <label for="preset-author" class="form-label">Author Name</label>
+                        <input type="text" class="form-control" id="preset-author" required>
+                        <div class="invalid-feedback">
+                          Please enter your name.
+                        </div>
+                      </div>
+                      <div class="mb-3">
+                        <label for="preset-version" class="form-label">Version</label>
+                        <input type="text" class="form-control" id="preset-version" value="1.0">
+                      </div>
+                      <div class="mb-3">
+                        <label for="preset-pin" class="form-label">PIN (8 digits)</label>
+                        <input type="text" class="form-control" id="preset-pin" 
+                               pattern="[0-9]{8}" maxlength="8" required
+                               placeholder="For future editing/deleting">
+                        <div class="invalid-feedback">
+                          Please enter an 8-digit PIN.
+                        </div>
+                        <div class="form-text">You'll need this PIN to edit or delete your preset later.</div>
+                      </div>
+                      <div class="mb-3">
+                        <label for="preset-description" class="form-label">Description</label>
+                        <textarea class="form-control" id="preset-description" rows="3"></textarea>
+                      </div>
+                    </form>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="savePresetBtn">Save</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+        `;
+        document.body.appendChild(modalContainer);
+    }
+    
+    // Define the function to handle preset clicks
     const onPresetClick = function(e) {
-        const parentDiv = e.target.closest('div[data-id]');
-        let id = parentDiv.dataset.id;
-        let type = parentDiv.dataset.type;
+        // Ignore clicks on buttons
+        if (e.target.closest('.btn-edit') || e.target.closest('.btn-delete')) {
+            return;
+        }
         
-        showLoading();
-        getPreset(id, type).then(data => { //TODO check structure integrity
-            if (!data) { alert('Ooops, error on loading preset'); return;}
-            let preset = data.data;
-            modifiedWeaponSettings = preset.WeaponSettings;
-            modifiedArmorSettings = preset.ArmorSettings;
-            modifiedGrenadeSettings = preset.GrenadeSettings;
-            modifiedAmmoByWeaponClass = preset.AmmoSettings;
-            modifiedWeaponList = preset.WeaponList;
-            modifiedDropConfigs = preset.DropConfigs;
-            modsCompatibility = preset.Compatibility;
-            modifiedArmorSpawnSettings = preset.ArmorSpawnSettings;
-            modifiedHelmetSpawnSettings = preset.HelmetsSettings;
-            document.getElementById('config_name').value = parentDiv.dataset.name;
+        const presetCard = e.currentTarget;
+        const id = presetCard.dataset.id;
+        const type = presetCard.dataset.type;
+        
+        // Use the withLoadingSpinner helper
+        withLoadingSpinner(async () => {
+            try {
+                const data = await getPreset(id, type);
+                if (!data) { 
+                    alert('Error loading preset'); 
+                    return;
+                }
+                
+                let preset = data.data;
+                modifiedWeaponSettings = preset.WeaponSettings;
+                modifiedArmorSettings = preset.ArmorSettings;
+                modifiedGrenadeSettings = preset.GrenadeSettings;
+                modifiedAmmoByWeaponClass = preset.AmmoSettings;
+                modifiedWeaponList = preset.WeaponList;
+                modifiedDropConfigs = preset.DropConfigs;
+                modsCompatibility = preset.Compatibility;
+                modifiedArmorSpawnSettings = preset.ArmorSpawnSettings;
+                modifiedHelmetSpawnSettings = preset.HelmetsSettings;
+                document.getElementById('config_name').value = presetCard.dataset.name;
 
-            contentEl.innerHTML = '';
-            oCategoryToEvent[currentCategory]();
+                contentEl.innerHTML = '';
+                oCategoryToEvent[currentCategory]();
 
-            document.body.removeChild(windEl);
-            hideLoading();
-            hideFreezeDiv();
+                // Hide the modal
+                const modalEl = document.getElementById('presetsModal');
+                const presetsModal = bootstrap.Modal.getInstance(modalEl);
+                presetsModal.hide();
+            } catch (error) {
+                console.error("Error loading preset:", error);
+                alert("Failed to load preset: " + error.message);
+            }
         });
     };
-
+    
     const onEditPresetClick = function(e) {
         e.stopPropagation();
-        const parentDiv = e.target.closest('div[data-id]');
-        const id = parentDiv.dataset.id;
+        const presetCard = e.currentTarget.closest('.card');
+        const id = presetCard.dataset.id;
         
         // Show pin prompt
         const pin = prompt("Enter the 8-digit PIN to edit this preset:", "");
@@ -890,19 +1405,19 @@ const openPresetsWindow = () =>{
             return;
         }
         
-        // First check if PIN is valid
-        showLoading();
-        checkPin(id, pin).then(response => {
-            if (!response || !response.result) {
-                hideLoading();
-                alert("Invalid PIN. Unable to edit preset.");
-                return;
-            }
-            
-            // PIN is valid, load the preset and prepare for editing
-            getPreset(id, 'community').then(data => {
+        // Use the withLoadingSpinner helper
+        withLoadingSpinner(async () => {
+            try {
+                // First check if PIN is valid
+                const response = await checkPin(id, pin);
+                if (!response || !response.result) {
+                    alert("Invalid PIN. Unable to edit preset.");
+                    return;
+                }
+                
+                // PIN is valid, load the preset and prepare for editing
+                const data = await getPreset(id, 'community');
                 if (!data) { 
-                    hideLoading();
                     alert('Error loading preset'); 
                     return;
                 }
@@ -918,30 +1433,36 @@ const openPresetsWindow = () =>{
                 modsCompatibility = preset.Compatibility;
                 modifiedArmorSpawnSettings = preset.ArmorSpawnSettings;
                 modifiedHelmetSpawnSettings = preset.HelmetsSettings;
-                document.getElementById('config_name').value = parentDiv.dataset.name;
+                document.getElementById('config_name').value = presetCard.dataset.name;
                 
                 // Store the preset ID and PIN for later use
                 localStorage.setItem('editingPresetId', id);
                 localStorage.setItem('editingPresetPin', pin);
                 
+                // Enable the update button
+                document.getElementById('btn_update_preset').disabled = false;
+                
                 contentEl.innerHTML = '';
                 oCategoryToEvent[currentCategory]();
                 
-                // Show notification that we're editing
-                alert("You are now editing the preset. Save changes using the 'Save Preset' option.");
+                // Hide the modal
+                const presetsModal = bootstrap.Modal.getInstance(document.getElementById('presetsModal'));
+                presetsModal.hide();
                 
-                document.body.removeChild(windEl);
-                hideLoading();
-                hideFreezeDiv();
-            });
+                // Show notification that we're editing
+                alert("You are now editing the preset. Save changes using the 'Update Current' option.");
+            } catch (error) {
+                console.error("Error editing preset:", error);
+                alert("Failed to edit preset: " + error.message);
+            }
         });
     };
 
     const onDeletePresetClick = function(e) {
         e.stopPropagation();
-        const parentDiv = e.target.closest('div[data-id]');
-        const id = parentDiv.dataset.id;
-        const name = parentDiv.dataset.name;
+        const presetCard = e.currentTarget.closest('.card');
+        const id = presetCard.dataset.id;
+        const name = presetCard.dataset.name;
         
         if (!confirm(`Are you sure you want to delete the preset "${name}"?`)) {
             return;
@@ -954,145 +1475,110 @@ const openPresetsWindow = () =>{
             return;
         }
         
-        showLoading();
-        deletePreset(id, pin).then(response => {
-            hideLoading();
-            if (response && response.result) {
-                alert("Preset deleted successfully");
-                parentDiv.remove(); // Remove from UI
-            } else {
-                alert("Failed to delete preset. Invalid PIN or server error.");
+        withLoadingSpinner(async () => {
+            try {
+                const response = await deletePreset(id, pin);
+                
+                if (response && response.result) {
+                    alert("Preset deleted successfully");
+                    
+                    // Remove from UI
+                    const colElement = presetCard.closest('.col-md-6');
+                    if (colElement) {
+                        colElement.remove();
+                    }
+                    
+                    // Check if there are no more presets
+                    const communityList = document.getElementById('communityPresetsList');
+                    if (communityList && communityList.children.length === 0) {
+                        communityList.innerHTML = '<div class="col-12 text-center text-muted py-3">No community presets available</div>';
+                    }
+                } else {
+                    alert("Failed to delete preset. Invalid PIN or server error.");
+                }
+            } catch (error) {
+                console.error("Error deleting preset:", error);
+                alert("Failed to delete preset: " + error.message);
             }
         });
     };
 
     const onSaveNewPresetClick = function() {
-        // Form for saving a new preset
-        const formHtml = `
-            <div class="save-preset-form">
-                <h3><i class="fas fa-save"></i> Save as New Preset</h3>
-                <div class="form-group">
-                    <label for="preset-name">Preset Name:</label>
-                    <input type="text" id="preset-name" value="${document.getElementById('config_name').value}">
-                </div>
-                <div class="form-group">
-                    <label for="preset-author">Author Name:</label>
-                    <input type="text" id="preset-author" value="">
-                </div>
-                <div class="form-group">
-                    <label for="preset-version">Version:</label>
-                    <input type="text" id="preset-version" value="1.0">
-                </div>
-                <div class="form-group">
-                    <label for="preset-pin">PIN (8 digits):</label>
-                    <input type="text" id="preset-pin" placeholder="For future editing/deleting">
-                </div>
-                <div class="form-group">
-                    <label for="preset-description">Description:</label>
-                    <textarea id="preset-description" rows="3"></textarea>
-                </div>
-                <div class="form-actions">
-                    <button id="btn-save-preset-submit" class="btn-primary"><i class="fas fa-check"></i> Save</button>
-                    <button id="btn-save-preset-cancel" class="btn-secondary"><i class="fas fa-times"></i> Cancel</button>
-                </div>
-            </div>
-        `;
+        // Hide the presets modal
+        const presetsModal = bootstrap.Modal.getInstance(document.getElementById('presetsModal'));
+        presetsModal.hide();
         
-        const saveFormDiv = document.createElement('div');
-        saveFormDiv.classList.add('save-preset-modal');
-        saveFormDiv.innerHTML = formHtml;
-        document.body.appendChild(saveFormDiv);
+        // Reset the form
+        const form = document.getElementById('savePresetForm');
+        form.classList.remove('was-validated');
+        document.getElementById('preset-name').value = document.getElementById('config_name').value || '';
+        document.getElementById('preset-author').value = '';
+        document.getElementById('preset-pin').value = '';
+        document.getElementById('preset-description').value = '';
         
-        // Handle form submit
-        document.getElementById('btn-save-preset-submit').addEventListener('click', function() {
-            const name = document.getElementById('preset-name').value.trim();
-            const author = document.getElementById('preset-author').value.trim();
-            const version = document.getElementById('preset-version').value.trim();
-            const pin = document.getElementById('preset-pin').value.trim();
-            const description = document.getElementById('preset-description').value.trim();
-            
-            if (!name) {
-                alert("Please enter a preset name");
-                return;
+        // Show the save preset modal
+        const savePresetModal = new bootstrap.Modal(document.getElementById('savePresetModal'));
+        savePresetModal.show();
+    };
+    
+    const onSavePresetSubmit = function() {
+        const form = document.getElementById('savePresetForm');
+        
+        // Validate the form
+        if (!form.checkValidity()) {
+            event.preventDefault();
+            event.stopPropagation();
+            form.classList.add('was-validated');
+            return;
+        }
+        
+        // Get form values
+        const name = document.getElementById('preset-name').value.trim();
+        const author = document.getElementById('preset-author').value.trim();
+        const version = document.getElementById('preset-version').value.trim();
+        const pin = document.getElementById('preset-pin').value.trim();
+        const description = document.getElementById('preset-description').value.trim();
+        
+        const presetData = {
+            name,
+            author,
+            version,
+            pin,
+            description,
+            data: {
+                WeaponSettings: modifiedWeaponSettings,
+                ArmorSettings: modifiedArmorSettings,
+                GrenadeSettings: modifiedGrenadeSettings,
+                AmmoSettings: modifiedAmmoByWeaponClass,
+                WeaponList: modifiedWeaponList,
+                DropConfigs: modifiedDropConfigs,
+                Compatibility: modsCompatibility,
+                ArmorSpawnSettings: modifiedArmorSpawnSettings,
+                HelmetsSettings: modifiedHelmetSpawnSettings
             }
-            
-            if (!author) {
-                alert("Please enter an author name");
-                return;
-            }
-            
-            if (!pin || pin.length !== 8 || !/^\d+$/.test(pin)) {
-                alert("Please enter a valid 8-digit PIN");
-                return;
-            }
-            
-            const presetData = {
-                name,
-                author,
-                version,
-                pin,
-                description,
-                data: {
-                    WeaponSettings: modifiedWeaponSettings,
-                    ArmorSettings: modifiedArmorSettings,
-                    GrenadeSettings: modifiedGrenadeSettings,
-                    AmmoSettings: modifiedAmmoByWeaponClass,
-                    WeaponList: modifiedWeaponList,
-                    DropConfigs: modifiedDropConfigs,
-                    Compatibility: modsCompatibility,
-                    ArmorSpawnSettings: modifiedArmorSpawnSettings,
-                    HelmetsSettings: modifiedHelmetSpawnSettings
-                }
-            };
-            
-            showLoading();
-            createPreset(presetData).then(response => {
-                hideLoading();
+        };
+        
+        withLoadingSpinner(async () => {
+            try {
+                const response = await createPreset(presetData);
+                
                 if (response && response.result) {
+                    // Hide the modal
+                    const savePresetModal = bootstrap.Modal.getInstance(document.getElementById('savePresetModal'));
+                    savePresetModal.hide();
+                    
+                    // Show success message
                     alert("Preset saved successfully!");
-                    document.body.removeChild(saveFormDiv);
                     
-                    // Optionally refresh the preset list
-                    const presetsBody = document.getElementById('presetsBody');
-                    const presetElement = document.createElement('div');
-                    presetElement.classList.add('preset-public', 'preset-item');
-                    presetElement.addEventListener('click', onPresetClick);
-                    presetElement.dataset.id = response.result;
-                    presetElement.dataset.type = 'community';
-                    presetElement.dataset.name = name;
-                    
-                    let cEl = `
-                        <div class="preset-name">${name}</div>
-                        <div class="preset-type">Community</div>
-                        <div class="preset-author">${author}</div>
-                        <div class="preset-version">${version}</div>
-                        <div class="preset-views">0</div>
-                        <div class="preset-actions">
-                            <button class="btn-edit" title="Edit"><i class="fas fa-edit"></i></button>
-                            <button class="btn-delete" title="Delete"><i class="fas fa-trash"></i></button>
-                        </div>
-                    `;
-                    presetElement.innerHTML = cEl;
-                    
-                    // Add event listeners to the new buttons
-                    setTimeout(() => {
-                        const editBtn = presetElement.querySelector('.btn-edit');
-                        const deleteBtn = presetElement.querySelector('.btn-delete');
-                        
-                        if (editBtn) editBtn.addEventListener('click', onEditPresetClick);
-                        if (deleteBtn) deleteBtn.addEventListener('click', onDeletePresetClick);
-                    }, 0);
-                    
-                    presetsBody.appendChild(presetElement);
+                    // Refresh the presets list by reopening the presets modal
+                    openPresetsWindow();
                 } else {
                     alert("Failed to save preset: " + (response?.error || "Unknown error"));
                 }
-            });
-        });
-        
-        // Handle cancel
-        document.getElementById('btn-save-preset-cancel').addEventListener('click', function() {
-            document.body.removeChild(saveFormDiv);
+            } catch (error) {
+                console.error("Error saving preset:", error);
+                alert("Failed to save preset: " + error.message);
+            }
         });
     };
 
@@ -1128,72 +1614,56 @@ const openPresetsWindow = () =>{
             }
         };
         
-        showLoading();
-        updatePreset(editingId, presetData).then(response => {
-            hideLoading();
-            if (response && response.result) {
-                alert("Preset updated successfully!");
+        withLoadingSpinner(async () => {
+            try {
+                const response = await updatePreset(editingId, presetData);
                 
-                // Clear editing state
-                localStorage.removeItem('editingPresetId');
-                localStorage.removeItem('editingPresetPin');
-            } else {
-                alert("Failed to update preset: " + (response?.error || "Unknown error"));
+                if (response && response.result) {
+                    alert("Preset updated successfully!");
+                    
+                    // Clear editing state
+                    localStorage.removeItem('editingPresetId');
+                    localStorage.removeItem('editingPresetPin');
+                    
+                    // Disable the update button
+                    document.getElementById('btn_update_preset').disabled = true;
+                    
+                    // Close the modal
+                    const presetsModal = bootstrap.Modal.getInstance(document.getElementById('presetsModal'));
+                    presetsModal.hide();
+                } else {
+                    alert("Failed to update preset: " + (response?.error || "Unknown error"));
+                }
+            } catch (error) {
+                console.error("Error updating preset:", error);
+                alert("Failed to update preset: " + error.message);
             }
         });
     };
 
-    showFreezeDiv();
-
-    let wind = `
-        <div id="presetsToolbar" class="preset-toolbar">
-            <h2><i class="fas fa-list"></i> Presets</h2>
-            <div class="preset-actions-main">
-                <button id="btn_save_new_preset" class="btn-primary"><i class="fas fa-plus"></i> Save as New</button>
-                <button id="btn_update_preset" class="btn-secondary" ${!localStorage.getItem('editingPresetId') ? 'disabled' : ''}><i class="fas fa-save"></i> Update Current</button>
-                <button id="btn_close_presets" class="btn-secondary"><i class="fas fa-times"></i> Close</button>
-            </div>
-        </div>
-        <div id="presetsBody" class="preset-body">
-            <div class="presets-section">
-                <h3><i class="fas fa-star"></i> Official Presets</h3>
-                <div id="officialPresetsList" class="presets-list"></div>
-            </div>
-            <div class="presets-section">
-                <h3><i class="fas fa-users"></i> Community Presets</h3>
-                <div id="communityPresetsList" class="presets-list"></div>
-            </div>
-        </div>
-    `;
-
-    let windEl = document.createElement('div');
-    windEl.classList.add('preset-window');
-    windEl.innerHTML = wind;
-    document.body.appendChild(windEl);
-
-    let closeButton = document.getElementById('btn_close_presets');
-    closeButton.addEventListener('click', ()=>{document.body.removeChild(windEl); hideFreezeDiv();});
+    // Setup event handlers for the modals
+    document.getElementById('btn_save_new_preset').addEventListener('click', onSaveNewPresetClick);
+    document.getElementById('btn_update_preset').addEventListener('click', onUpdatePresetClick);
+    document.getElementById('savePresetBtn').addEventListener('click', onSavePresetSubmit);
     
-    let saveNewButton = document.getElementById('btn_save_new_preset');
-    saveNewButton.addEventListener('click', onSaveNewPresetClick);
+    // Show the modal
+    const presetsModal = new bootstrap.Modal(document.getElementById('presetsModal'));
+    presetsModal.show();
     
-    let updateButton = document.getElementById('btn_update_preset');
-    updateButton.addEventListener('click', onUpdatePresetClick);
-
-    showLoading();
-    fetchHeaders().then(headers => {
-        hideLoading();
+    // Load presets data
+    try {
+        const headers = await fetchHeaders();
         
         if (!headers) {
             alert("Failed to load presets. Please check your connection and try again.");
             return;
         }
         
-        let officialPresets = headers.officialPresets || [];
-        let publicPresets = headers.publicPresets || [];
+        const officialPresets = headers.officialPresets || [];
+        const publicPresets = headers.publicPresets || [];
 
-        let officialList = document.getElementById('officialPresetsList');
-        let communityList = document.getElementById('communityPresetsList');
+            const officialList = document.getElementById('officialPresetsList');
+            const communityList = document.getElementById('communityPresetsList');
         
         // Clear any existing content
         officialList.innerHTML = '';
@@ -1201,62 +1671,101 @@ const openPresetsWindow = () =>{
         
         // Add official presets
         if (officialPresets.length === 0) {
-            officialList.innerHTML = '<div class="no-presets">No official presets available</div>';
+            officialList.innerHTML = '<div class="col-12 text-center text-muted py-3">No official presets available</div>';
         } else {
             for (let preset of officialPresets) {
-                let presetElement = document.createElement('div');
-                presetElement.classList.add('preset-official', 'preset-item');
-                presetElement.addEventListener('click', onPresetClick);
-                presetElement.dataset.id = preset._id;
-                presetElement.dataset.type = 'official';
-                presetElement.dataset.name = preset.name;
-                let cEl = `
-                    <div class="preset-name">${preset.name}</div>
-                    <div class="preset-type"><i class="fas fa-certificate"></i> Official</div>
-                    <div class="preset-version"><i class="fas fa-code-branch"></i> ${preset.version || 'v1.0'}</div>
-                    <div class="preset-views"><i class="fas fa-eye"></i> ${preset.views || 0}</div>
+                const col = document.createElement('div');
+                col.className = 'col-md-6 col-lg-4';
+                
+                col.innerHTML = `
+                    <div class="card h-100 border-primary border-opacity-25 card-preset card-preset-official" data-id="${preset._id}" data-type="official" data-name="${preset.name}">
+                        <div class="card-body">
+                            <h5 class="card-title">${preset.name}</h5>
+                            <div class="d-flex justify-content-between">
+                                <span class="badge bg-primary bg-opacity-75 text-dark">
+                                    <i class="fas fa-certificate me-1"></i>Official
+                                </span>
+                                <span class="text-muted small">
+                                    <i class="fas fa-code-branch me-1"></i>v${preset.version || '1.0'}
+                                </span>
+                            </div>
+                            <div class="mt-2 text-end">
+                                <span class="text-muted small">
+                                    <i class="fas fa-eye me-1"></i>${preset.views || 0} views
+                                </span>
+                            </div>
+                        </div>
+                    </div>
                 `;
-                presetElement.innerHTML = cEl;
-                officialList.appendChild(presetElement);
+                
+                // Add click event to load the preset
+                const presetCard = col.querySelector('.card-preset');
+                presetCard.addEventListener('click', onPresetClick);
+                
+                officialList.appendChild(col);
             }
         }
 
         // Add community presets
         if (publicPresets.length === 0) {
-            communityList.innerHTML = '<div class="no-presets">No community presets available</div>';
+            communityList.innerHTML = '<div class="col-12 text-center text-muted py-3">No community presets available</div>';
         } else {
             for (let preset of publicPresets) {
-                let presetElement = document.createElement('div');
-                presetElement.classList.add('preset-public', 'preset-item');
-                presetElement.addEventListener('click', onPresetClick);
-                presetElement.dataset.id = preset._id;
-                presetElement.dataset.type = 'community';
-                presetElement.dataset.name = preset.name;
-                let cEl = `
-                    <div class="preset-name">${preset.name}</div>
-                    <div class="preset-type"><i class="fas fa-users"></i> Community</div>
-                    <div class="preset-author"><i class="fas fa-user"></i> ${preset.author || 'Anonymous'}</div>
-                    <div class="preset-version"><i class="fas fa-code-branch"></i> ${preset.version || 'v1.0'}</div>
-                    <div class="preset-views"><i class="fas fa-eye"></i> ${preset.views || 0}</div>
-                    <div class="preset-actions">
-                        <button class="btn-edit" title="Edit"><i class="fas fa-edit"></i></button>
-                        <button class="btn-delete" title="Delete"><i class="fas fa-trash"></i></button>
+                const col = document.createElement('div');
+                col.className = 'col-md-6 col-lg-4';
+                
+                col.innerHTML = `
+                    <div class="card h-100 border-warning border-opacity-25 card-preset card-preset-community" data-id="${preset._id}" data-type="community" data-name="${preset.name}">
+                        <div class="card-body position-relative">
+                            <h5 class="card-title">${preset.name}</h5>
+                            <div class="d-flex justify-content-between">
+                                <span class="badge bg-warning bg-opacity-75 text-dark">
+                                    <i class="fas fa-users me-1"></i>Community
+                                </span>
+                                <span class="text-muted small">
+                                    <i class="fas fa-user me-1"></i>${preset.author || 'Anonymous'}
+                                </span>
+                            </div>
+                            <div class="mt-2 d-flex justify-content-between">
+                                <span class="text-muted small">
+                                    <i class="fas fa-code-branch me-1"></i>v${preset.version || '1.0'}
+                                </span>
+                                <span class="text-muted small">
+                                    <i class="fas fa-eye me-1"></i>${preset.views || 0} views
+                                </span>
+                            </div>
+                            <div class="position-absolute top-0 end-0 m-2">
+                                <button class="btn btn-sm btn-outline-primary btn-edit" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger btn-delete ms-1" title="Delete">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 `;
-                presetElement.innerHTML = cEl;
-                communityList.appendChild(presetElement);
                 
-                // Add event listeners to the buttons
-                const editBtn = presetElement.querySelector('.btn-edit');
-                const deleteBtn = presetElement.querySelector('.btn-delete');
+                // Add click event to load the preset
+                const presetCard = col.querySelector('.card-preset');
+                presetCard.addEventListener('click', onPresetClick);
                 
-                if (editBtn) editBtn.addEventListener('click', onEditPresetClick);
-                if (deleteBtn) deleteBtn.addEventListener('click', onDeletePresetClick);
+                // Add click events for edit and delete buttons
+                const editBtn = col.querySelector('.btn-edit');
+                editBtn.addEventListener('click', onEditPresetClick);
+                
+                const deleteBtn = col.querySelector('.btn-delete');
+                deleteBtn.addEventListener('click', onDeletePresetClick);
+                
+                communityList.appendChild(col);
             }
         }
-    });
+        
+    } catch (error) {
+        console.error("Error loading presets:", error);
+        alert("Failed to load presets: " + error.message);
+    }
 };
-
 
 let button = document.getElementById('btn_save');
 button.addEventListener('click', generateConfig);
@@ -1283,4 +1792,7 @@ button = document.getElementById('btn_info');
 button.addEventListener('click', showInfo);
 
 button = document.getElementById('btn_presets');
-button.addEventListener('click', openPresetsWindow);
+button.addEventListener('click', () => {
+    console.log('Presets button clicked');
+    withLoadingSpinner(openPresetsWindow);
+});

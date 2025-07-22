@@ -585,3 +585,347 @@ input.chance{
     color: #888;
     font-style: italic;
 }
+
+/* ========================================
+ * BOOTSTRAP OVERRIDES AND FIXES
+ * Merged from bootstrap-fixes.css
+ * ======================================== */
+
+/* Custom colors and variables */
+:root {
+  --bs-brown: #AE9672;
+  --bs-brown-dark: #997c5a;
+  --bs-brown-darker: #816842;
+}
+
+/* Brown background class for headers */
+.bg-brown {
+  background-color: var(--bs-brown) !important;
+}
+
+/* Brown text class */
+.text-brown {
+  color: var(--bs-brown) !important;
+}
+
+/* Button styling to match our custom colors */
+.btn-brown {
+  color: #fff;
+  background-color: var(--bs-brown);
+  border-color: var(--bs-brown-dark);
+}
+
+.btn-brown:hover {
+  color: #fff;
+  background-color: var(--bs-brown-dark);
+  border-color: var(--bs-brown-darker);
+}
+
+.btn-outline-brown {
+  color: var(--bs-brown);
+  border-color: var(--bs-brown);
+}
+
+.btn-outline-brown:hover {
+  color: #fff;
+  background-color: var(--bs-brown);
+  border-color: var(--bs-brown);
+}
+
+/* Bootstrap Layout Overrides */
+#canvas {
+  height: 100vh;
+  /* Use flexbox instead of CSS Grid */
+  display: flex !important;
+  grid-template-columns: unset !important;
+  grid-template-rows: unset !important;
+  width: 100% !important;
+}
+
+/* Ensure Bootstrap grid system works */
+.container-fluid {
+  width: 100% !important;
+  max-width: none !important;
+}
+
+/* Categories bar styling - Bootstrap overrides */
+#categories_bar {
+  background-color: #AE9672;
+  padding: 0;
+  /* Override original grid positioning */
+  grid-row: unset !important;
+  grid-column: unset !important;
+  flex-direction: row !important;
+  width: auto !important;
+}
+
+#categories_bar .category_item {
+  width: 45px;
+  height: 45px;
+  cursor: pointer;
+  display: block;
+  padding: 2px;
+}
+
+#categories_bar .category_item.active {
+  background-color: rgb(255, 255, 255);
+}
+
+/* Factions bar styling - Bootstrap overrides */
+#factions_bar {
+  background-color: #332208;
+  width: 45px !important;
+  padding: 0;
+  /* Override original grid positioning */
+  grid-column: unset !important;
+  flex-direction: column !important;
+  min-width: 45px !important;
+  max-width: 45px !important;
+  /* Ensure full height */
+  height: 100vh !important;
+  min-height: 100vh !important;
+}
+
+#factions_bar .faction_item {
+  width: 45px;
+  height: 45px;
+  cursor: pointer;
+  display: block;
+}
+
+#factions_bar .faction_item.active {
+  background-color: #6b4d21;
+}
+
+/* Toolbar styling - Bootstrap overrides */
+#toolbar {
+  background-color: #AE9672;
+  padding: 8px 12px;
+  min-height: 45px;
+  /* Override original grid positioning */
+  grid-row: unset !important;
+  flex-direction: row !important;
+  width: auto !important;
+}
+
+/* Content area - Bootstrap overrides */
+#content {
+  background-color: #f8f9fa;
+  /* Override original grid positioning */
+  grid-column: unset !important;
+  width: 100% !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  #toolbar .btn-group {
+    flex-wrap: wrap;
+  }
+  
+  #toolbar .input-group {
+    max-width: 150px !important;
+    margin-bottom: 4px;
+  }
+  
+  #categories_bar {
+    flex-wrap: wrap;
+  }
+  
+  #categories_bar .category_item,
+  #factions_bar .faction_item {
+    width: 35px;
+    height: 35px;
+  }
+}
+
+/* Fix for preset window container - legacy support */
+.preset-window {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 80%;
+  max-width: 900px;
+  height: 80%;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+  z-index: 1050; /* Higher than Bootstrap modal backdrop */
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Preset toolbar fixes - legacy support */
+.preset-toolbar {
+  background-color: var(--bs-brown);
+  color: white;
+  padding: 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #ddd;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Preset body content - legacy support */
+.preset-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+  background-color: #f8f8f8;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Fix for preset sections - legacy support */
+.presets-section {
+  width: 100%;
+  margin-bottom: 20px;
+  box-sizing: border-box;
+}
+
+/* Fix for preset items - legacy support */
+.preset-item {
+  position: relative;
+  padding: 15px;
+  margin-bottom: 10px;
+  border-radius: 5px;
+  transition: all 0.2s;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Fix for presets list - legacy support */
+.presets-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-gap: 10px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Fix for edit/delete buttons - legacy support */
+.preset-actions {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 10;
+}
+
+.preset-actions button {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: none;
+  background-color: #f0f0f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Button styling to match Bootstrap but keep your custom colors */
+.btn-primary {
+  background-color: var(--bs-brown);
+  border-color: var(--bs-brown-dark);
+}
+
+.btn-primary:hover {
+  background-color: var(--bs-brown-dark);
+  border-color: var(--bs-brown-darker);
+}
+
+/* Save preset form styling - legacy support */
+.save-preset-modal {
+  z-index: 1060; /* Higher than the preset window */
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+}
+
+/* Fix for preset name and other content - legacy support */
+.preset-name {
+  width: 100%;
+  text-align: left;
+  margin-bottom: 10px;
+  grid-column: 1/3 !important;
+}
+
+/* Fix for loading animation and backdrop */
+.loading-animation {
+  z-index: 2000;
+}
+
+.freezeDiv {
+  z-index: 1040;
+}
+
+/* Loading spinner */
+#loadingSpinner {
+  z-index: 9999;
+}
+
+.loading-spinner {
+  width: 3rem;
+  height: 3rem;
+}
+
+/* Bootstrap card enhancements */
+.card-preset {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
+}
+
+.card-preset:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Official preset card styling */
+.card-preset-official {
+  border-left: 4px solid var(--bs-primary);
+}
+
+/* Community preset card styling */
+.card-preset-community {
+  border-left: 4px solid var(--bs-warning);
+}
+
+/* Preset action buttons on hover */
+.preset-card .preset-actions {
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.preset-card:hover .preset-actions {
+  opacity: 1;
+}
+
+/* Validation styles for form inputs */
+.form-control.is-invalid:focus {
+  box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25);
+}
+
+.form-control.is-valid:focus {
+  box-shadow: 0 0 0 0.25rem rgba(25, 135, 84, 0.25);
+}
+
+/* Custom scrollbar for preset lists */
+.modal-body::-webkit-scrollbar {
+  width: 8px;
+}
+
+.modal-body::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+.modal-body::-webkit-scrollbar-thumb {
+  background: #ddd;
+  border-radius: 10px;
+}
+
+.modal-body::-webkit-scrollbar-thumb:hover {
+  background: #ccc;
+}
