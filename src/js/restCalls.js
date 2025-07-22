@@ -1,37 +1,57 @@
 const RESTUrl = `https://${import.meta.env.VITE_RESTUrl}`;
 
-export async function fetchHeaders() {
+// Helper function for fetch calls to reduce code duplication
+async function fetchData(url, options = {}) {
     try {
-        const response = await fetch(`${RESTUrl}/headers`, {
+        const defaultOptions = {
             headers: {
                 'Accept': 'application/json',
+                'Content-Type': 'application/json'
             },
-        });
-
+        };
+        
+        const response = await fetch(url, { ...defaultOptions, ...options });
+        
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
-        const headers = await response.json();
-        return headers;
+        
+        return await response.json();
     } catch (error) {
-        console.error('Error fetching headers:', error);
+        console.error(`Error fetching from ${url}:`, error);
+        return { error: error.message };
     }
 }
 
-export async function getPreset (id, type) {
-    try {
-        const response = await fetch(`${RESTUrl}/preset/${type}/${id}`, {
-            headers: {
-                'Accept': 'application/json',
-            },
-        });
+export async function fetchHeaders() {
+    return fetchData(`${RESTUrl}/headers`);
+}
 
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data = await response.json();
-        return data;
-    } catch (error) {
-        console.error('Error fetching preset:', error);
-    }
+export async function getPreset(id, type) {
+    return fetchData(`${RESTUrl}/preset/${type}/${id}`);
+}
+
+export async function checkPin(id, pin) {
+    return fetchData(`${RESTUrl}/checkPin/${id}/${pin}`);
+}
+
+export async function createPreset(presetData) {
+    return fetchData(`${RESTUrl}/create`, {
+        method: 'POST',
+        body: JSON.stringify(presetData)
+    });
+}
+
+export async function updatePreset(id, presetData) {
+    return fetchData(`${RESTUrl}/update/${id}`, {
+        method: 'POST',
+        body: JSON.stringify(presetData)
+    });
+}
+
+export async function deletePreset(id, pin) {
+    return fetchData(`${RESTUrl}/delete/${id}`, {
+        method: 'POST',
+        body: JSON.stringify({ pin })
+    });
 }

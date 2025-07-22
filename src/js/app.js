@@ -1,6 +1,6 @@
 import { generateConfig } from './fileStreamGenerator.js';
 import { showFreezeDiv, hideFreezeDiv, showLoading, hideLoading} from './utils.js';
-import { fetchHeaders, getPreset } from './restCalls.js';
+import { fetchHeaders, getPreset, checkPin, createPreset, updatePreset, deletePreset } from './restCalls.js';
 
 /*ugliest code that I wrote*/
 import * as configs from './configs.js'; 
@@ -878,14 +878,292 @@ const openPresetsWindow = () =>{
         });
     };
 
+    const onEditPresetClick = function(e) {
+        e.stopPropagation();
+        const parentDiv = e.target.closest('div[data-id]');
+        const id = parentDiv.dataset.id;
+        
+        // Show pin prompt
+        const pin = prompt("Enter the 8-digit PIN to edit this preset:", "");
+        if (!pin || pin.length !== 8 || !/^\d+$/.test(pin)) {
+            alert("Please enter a valid 8-digit PIN");
+            return;
+        }
+        
+        // First check if PIN is valid
+        showLoading();
+        checkPin(id, pin).then(response => {
+            if (!response || !response.result) {
+                hideLoading();
+                alert("Invalid PIN. Unable to edit preset.");
+                return;
+            }
+            
+            // PIN is valid, load the preset and prepare for editing
+            getPreset(id, 'community').then(data => {
+                if (!data) { 
+                    hideLoading();
+                    alert('Error loading preset'); 
+                    return;
+                }
+                
+                // Load preset data
+                let preset = data.data;
+                modifiedWeaponSettings = preset.WeaponSettings;
+                modifiedArmorSettings = preset.ArmorSettings;
+                modifiedGrenadeSettings = preset.GrenadeSettings;
+                modifiedAmmoByWeaponClass = preset.AmmoSettings;
+                modifiedWeaponList = preset.WeaponList;
+                modifiedDropConfigs = preset.DropConfigs;
+                modsCompatibility = preset.Compatibility;
+                modifiedArmorSpawnSettings = preset.ArmorSpawnSettings;
+                modifiedHelmetSpawnSettings = preset.HelmetsSettings;
+                document.getElementById('config_name').value = parentDiv.dataset.name;
+                
+                // Store the preset ID and PIN for later use
+                localStorage.setItem('editingPresetId', id);
+                localStorage.setItem('editingPresetPin', pin);
+                
+                contentEl.innerHTML = '';
+                oCategoryToEvent[currentCategory]();
+                
+                // Show notification that we're editing
+                alert("You are now editing the preset. Save changes using the 'Save Preset' option.");
+                
+                document.body.removeChild(windEl);
+                hideLoading();
+                hideFreezeDiv();
+            });
+        });
+    };
+
+    const onDeletePresetClick = function(e) {
+        e.stopPropagation();
+        const parentDiv = e.target.closest('div[data-id]');
+        const id = parentDiv.dataset.id;
+        const name = parentDiv.dataset.name;
+        
+        if (!confirm(`Are you sure you want to delete the preset "${name}"?`)) {
+            return;
+        }
+        
+        // Show pin prompt
+        const pin = prompt("Enter the 8-digit PIN to delete this preset:", "");
+        if (!pin || pin.length !== 8 || !/^\d+$/.test(pin)) {
+            alert("Please enter a valid 8-digit PIN");
+            return;
+        }
+        
+        showLoading();
+        deletePreset(id, pin).then(response => {
+            hideLoading();
+            if (response && response.result) {
+                alert("Preset deleted successfully");
+                parentDiv.remove(); // Remove from UI
+            } else {
+                alert("Failed to delete preset. Invalid PIN or server error.");
+            }
+        });
+    };
+
+    const onSaveNewPresetClick = function() {
+        // Form for saving a new preset
+        const formHtml = `
+            <div class="save-preset-form">
+                <h3><i class="fas fa-save"></i> Save as New Preset</h3>
+                <div class="form-group">
+                    <label for="preset-name">Preset Name:</label>
+                    <input type="text" id="preset-name" value="${document.getElementById('config_name').value}">
+                </div>
+                <div class="form-group">
+                    <label for="preset-author">Author Name:</label>
+                    <input type="text" id="preset-author" value="">
+                </div>
+                <div class="form-group">
+                    <label for="preset-version">Version:</label>
+                    <input type="text" id="preset-version" value="1.0">
+                </div>
+                <div class="form-group">
+                    <label for="preset-pin">PIN (8 digits):</label>
+                    <input type="text" id="preset-pin" placeholder="For future editing/deleting">
+                </div>
+                <div class="form-group">
+                    <label for="preset-description">Description:</label>
+                    <textarea id="preset-description" rows="3"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button id="btn-save-preset-submit" class="btn-primary"><i class="fas fa-check"></i> Save</button>
+                    <button id="btn-save-preset-cancel" class="btn-secondary"><i class="fas fa-times"></i> Cancel</button>
+                </div>
+            </div>
+        `;
+        
+        const saveFormDiv = document.createElement('div');
+        saveFormDiv.classList.add('save-preset-modal');
+        saveFormDiv.innerHTML = formHtml;
+        document.body.appendChild(saveFormDiv);
+        
+        // Handle form submit
+        document.getElementById('btn-save-preset-submit').addEventListener('click', function() {
+            const name = document.getElementById('preset-name').value.trim();
+            const author = document.getElementById('preset-author').value.trim();
+            const version = document.getElementById('preset-version').value.trim();
+            const pin = document.getElementById('preset-pin').value.trim();
+            const description = document.getElementById('preset-description').value.trim();
+            
+            if (!name) {
+                alert("Please enter a preset name");
+                return;
+            }
+            
+            if (!author) {
+                alert("Please enter an author name");
+                return;
+            }
+            
+            if (!pin || pin.length !== 8 || !/^\d+$/.test(pin)) {
+                alert("Please enter a valid 8-digit PIN");
+                return;
+            }
+            
+            const presetData = {
+                name,
+                author,
+                version,
+                pin,
+                description,
+                data: {
+                    WeaponSettings: modifiedWeaponSettings,
+                    ArmorSettings: modifiedArmorSettings,
+                    GrenadeSettings: modifiedGrenadeSettings,
+                    AmmoSettings: modifiedAmmoByWeaponClass,
+                    WeaponList: modifiedWeaponList,
+                    DropConfigs: modifiedDropConfigs,
+                    Compatibility: modsCompatibility,
+                    ArmorSpawnSettings: modifiedArmorSpawnSettings,
+                    HelmetsSettings: modifiedHelmetSpawnSettings
+                }
+            };
+            
+            showLoading();
+            createPreset(presetData).then(response => {
+                hideLoading();
+                if (response && response.result) {
+                    alert("Preset saved successfully!");
+                    document.body.removeChild(saveFormDiv);
+                    
+                    // Optionally refresh the preset list
+                    const presetsBody = document.getElementById('presetsBody');
+                    const presetElement = document.createElement('div');
+                    presetElement.classList.add('preset-public', 'preset-item');
+                    presetElement.addEventListener('click', onPresetClick);
+                    presetElement.dataset.id = response.result;
+                    presetElement.dataset.type = 'community';
+                    presetElement.dataset.name = name;
+                    
+                    let cEl = `
+                        <div class="preset-name">${name}</div>
+                        <div class="preset-type">Community</div>
+                        <div class="preset-author">${author}</div>
+                        <div class="preset-version">${version}</div>
+                        <div class="preset-views">0</div>
+                        <div class="preset-actions">
+                            <button class="btn-edit" title="Edit"><i class="fas fa-edit"></i></button>
+                            <button class="btn-delete" title="Delete"><i class="fas fa-trash"></i></button>
+                        </div>
+                    `;
+                    presetElement.innerHTML = cEl;
+                    
+                    // Add event listeners to the new buttons
+                    setTimeout(() => {
+                        const editBtn = presetElement.querySelector('.btn-edit');
+                        const deleteBtn = presetElement.querySelector('.btn-delete');
+                        
+                        if (editBtn) editBtn.addEventListener('click', onEditPresetClick);
+                        if (deleteBtn) deleteBtn.addEventListener('click', onDeletePresetClick);
+                    }, 0);
+                    
+                    presetsBody.appendChild(presetElement);
+                } else {
+                    alert("Failed to save preset: " + (response?.error || "Unknown error"));
+                }
+            });
+        });
+        
+        // Handle cancel
+        document.getElementById('btn-save-preset-cancel').addEventListener('click', function() {
+            document.body.removeChild(saveFormDiv);
+        });
+    };
+
+    const onUpdatePresetClick = function() {
+        const editingId = localStorage.getItem('editingPresetId');
+        const editingPin = localStorage.getItem('editingPresetPin');
+        
+        if (!editingId || !editingPin) {
+            alert("No preset is currently being edited");
+            return;
+        }
+        
+        const name = document.getElementById('config_name').value.trim();
+        
+        if (!name) {
+            alert("Please enter a preset name");
+            return;
+        }
+        
+        const presetData = {
+            name,
+            pin: editingPin,
+            data: {
+                WeaponSettings: modifiedWeaponSettings,
+                ArmorSettings: modifiedArmorSettings,
+                GrenadeSettings: modifiedGrenadeSettings,
+                AmmoSettings: modifiedAmmoByWeaponClass,
+                WeaponList: modifiedWeaponList,
+                DropConfigs: modifiedDropConfigs,
+                Compatibility: modsCompatibility,
+                ArmorSpawnSettings: modifiedArmorSpawnSettings,
+                HelmetsSettings: modifiedHelmetSpawnSettings
+            }
+        };
+        
+        showLoading();
+        updatePreset(editingId, presetData).then(response => {
+            hideLoading();
+            if (response && response.result) {
+                alert("Preset updated successfully!");
+                
+                // Clear editing state
+                localStorage.removeItem('editingPresetId');
+                localStorage.removeItem('editingPresetPin');
+            } else {
+                alert("Failed to update preset: " + (response?.error || "Unknown error"));
+            }
+        });
+    };
+
     showFreezeDiv();
 
     let wind = `
         <div id="presetsToolbar" class="preset-toolbar">
-            <h2>Presets</h2>
-            <button id="btn_close_presets">Close</button>
+            <h2><i class="fas fa-list"></i> Presets</h2>
+            <div class="preset-actions-main">
+                <button id="btn_save_new_preset" class="btn-primary"><i class="fas fa-plus"></i> Save as New</button>
+                <button id="btn_update_preset" class="btn-secondary" ${!localStorage.getItem('editingPresetId') ? 'disabled' : ''}><i class="fas fa-save"></i> Update Current</button>
+                <button id="btn_close_presets" class="btn-secondary"><i class="fas fa-times"></i> Close</button>
+            </div>
         </div>
-        <div id="presetsBody" class="preset-body"></div>
+        <div id="presetsBody" class="preset-body">
+            <div class="presets-section">
+                <h3><i class="fas fa-star"></i> Official Presets</h3>
+                <div id="officialPresetsList" class="presets-list"></div>
+            </div>
+            <div class="presets-section">
+                <h3><i class="fas fa-users"></i> Community Presets</h3>
+                <div id="communityPresetsList" class="presets-list"></div>
+            </div>
+        </div>
     `;
 
     let windEl = document.createElement('div');
@@ -895,49 +1173,86 @@ const openPresetsWindow = () =>{
 
     let closeButton = document.getElementById('btn_close_presets');
     closeButton.addEventListener('click', ()=>{document.body.removeChild(windEl); hideFreezeDiv();});
+    
+    let saveNewButton = document.getElementById('btn_save_new_preset');
+    saveNewButton.addEventListener('click', onSaveNewPresetClick);
+    
+    let updateButton = document.getElementById('btn_update_preset');
+    updateButton.addEventListener('click', onUpdatePresetClick);
 
     showLoading();
     fetchHeaders().then(headers => {
         hideLoading();
-        console.log(headers);
-        let officialPresets = headers.officialPresets;
-        let publicPresets = headers.publicPresets;
+        
+        if (!headers) {
+            alert("Failed to load presets. Please check your connection and try again.");
+            return;
+        }
+        
+        let officialPresets = headers.officialPresets || [];
+        let publicPresets = headers.publicPresets || [];
 
-        let presetsBody = document.getElementById('presetsBody');
-        for (let preset of officialPresets) {
-            let presetElement = document.createElement('div');
-            presetElement.classList.add('preset-official', 'preset-item');
-            presetElement.addEventListener('click', onPresetClick);
-            presetElement.dataset.id = preset._id;
-            presetElement.dataset.type = 'official';
-            presetElement.dataset.name = preset.name;
-            let cEl = `
-                <div class="preset-name">${preset.name}</div>
-                <div class="preset-type">Official</div>
-                <div class="preset-version">${preset.version}</div>
-                <div class="preset-views">${preset.views}</div>
-            `;
-            presetElement.innerHTML = cEl;
-            presetsBody.appendChild(presetElement);
+        let officialList = document.getElementById('officialPresetsList');
+        let communityList = document.getElementById('communityPresetsList');
+        
+        // Clear any existing content
+        officialList.innerHTML = '';
+        communityList.innerHTML = '';
+        
+        // Add official presets
+        if (officialPresets.length === 0) {
+            officialList.innerHTML = '<div class="no-presets">No official presets available</div>';
+        } else {
+            for (let preset of officialPresets) {
+                let presetElement = document.createElement('div');
+                presetElement.classList.add('preset-official', 'preset-item');
+                presetElement.addEventListener('click', onPresetClick);
+                presetElement.dataset.id = preset._id;
+                presetElement.dataset.type = 'official';
+                presetElement.dataset.name = preset.name;
+                let cEl = `
+                    <div class="preset-name">${preset.name}</div>
+                    <div class="preset-type"><i class="fas fa-certificate"></i> Official</div>
+                    <div class="preset-version"><i class="fas fa-code-branch"></i> ${preset.version || 'v1.0'}</div>
+                    <div class="preset-views"><i class="fas fa-eye"></i> ${preset.views || 0}</div>
+                `;
+                presetElement.innerHTML = cEl;
+                officialList.appendChild(presetElement);
+            }
         }
 
-        for (let preset of publicPresets) {
-            let presetElement = document.createElement('div');
-            presetElement.classList.add('preset-public', 'preset-item');
-            presetElement.addEventListener('click', onPresetClick);
-            presetElement.dataset.id = preset._id;
-            presetElement.dataset.type = 'community';
-            presetElement.dataset.name = preset.name;
-            let cEl = `
-                <div class="preset-name">${preset.name}</div>
-                <div class="preset-type">Community</div>
-                <div class="preset-author">${preset.author}</div>
-                <div class="preset-version">${preset.version}</div>
-                <div class="preset-views">${preset.views}</div>
+        // Add community presets
+        if (publicPresets.length === 0) {
+            communityList.innerHTML = '<div class="no-presets">No community presets available</div>';
+        } else {
+            for (let preset of publicPresets) {
+                let presetElement = document.createElement('div');
+                presetElement.classList.add('preset-public', 'preset-item');
+                presetElement.addEventListener('click', onPresetClick);
+                presetElement.dataset.id = preset._id;
+                presetElement.dataset.type = 'community';
+                presetElement.dataset.name = preset.name;
+                let cEl = `
+                    <div class="preset-name">${preset.name}</div>
+                    <div class="preset-type"><i class="fas fa-users"></i> Community</div>
+                    <div class="preset-author"><i class="fas fa-user"></i> ${preset.author || 'Anonymous'}</div>
+                    <div class="preset-version"><i class="fas fa-code-branch"></i> ${preset.version || 'v1.0'}</div>
+                    <div class="preset-views"><i class="fas fa-eye"></i> ${preset.views || 0}</div>
+                    <div class="preset-actions">
+                        <button class="btn-edit" title="Edit"><i class="fas fa-edit"></i></button>
+                        <button class="btn-delete" title="Delete"><i class="fas fa-trash"></i></button>
+                    </div>
+                `;
+                presetElement.innerHTML = cEl;
+                communityList.appendChild(presetElement);
                 
-            `;
-            presetElement.innerHTML = cEl;
-            presetsBody.appendChild(presetElement);
+                // Add event listeners to the buttons
+                const editBtn = presetElement.querySelector('.btn-edit');
+                const deleteBtn = presetElement.querySelector('.btn-delete');
+                
+                if (editBtn) editBtn.addEventListener('click', onEditPresetClick);
+                if (deleteBtn) deleteBtn.addEventListener('click', onDeletePresetClick);
+            }
         }
     });
 };
