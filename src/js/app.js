@@ -7,7 +7,7 @@ import { chancesController } from './chances.js';
 import * as configs from './configs.js'; 
 import { deepCopy } from './utils.js';
 import { createModal, createElement, createCardHeader, createFormInput, createAlert, escapeHtml, setTextContent, clearContent } from './utils/dom.js';
-import { validateNumber, validatePercentage, validateConfigName, validatePin, validateString } from './utils/validation.js';
+import { validateNumber, validatePercentage, validateConfigName, validatePin, validateString, addInputValidation } from './utils/validation.js';
 
 
 // End of bootstrap fixes
@@ -146,50 +146,11 @@ const showPrimarySettings = () => {
     const maxInput = maxConditionCol.querySelector('input');
     
     if (minInput) {
-        minInput.addEventListener('input', function() {
-            const validation = validateNumber(this.value, 0, 100);
-            if (!validation.isValid) {
-                this.classList.add('is-invalid');
-                // Create or update feedback
-                let feedback = this.parentNode.querySelector('.invalid-feedback');
-                if (!feedback) {
-                    feedback = createElement('div', {
-                        className: 'invalid-feedback'
-                    });
-                    this.parentNode.appendChild(feedback);
-                }
-                feedback.textContent = validation.error;
-            } else {
-                this.classList.remove('is-invalid');
-                const feedback = this.parentNode.querySelector('.invalid-feedback');
-                if (feedback) {
-                    feedback.remove();
-                }
-            }
-        });
+        addInputValidation(minInput, (value) => validateNumber(value, 0, 100));
     }
     
     if (maxInput) {
-        maxInput.addEventListener('input', function() {
-            const validation = validateNumber(this.value, 0, 100);
-            if (!validation.isValid) {
-                this.classList.add('is-invalid');
-                let feedback = this.parentNode.querySelector('.invalid-feedback');
-                if (!feedback) {
-                    feedback = createElement('div', {
-                        className: 'invalid-feedback'
-                    });
-                    this.parentNode.appendChild(feedback);
-                }
-                feedback.textContent = validation.error;
-            } else {
-                this.classList.remove('is-invalid');
-                const feedback = this.parentNode.querySelector('.invalid-feedback');
-                if (feedback) {
-                    feedback.remove();
-                }
-            }
-        });
+        addInputValidation(maxInput, (value) => validateNumber(value, 0, 100));
     }
     
     globalCard.appendChild(cardHeader);
@@ -302,31 +263,11 @@ const showPistols = ()=>{
         pistolSpawnChanceInput.min = '0';
         pistolSpawnChanceInput.max = '100';
 
-        // Add real-time validation
-        pistolSpawnChanceInput.addEventListener('input', function() {
-            const validation = validatePercentage(this.value);
-            if (validation.isValid) {
-                this.classList.remove('is-invalid');
-                this.classList.add('is-valid');
-                this.title = '';
-            } else {
-                this.classList.remove('is-valid');
-                this.classList.add('is-invalid');
-                this.title = validation.error;
-            }
-        });
-
-        pistolSpawnChanceInput.addEventListener('change', function(e) {
-            const validation = validatePercentage(e.target.value);
-            if (validation.isValid) {
-                modifiedPistolSpawnChance = validation.sanitizedValue;
-            } else {
-                // Reset to previous valid value
-                e.target.value = modifiedPistolSpawnChance;
-                e.target.classList.add('is-invalid');
-                e.target.title = validation.error;
-            }
-        });
+        // Add validation with change handler for data updates
+        addInputValidation(pistolSpawnChanceInput, validatePercentage, 
+            (sanitizedValue) => {
+                modifiedPistolSpawnChance = sanitizedValue;
+            }, true);
 
         pistolSpawnChance.appendChild(pistolSpawnChanceInput);
 
@@ -749,82 +690,25 @@ const subscribeFileSettingsEvents = () => {
     });
 
     let armorChance = document.getElementById('armor_chance');
-    // Add real-time validation
-    armorChance.addEventListener('input', function() {
-        const validation = validatePercentage(this.value);
-        if (validation.isValid) {
-            this.classList.remove('is-invalid');
-            this.classList.add('is-valid');
-            this.title = '';
-        } else {
-            this.classList.remove('is-valid');
-            this.classList.add('is-invalid');
-            this.title = validation.error;
-        }
-    });
-    armorChance.addEventListener('change', function(e) {
-        const validation = validatePercentage(e.target.value);
-        if (validation.isValid) {
-            modifiedDropConfigs.nLootChance = validation.sanitizedValue;
-            e.target.classList.remove('is-invalid');
-            e.target.classList.add('is-valid');
-        } else {
-            e.target.classList.add('is-invalid');
-            e.target.title = validation.error;
-        }
-    });
+    // Add validation with change handler for data updates
+    addInputValidation(armorChance, validatePercentage, 
+        (sanitizedValue) => {
+            modifiedDropConfigs.nLootChance = sanitizedValue;
+        }, true);
 
     let minCondition = document.getElementById('min_condition');
-    // Add real-time validation
-    minCondition.addEventListener('input', function() {
-        const validation = validatePercentage(this.value);
-        if (validation.isValid) {
-            this.classList.remove('is-invalid');
-            this.classList.add('is-valid');
-            this.title = '';
-        } else {
-            this.classList.remove('is-valid');
-            this.classList.add('is-invalid');
-            this.title = validation.error;
-        }
-    });
-    minCondition.addEventListener('change', function(e) {
-        const validation = validatePercentage(e.target.value);
-        if (validation.isValid) {
-            modifiedDropConfigs.nMinDurability = validation.sanitizedValue;
-            e.target.classList.remove('is-invalid');
-            e.target.classList.add('is-valid');
-        } else {
-            e.target.classList.add('is-invalid');
-            e.target.title = validation.error;
-        }
-    });
+    // Add validation with change handler for data updates
+    addInputValidation(minCondition, validatePercentage, 
+        (sanitizedValue) => {
+            modifiedDropConfigs.nMinDurability = sanitizedValue;
+        }, true);
 
     let maxCondition = document.getElementById('max_condition');
-    // Add real-time validation
-    maxCondition.addEventListener('input', function() {
-        const validation = validatePercentage(this.value);
-        if (validation.isValid) {
-            this.classList.remove('is-invalid');
-            this.classList.add('is-valid');
-            this.title = '';
-        } else {
-            this.classList.remove('is-valid');
-            this.classList.add('is-invalid');
-            this.title = validation.error;
-        }
-    });
-    maxCondition.addEventListener('change', function(e) {
-        const validation = validatePercentage(e.target.value);
-        if (validation.isValid) {
-            modifiedDropConfigs.nMaxDurability = validation.sanitizedValue;
-            e.target.classList.remove('is-invalid');
-            e.target.classList.add('is-valid');
-        } else {
-            e.target.classList.add('is-invalid');
-            e.target.title = validation.error;
-        }
-    });
+    // Add validation with change handler for data updates
+    addInputValidation(maxCondition, validatePercentage, 
+        (sanitizedValue) => {
+            modifiedDropConfigs.nMaxDurability = sanitizedValue;
+        }, true);
 };
 
 const createMessageBox = (wind, contentElement) => {
@@ -1334,7 +1218,7 @@ const openPresetsWindow = async () => {
         // Additional validation beyond HTML5 validation
         const nameValidation = validateConfigName(name);
         if (!nameValidation.isValid) {
-            document.getElementById('preset-name').classList.add('is-invalid');
+            document.getElementById('preset-name').classList.add('validation-error');
             document.getElementById('preset-name').title = nameValidation.error;
             alert(`Invalid preset name: ${nameValidation.error}`);
             return;
@@ -1342,7 +1226,7 @@ const openPresetsWindow = async () => {
         
         const authorValidation = validateString(author, { minLength: 1, maxLength: 30, allowEmpty: false });
         if (!authorValidation.isValid) {
-            document.getElementById('preset-author').classList.add('is-invalid');
+            document.getElementById('preset-author').classList.add('validation-error');
             document.getElementById('preset-author').title = authorValidation.error;
             alert(`Invalid author name: ${authorValidation.error}`);
             return;
@@ -1350,7 +1234,7 @@ const openPresetsWindow = async () => {
         
         const pinValidation = validatePin(pin);
         if (!pinValidation.isValid) {
-            document.getElementById('preset-pin').classList.add('is-invalid');
+            document.getElementById('preset-pin').classList.add('validation-error');
             document.getElementById('preset-pin').title = pinValidation.error;
             alert(`Invalid PIN: ${pinValidation.error}`);
             return;
@@ -1570,28 +1454,5 @@ button.addEventListener('click', () => {
 // Add validation to the main config name input
 const configNameInput = document.getElementById('config_name');
 if (configNameInput) {
-    configNameInput.addEventListener('input', function() {
-        const validation = validateConfigName(this.value);
-        if (validation.isValid) {
-            this.classList.remove('is-invalid');
-            this.classList.add('is-valid');
-            this.title = '';
-        } else {
-            this.classList.remove('is-valid');
-            this.classList.add('is-invalid');
-            this.title = validation.error;
-        }
-    });
-    
-    configNameInput.addEventListener('change', function(e) {
-        const validation = validateConfigName(e.target.value);
-        if (validation.isValid) {
-            e.target.value = validation.sanitizedValue;
-            e.target.classList.remove('is-invalid');
-            e.target.classList.add('is-valid');
-        } else {
-            e.target.classList.add('is-invalid');
-            e.target.title = validation.error;
-        }
-    });
+    addInputValidation(configNameInput, validateConfigName, null, true);
 }

@@ -276,3 +276,51 @@ export function validateGameConfig(config) {
     
     return result;
 }
+
+/**
+ * Helper function to handle validation UI feedback consistently
+ * @param {HTMLElement} input - The input element to validate
+ * @param {Object} validation - The validation result object
+ * @param {boolean} showSuccess - Whether to show success state (default: false)
+ */
+export function applyValidationUI(input, validation, showSuccess = false) {
+    // Remove all validation classes first
+    input.classList.remove('validation-error', 'validation-success');
+    
+    // Remove any existing error tooltip
+    input.removeAttribute('title');
+    
+    if (validation.isValid) {
+        if (showSuccess) {
+            input.classList.add('validation-success');
+        }
+    } else {
+        input.classList.add('validation-error');
+        input.title = validation.error;
+    }
+}
+
+/**
+ * Creates event listeners for real-time validation with consistent UI feedback
+ * @param {HTMLElement} input - The input element
+ * @param {Function} validationFunction - The validation function to use
+ * @param {Function} onValidChange - Callback when valid value changes (optional)
+ * @param {boolean} showSuccess - Whether to show success state (default: false)
+ */
+export function addInputValidation(input, validationFunction, onValidChange = null, showSuccess = false) {
+    // Real-time validation on input
+    input.addEventListener('input', function() {
+        const validation = validationFunction(this.value);
+        applyValidationUI(this, validation, showSuccess);
+    });
+    
+    // Final validation on change
+    input.addEventListener('change', function(e) {
+        const validation = validationFunction(e.target.value);
+        applyValidationUI(e.target, validation, showSuccess);
+        
+        if (validation.isValid && onValidChange) {
+            onValidChange(validation.sanitizedValue);
+        }
+    });
+}

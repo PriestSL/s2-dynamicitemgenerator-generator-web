@@ -1,6 +1,6 @@
 import { showFreezeDiv, hideFreezeDiv } from './utils.js';
 import { createElement, setTextContent, createButton } from './utils/dom.js';
-import { validateNumber } from './utils/validation.js';
+import { validateNumber, addInputValidation } from './utils/validation.js';
 
 export class chancesController {
     constructor() {
@@ -72,33 +72,8 @@ export class chancesController {
                     chanceElement.min = '0';
                     chanceElement.max = '1000'; // Allow high values for spawn chances
 
-                // Add real-time validation
-                chanceElement.addEventListener('input', function() {
-                    const validation = validateNumber(this.value, 0, 1000);
-                    if (validation.isValid) {
-                        this.classList.remove('is-invalid');
-                        this.classList.add('is-valid');
-                        this.title = '';
-                    } else {
-                        this.classList.remove('is-valid');
-                        this.classList.add('is-invalid');
-                        this.title = validation.error;
-                    }
-                });
-
-                // Add change validation
-                chanceElement.addEventListener('change', function(e) {
-                    const validation = validateNumber(e.target.value, 0, 1000);
-                    if (validation.isValid) {
-                        e.target.value = validation.sanitizedValue;
-                        e.target.classList.remove('is-invalid');
-                        e.target.classList.add('is-valid');
-                    } else {
-                        e.target.classList.add('is-invalid');
-                        e.target.title = validation.error;
-                        // Don't reset value here to allow user to correct it
-                    }
-                });
+                // Add validation using helper function
+                addInputValidation(chanceElement, (value) => validateNumber(value, 0, 1000), null, true);
 
                 resultElement.appendChild(chanceElement);
 
@@ -428,32 +403,8 @@ export class chancesController {
                         input.min = '0';
                         input.max = '1000';
 
-                        // Add real-time validation
-                        input.addEventListener('input', function() {
-                            const validation = validateNumber(this.value, 0, 1000);
-                            if (validation.isValid) {
-                                this.classList.remove('is-invalid');
-                                this.classList.add('is-valid');
-                                this.title = '';
-                            } else {
-                                this.classList.remove('is-valid');
-                                this.classList.add('is-invalid');
-                                this.title = validation.error;
-                            }
-                        });
-
-                        // Add change validation
-                        input.addEventListener('change', function(e) {
-                            const validation = validateNumber(e.target.value, 0, 1000);
-                            if (validation.isValid) {
-                                e.target.value = validation.sanitizedValue;
-                                e.target.classList.remove('is-invalid');
-                                e.target.classList.add('is-valid');
-                            } else {
-                                e.target.classList.add('is-invalid');
-                                e.target.title = validation.error;
-                            }
-                        });
+                        // Add validation using helper function
+                        addInputValidation(input, (value) => validateNumber(value, 0, 1000), null, true);
                         
                         let label = document.createElement('small');
                         label.className = 'text-muted position-absolute top-0 end-0 me-1';
@@ -494,32 +445,8 @@ export class chancesController {
                         input.min = '0';
                         input.max = '1000';
 
-                        // Add real-time validation
-                        input.addEventListener('input', function() {
-                            const validation = validateNumber(this.value, 0, 1000);
-                            if (validation.isValid) {
-                                this.classList.remove('is-invalid');
-                                this.classList.add('is-valid');
-                                this.title = '';
-                            } else {
-                                this.classList.remove('is-valid');
-                                this.classList.add('is-invalid');
-                                this.title = validation.error;
-                            }
-                        });
-
-                        // Add change validation
-                        input.addEventListener('change', function(e) {
-                            const validation = validateNumber(e.target.value, 0, 1000);
-                            if (validation.isValid) {
-                                e.target.value = validation.sanitizedValue;
-                                e.target.classList.remove('is-invalid');
-                                e.target.classList.add('is-valid');
-                            } else {
-                                e.target.classList.add('is-invalid');
-                                e.target.title = validation.error;
-                            }
-                        });
+                        // Add validation using helper function
+                        addInputValidation(input, (value) => validateNumber(value, 0, 1000), null, true);
                         
                         let label = document.createElement('small');
                         label.className = 'text-muted position-absolute top-0 end-0 me-1';
@@ -676,32 +603,8 @@ export class chancesController {
                         attrElement.min = min;
                         attrElement.max = max;
 
-                        // Add real-time validation
-                        attrElement.addEventListener('input', function() {
-                            const validation = validateNumber(this.value, min, max);
-                            if (validation.isValid) {
-                                this.classList.remove('is-invalid');
-                                this.classList.add('is-valid');
-                                this.title = '';
-                            } else {
-                                this.classList.remove('is-valid');
-                                this.classList.add('is-invalid');
-                                this.title = validation.error;
-                            }
-                        });
-
-                        // Add change validation
-                        attrElement.addEventListener('change', function(e) {
-                            const validation = validateNumber(e.target.value, min, max);
-                            if (validation.isValid) {
-                                e.target.value = validation.sanitizedValue;
-                                e.target.classList.remove('is-invalid');
-                                e.target.classList.add('is-valid');
-                            } else {
-                                e.target.classList.add('is-invalid');
-                                e.target.title = validation.error;
-                            }
-                        });
+                        // Add validation using helper function
+                        addInputValidation(attrElement, (value) => validateNumber(value, min, max), null, true);
                     }
                 }
 

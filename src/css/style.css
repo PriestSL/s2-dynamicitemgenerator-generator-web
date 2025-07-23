@@ -929,3 +929,47 @@ input.chance{
 .modal-body::-webkit-scrollbar-thumb:hover {
   background: #ccc;
 }
+
+/* Custom validation styles - lightweight alternative to Bootstrap validation */
+.validation-error {
+  border-color: #dc3545 !important;
+  box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25) !important;
+}
+
+.validation-success {
+  border-color: #198754 !important;
+  box-shadow: 0 0 0 0.2rem rgba(25, 135, 84, 0.25) !important;
+}
+
+/* Override Bootstrap validation classes to prevent layout issues */
+.form-control.is-valid {
+  background-image: none !important;
+  padding-right: 0.75rem !important;
+}
+
+.form-control.is-invalid {
+  background-image: none !important;
+  padding-right: 0.75rem !important;
+}
+
+/* Ensure consistent input sizing */
+.form-control-sm.validation-error,
+.form-control-sm.validation-success {
+  padding-right: 0.5rem !important;
+}
+
+/* Validation tooltip styling */
+input[title]:hover::after {
+  content: attr(title);
+  position: absolute;
+  z-index: 1000;
+  background: #333;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+  top: 100%;
+  left: 0;
+  margin-top: 2px;
+}
