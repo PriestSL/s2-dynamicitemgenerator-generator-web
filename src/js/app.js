@@ -6,6 +6,8 @@ import { chancesController } from './chances.js';
 /*ugliest code that I wrote*/
 import * as configs from './configs.js'; 
 import { deepCopy } from './utils.js';
+import { createModal, createElement, createCardHeader, createFormInput, createAlert, escapeHtml, setTextContent, clearContent } from './utils/dom.js';
+import { validateNumber, validatePercentage, validateConfigName, validatePin, validateString } from './utils/validation.js';
 
 
 // End of bootstrap fixes
@@ -28,7 +30,23 @@ document.addEventListener('DOMContentLoaded', () => {
         spinnerDiv.style.alignItems = 'center';
         spinnerDiv.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
         spinnerDiv.style.zIndex = '9999';
-        spinnerDiv.innerHTML = '<div class="spinner-border text-light" style="width: 3rem; height: 3rem;" role="status"><span class="visually-hidden">Loading...</span></div>';
+        
+        // Create spinner content safely
+        const spinner = createElement('div', {
+            className: 'spinner-border text-light',
+            attributes: { 
+                role: 'status',
+                style: 'width: 3rem; height: 3rem;'
+            }
+        });
+        
+        const spinnerText = createElement('span', {
+            className: 'visually-hidden',
+            textContent: 'Loading...'
+        });
+        spinner.appendChild(spinnerText);
+        spinnerDiv.appendChild(spinner);
+        
         document.body.appendChild(spinnerDiv);
         
         // Explicitly ensure spinner is hidden after creation
@@ -89,13 +107,11 @@ const showPrimarySettings = () => {
     let globalCard = document.createElement('div');
     globalCard.className = 'card mb-3';
     
-    let cardHeader = document.createElement('div');
-    cardHeader.className = 'card-header bg-info bg-opacity-10';
-    cardHeader.innerHTML = `
-        <h5 class="mb-0">
-            <i class="fas fa-cog me-2"></i>Global Weapon Settings
-        </h5>
-    `;
+    let cardHeader = createCardHeader({
+        title: 'Global Weapon Settings',
+        iconClass: 'fas fa-cog'
+    });
+    cardHeader.className += ' bg-info bg-opacity-10';
     
     let cardBody = document.createElement('div');
     cardBody.className = 'card-body';
@@ -104,24 +120,77 @@ const showPrimarySettings = () => {
     settingsRow.className = 'row g-3';
     
     // Minimal condition setting
-    let minConditionCol = document.createElement('div');
+    let minConditionCol = createFormInput({
+        id: 'minWeaponCondition',
+        type: 'number',
+        label: 'Minimal condition (%)',
+        value: modifiedMinWeaponDurability
+    });
     minConditionCol.className = 'col-md-6';
-    minConditionCol.innerHTML = `
-        <label class="form-label">Minimal condition (%)</label>
-        <input type="number" class="form-control" id="minWeaponCondition" value="${modifiedMinWeaponDurability}">
-    `;
     
     // Maximal condition setting  
-    let maxConditionCol = document.createElement('div');
+    let maxConditionCol = createFormInput({
+        id: 'maxWeaponCondition',
+        type: 'number', 
+        label: 'Maximal condition (%)',
+        value: modifiedMaxWeaponDurability
+    });
     maxConditionCol.className = 'col-md-6';
-    maxConditionCol.innerHTML = `
-        <label class="form-label">Maximal condition (%)</label>
-        <input type="number" class="form-control" id="maxWeaponCondition" value="${modifiedMaxWeaponDurability}">
-    `;
     
     settingsRow.appendChild(minConditionCol);
     settingsRow.appendChild(maxConditionCol);
     cardBody.appendChild(settingsRow);
+    
+    // Add input validation
+    const minInput = minConditionCol.querySelector('input');
+    const maxInput = maxConditionCol.querySelector('input');
+    
+    if (minInput) {
+        minInput.addEventListener('input', function() {
+            const validation = validateNumber(this.value, 0, 100);
+            if (!validation.isValid) {
+                this.classList.add('is-invalid');
+                // Create or update feedback
+                let feedback = this.parentNode.querySelector('.invalid-feedback');
+                if (!feedback) {
+                    feedback = createElement('div', {
+                        className: 'invalid-feedback'
+                    });
+                    this.parentNode.appendChild(feedback);
+                }
+                feedback.textContent = validation.error;
+            } else {
+                this.classList.remove('is-invalid');
+                const feedback = this.parentNode.querySelector('.invalid-feedback');
+                if (feedback) {
+                    feedback.remove();
+                }
+            }
+        });
+    }
+    
+    if (maxInput) {
+        maxInput.addEventListener('input', function() {
+            const validation = validateNumber(this.value, 0, 100);
+            if (!validation.isValid) {
+                this.classList.add('is-invalid');
+                let feedback = this.parentNode.querySelector('.invalid-feedback');
+                if (!feedback) {
+                    feedback = createElement('div', {
+                        className: 'invalid-feedback'
+                    });
+                    this.parentNode.appendChild(feedback);
+                }
+                feedback.textContent = validation.error;
+            } else {
+                this.classList.remove('is-invalid');
+                const feedback = this.parentNode.querySelector('.invalid-feedback');
+                if (feedback) {
+                    feedback.remove();
+                }
+            }
+        });
+    }
     
     globalCard.appendChild(cardHeader);
     globalCard.appendChild(cardBody);
@@ -160,16 +229,35 @@ const showPrimary = ()=>{
         
         let cardHeader = document.createElement('div');
         cardHeader.className = 'card-header bg-primary bg-opacity-10';
-        cardHeader.innerHTML = `
-            <h5 class="mb-0">
-                <button class="btn btn-link text-decoration-none p-0 text-start w-100" type="button" 
-                        data-bs-toggle="collapse" data-bs-target="#collapse-${classification}" 
-                        aria-expanded="true" aria-controls="collapse-${classification}">
-                    <i class="fas fa-gun me-2"></i>${classification}
-                    <i class="fas fa-chevron-down float-end"></i>
-                </button>
-            </h5>
-        `;
+        
+        const headerContent = createElement('h5', {
+            className: 'mb-0'
+        });
+        
+        const button = createElement('button', {
+            className: 'btn btn-link text-decoration-none p-0 text-start w-100',
+            attributes: {
+                type: 'button',
+                'data-bs-toggle': 'collapse',
+                'data-bs-target': `#collapse-${classification}`,
+                'aria-expanded': 'true',
+                'aria-controls': `collapse-${classification}`
+            }
+        });
+        
+        const gunIcon = createElement('i', {
+            className: 'fas fa-gun me-2'
+        });
+        button.appendChild(gunIcon);
+        button.appendChild(document.createTextNode(classification));
+        
+        const chevronIcon = createElement('i', {
+            className: 'fas fa-chevron-down float-end'
+        });
+        button.appendChild(chevronIcon);
+        
+        headerContent.appendChild(button);
+        cardHeader.appendChild(headerContent);
         
         let collapseDiv = document.createElement('div');
         collapseDiv.className = 'collapse show';
@@ -192,12 +280,11 @@ const showPrimary = ()=>{
 }
 
 const showSecondary = ()=>{
-    let alertElement = document.createElement('div');
-    alertElement.className = 'alert alert-warning';
-    alertElement.innerHTML = `
-        <i class="fas fa-exclamation-triangle me-2"></i>
-        <strong>Not Implemented:</strong> Changing secondary weapons are not implemented yet (they are works in game?)
-    `;
+    const alertElement = createAlert({
+        type: 'warning',
+        message: 'Not Implemented: Changing secondary weapons are not implemented yet (they are works in game?)',
+        iconClass: 'fas fa-exclamation-triangle'
+    });
     contentEl.appendChild(alertElement);
 };
 
@@ -206,14 +293,39 @@ const showPistols = ()=>{
     if (chancesCtrl.curentFaction === 'Generic_settings'){
         let pistolSpawnChance = document.createElement('div');
         let pistolSpawnChanceLabel = document.createElement('label');
-        pistolSpawnChanceLabel.innerHTML = 'Pistol kit spawn chance, %';
+        setTextContent(pistolSpawnChanceLabel, 'Pistol kit spawn chance, %');
         pistolSpawnChance.appendChild(pistolSpawnChanceLabel);
         let pistolSpawnChanceInput = document.createElement('input');
         pistolSpawnChanceInput.type = 'number';
         pistolSpawnChanceInput.value = modifiedPistolSpawnChance;
+        pistolSpawnChanceInput.className = 'form-control';
+        pistolSpawnChanceInput.min = '0';
+        pistolSpawnChanceInput.max = '100';
+
+        // Add real-time validation
+        pistolSpawnChanceInput.addEventListener('input', function() {
+            const validation = validatePercentage(this.value);
+            if (validation.isValid) {
+                this.classList.remove('is-invalid');
+                this.classList.add('is-valid');
+                this.title = '';
+            } else {
+                this.classList.remove('is-valid');
+                this.classList.add('is-invalid');
+                this.title = validation.error;
+            }
+        });
 
         pistolSpawnChanceInput.addEventListener('change', function(e) {
-            modifiedPistolSpawnChance = e.target.value;
+            const validation = validatePercentage(e.target.value);
+            if (validation.isValid) {
+                modifiedPistolSpawnChance = validation.sanitizedValue;
+            } else {
+                // Reset to previous valid value
+                e.target.value = modifiedPistolSpawnChance;
+                e.target.classList.add('is-invalid');
+                e.target.title = validation.error;
+            }
         });
 
         pistolSpawnChance.appendChild(pistolSpawnChanceInput);
@@ -256,22 +368,20 @@ const showArmor = ()=>{
 };
 
 const showArtifacts = ()=>{
-    let alertElement = document.createElement('div');
-    alertElement.className = 'alert alert-warning';
-    alertElement.innerHTML = `
-        <i class="fas fa-exclamation-triangle me-2"></i>
-        <strong>Not Implemented:</strong> Lootable artifact settings are not implemented yet (and game uses Artifact class to generate grenades)
-    `;
+    const alertElement = createAlert({
+        type: 'warning',
+        message: 'Not Implemented: Lootable artifact settings are not implemented yet (and game uses Artifact class to generate grenades)',
+        iconClass: 'fas fa-exclamation-triangle'
+    });
     contentEl.appendChild(alertElement);
 };
 
 const showConsumables = ()=>{
-    let alertElement = document.createElement('div');
-    alertElement.className = 'alert alert-warning';
-    alertElement.innerHTML = `
-        <i class="fas fa-exclamation-triangle me-2"></i>
-        <strong>Not Implemented:</strong> Consumables loot settings are not implemented yet.
-    `;
+    const alertElement = createAlert({
+        type: 'warning',
+        message: 'Not Implemented: Consumables loot settings are not implemented yet.',
+        iconClass: 'fas fa-exclamation-triangle'
+    });
     contentEl.appendChild(alertElement);
 };
 
@@ -311,7 +421,7 @@ const subscribeToEvents = () => {
     let elements = document.getElementsByClassName('faction_item');
     for (let i = 0; i < elements.length; i++) {
         elements[i].addEventListener('click', function(e) {
-            contentEl.innerHTML = '';
+            clearContent(contentEl);
             chancesCtrl.curentFaction = e.target.id;
             e.target.classList.add('active');
             let els = document.getElementsByClassName('faction_item');
@@ -328,7 +438,7 @@ const subscribeToEvents = () => {
     elements = document.getElementsByClassName('category_item');
     for (let i = 0; i < elements.length; i++) {
         elements[i].addEventListener('click', function(e) {
-            contentEl.innerHTML = '';
+            clearContent(contentEl);
             chancesCtrl.currentCategory = e.target.id;
             e.target.classList.add('active');
             let els = document.getElementsByClassName('category_item');
@@ -344,6 +454,152 @@ const subscribeToEvents = () => {
 }
 
 subscribeToEvents()
+
+// Helper function to safely convert HTML strings to DOM elements
+// TODO: Replace with proper DOM creation functions
+const createElementFromHtml = (htmlString) => {
+    const container = createElement('div');
+    // Use basic sanitization - remove script tags and on* attributes
+    const sanitized = htmlString
+        .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+        .replace(/\son\w+="[^"]*"/gi, '')
+        .replace(/\son\w+='[^']*'/gi, '');
+    
+    container.innerHTML = sanitized;
+    return container;
+};
+
+// Helper function to safely create preset cards
+const createPresetCard = (preset, type) => {
+    const col = createElement('div', {
+        className: 'col-md-6 col-lg-4'
+    });
+    
+    const card = createElement('div', {
+        className: `card h-100 border-${type === 'official' ? 'primary' : 'warning'} border-opacity-25 card-preset card-preset-${type}`,
+        attributes: {
+            'data-id': preset._id,
+            'data-type': type,
+            'data-name': escapeHtml(preset.name)
+        }
+    });
+    
+    const cardBody = createElement('div', {
+        className: type === 'community' ? 'card-body position-relative' : 'card-body'
+    });
+    
+    // Title
+    const title = createElement('h5', {
+        className: 'card-title',
+        textContent: preset.name // Safe text content
+    });
+    cardBody.appendChild(title);
+    
+    // Badge and info row
+    const badgeRow = createElement('div', {
+        className: 'd-flex justify-content-between'
+    });
+    
+    const badge = createElement('span', {
+        className: `badge bg-${type === 'official' ? 'primary' : 'warning'} bg-opacity-75 text-dark`
+    });
+    const badgeIcon = createElement('i', {
+        className: `fas fa-${type === 'official' ? 'certificate' : 'users'} me-1`
+    });
+    badge.appendChild(badgeIcon);
+    badge.appendChild(document.createTextNode(type === 'official' ? 'Official' : 'Community'));
+    
+    const info = createElement('span', {
+        className: 'text-muted small'
+    });
+    const infoIcon = createElement('i', {
+        className: `fas fa-${type === 'official' ? 'code-branch' : 'user'} me-1`
+    });
+    info.appendChild(infoIcon);
+    info.appendChild(document.createTextNode(
+        type === 'official' 
+            ? `v${preset.version || '1.0'}`
+            : preset.author || 'Anonymous'
+    ));
+    
+    badgeRow.appendChild(badge);
+    badgeRow.appendChild(info);
+    cardBody.appendChild(badgeRow);
+    
+    // Second info row
+    const infoRow = createElement('div', {
+        className: 'mt-2 d-flex justify-content-between'
+    });
+    
+    if (type === 'official') {
+        const viewsSpan = createElement('span', {
+            className: 'text-muted small'
+        });
+        const viewsIcon = createElement('i', {
+            className: 'fas fa-eye me-1'
+        });
+        viewsSpan.appendChild(viewsIcon);
+        viewsSpan.appendChild(document.createTextNode(`${preset.views || 0} views`));
+        infoRow.appendChild(viewsSpan);
+    } else {
+        const versionSpan = createElement('span', {
+            className: 'text-muted small'
+        });
+        const versionIcon = createElement('i', {
+            className: 'fas fa-code-branch me-1'
+        });
+        versionSpan.appendChild(versionIcon);
+        versionSpan.appendChild(document.createTextNode(`v${preset.version || '1.0'}`));
+        
+        const viewsSpan = createElement('span', {
+            className: 'text-muted small'
+        });
+        const viewsIcon = createElement('i', {
+            className: 'fas fa-eye me-1'
+        });
+        viewsSpan.appendChild(viewsIcon);
+        viewsSpan.appendChild(document.createTextNode(`${preset.views || 0} views`));
+        
+        infoRow.appendChild(versionSpan);
+        infoRow.appendChild(viewsSpan);
+    }
+    
+    cardBody.appendChild(infoRow);
+    
+    // Add edit/delete buttons for community presets
+    if (type === 'community') {
+        const buttonContainer = createElement('div', {
+            className: 'position-absolute top-0 end-0 m-2'
+        });
+        
+        const editBtn = createElement('button', {
+            className: 'btn btn-sm btn-outline-primary btn-edit',
+            attributes: { title: 'Edit' }
+        });
+        const editIcon = createElement('i', {
+            className: 'fas fa-edit'
+        });
+        editBtn.appendChild(editIcon);
+        
+        const deleteBtn = createElement('button', {
+            className: 'btn btn-sm btn-outline-danger btn-delete ms-1',
+            attributes: { title: 'Delete' }
+        });
+        const deleteIcon = createElement('i', {
+            className: 'fas fa-trash'
+        });
+        deleteBtn.appendChild(deleteIcon);
+        
+        buttonContainer.appendChild(editBtn);
+        buttonContainer.appendChild(deleteBtn);
+        cardBody.appendChild(buttonContainer);
+    }
+    
+    card.appendChild(cardBody);
+    col.appendChild(card);
+    
+    return col;
+};
 
 const drawHelp = () => {
     return `
@@ -398,16 +654,6 @@ const drawHelp = () => {
                     </div>
                 </div>
             </div>
-        </div>
-    `;
-};
-
-const drawCloseButton = (wind) => {
-    return `
-        <div class="d-flex justify-content-end mt-3">
-            <button id="btn_close_msg_${wind}" class="btn btn-secondary">
-                <i class="fas fa-times me-1"></i>Close
-            </button>
         </div>
     `;
 };
@@ -503,46 +749,114 @@ const subscribeFileSettingsEvents = () => {
     });
 
     let armorChance = document.getElementById('armor_chance');
+    // Add real-time validation
+    armorChance.addEventListener('input', function() {
+        const validation = validatePercentage(this.value);
+        if (validation.isValid) {
+            this.classList.remove('is-invalid');
+            this.classList.add('is-valid');
+            this.title = '';
+        } else {
+            this.classList.remove('is-valid');
+            this.classList.add('is-invalid');
+            this.title = validation.error;
+        }
+    });
     armorChance.addEventListener('change', function(e) {
-        modifiedDropConfigs.nLootChance = e.target.value;
+        const validation = validatePercentage(e.target.value);
+        if (validation.isValid) {
+            modifiedDropConfigs.nLootChance = validation.sanitizedValue;
+            e.target.classList.remove('is-invalid');
+            e.target.classList.add('is-valid');
+        } else {
+            e.target.classList.add('is-invalid');
+            e.target.title = validation.error;
+        }
     });
 
     let minCondition = document.getElementById('min_condition');
+    // Add real-time validation
+    minCondition.addEventListener('input', function() {
+        const validation = validatePercentage(this.value);
+        if (validation.isValid) {
+            this.classList.remove('is-invalid');
+            this.classList.add('is-valid');
+            this.title = '';
+        } else {
+            this.classList.remove('is-valid');
+            this.classList.add('is-invalid');
+            this.title = validation.error;
+        }
+    });
     minCondition.addEventListener('change', function(e) {
-        modifiedDropConfigs.nMinDurability = e.target.value;
+        const validation = validatePercentage(e.target.value);
+        if (validation.isValid) {
+            modifiedDropConfigs.nMinDurability = validation.sanitizedValue;
+            e.target.classList.remove('is-invalid');
+            e.target.classList.add('is-valid');
+        } else {
+            e.target.classList.add('is-invalid');
+            e.target.title = validation.error;
+        }
     });
 
     let maxCondition = document.getElementById('max_condition');
+    // Add real-time validation
+    maxCondition.addEventListener('input', function() {
+        const validation = validatePercentage(this.value);
+        if (validation.isValid) {
+            this.classList.remove('is-invalid');
+            this.classList.add('is-valid');
+            this.title = '';
+        } else {
+            this.classList.remove('is-valid');
+            this.classList.add('is-invalid');
+            this.title = validation.error;
+        }
+    });
     maxCondition.addEventListener('change', function(e) {
-        modifiedDropConfigs.nMaxDurability = e.target.value;
+        const validation = validatePercentage(e.target.value);
+        if (validation.isValid) {
+            modifiedDropConfigs.nMaxDurability = validation.sanitizedValue;
+            e.target.classList.remove('is-invalid');
+            e.target.classList.add('is-valid');
+        } else {
+            e.target.classList.add('is-invalid');
+            e.target.title = validation.error;
+        }
     });
 };
 
-const createMessageBox = (wind, message) => {
+const createMessageBox = (wind, contentElement) => {
     if (document.getElementById('messageBox_'+wind)) {
         return;
     }
 
-    let messageBox = document.createElement('div');
+    // Create modal with safe content
+    const messageBox = createModal({
+        id: `messageBox_${wind}`,
+        content: contentElement,
+        buttons: [
+            {
+                text: 'Close',
+                className: 'btn btn-secondary',
+                iconClass: 'fas fa-times',
+                onClick: () => removeMessageBox(wind)
+            }
+        ]
+    });
     
-    // Use Bootstrap modal-like styling
-    messageBox.className = 'position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center';
-    messageBox.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
-    messageBox.style.zIndex = '1050';
-    messageBox.innerHTML = `
-        <div class="bg-white rounded shadow p-4" style="max-width: 90vw; max-height: 90vh; overflow-y: auto;">
-            ${message}
-            ${drawCloseButton(wind)}
-        </div>
-    `;
-    
-    messageBox.id = 'messageBox_'+wind;
     document.body.appendChild(messageBox);
 };
 
 const removeMessageBox = (wind) => {
-    let messageBox = document.getElementById('messageBox_'+wind);
-    document.body.removeChild(messageBox);
+    const messageBox = document.getElementById('messageBox_'+wind);
+    if (messageBox && messageBox.parentNode) {
+        // Remove all event listeners before removing the element
+        const newElement = messageBox.cloneNode(false);
+        messageBox.parentNode.replaceChild(newElement, messageBox);
+        newElement.remove();
+    }
 };
 
 const exportToJSON = () => {
@@ -598,7 +912,7 @@ const importFromJSON = () => {
             modsCompatibility = data.Compatibility;
             modifiedArmorSpawnSettings = data.ArmorSpawnSettings;
             modifiedHelmetSpawnSettings = adoptOldHelmetVersion(data.HelmetsSettings);
-            contentEl.innerHTML = '';
+            clearContent(contentEl);
             oCategoryToEvent[chancesCtrl.currentCategory]();
         };
         reader.readAsText(file);
@@ -629,33 +943,82 @@ const TODOList = [
     "packing into .pak file"
 ];
 
-const drawToDo = () => {
-    let finalStr = '<h2>TODO LIST</h2><ul>';
-    for (let item of TODOList) {
-        finalStr += '<li>'+item+'</li>';
-    }
-    finalStr += '</ul>';
-    return finalStr;
+const createToDoElement = () => {
+    const container = createElement('div');
+    
+    const title = createElement('h2', {
+        textContent: 'TODO LIST'
+    });
+    container.appendChild(title);
+    
+    const list = createElement('ul');
+    
+    TODOList.forEach(item => {
+        const listItem = createElement('li', {
+            textContent: item
+        });
+        list.appendChild(listItem);
+    });
+    
+    container.appendChild(list);
+    return container;
 };
 
 const showToDoWindow = () => {
-    createMessageBox('todo', drawToDo());
-    let closeButton = document.getElementById('btn_close_msg_todo');
-    closeButton.addEventListener('click', ()=>removeMessageBox('todo'));
+    createMessageBox('todo', createToDoElement());
 };
 
 const showInfo = () => {
-    let text = 'This site is created by <a href="https://next.nexusmods.com/profile/TechPriestSL" target="_blank">PriestSL</a>';
-    text += '<br>Website ugly as shit, I know. But I tried to write it on pure JS to made it litest as it can be. '
-    text += '<br>Source code is available on <a href="https://github.com/PriestSL/s2-dynamicitemgenerator-generator-web" target="_blank">GitHub</a>';
-    text += '<br>For any questions or suggestions you can contact me on NexusMods or Discord (priestsl)';
-    text += '<br>You free to use sources or colaborate';
-    text += '<br>If you want to rewrite it all (because front end is absolutely crap, and all site created without any design documents), you are welcome. If you need help with it, you can ask me =)';
-    text += '<br>All planning features you can see in TODO list';
+    const container = createElement('div');
+    
+    // First paragraph with link
+    const p1 = createElement('p');
+    p1.appendChild(document.createTextNode('This site is created by '));
+    const link1 = createElement('a', {
+        textContent: 'PriestSL',
+        attributes: {
+            href: 'https://next.nexusmods.com/profile/TechPriestSL',
+            target: '_blank'
+        }
+    });
+    p1.appendChild(link1);
+    container.appendChild(p1);
+    
+    // Second paragraph
+    const p2 = createElement('p', {
+        textContent: 'Website ugly as shit, I know. But I tried to write it on pure JS to made it litest as it can be.'
+    });
+    container.appendChild(p2);
+    
+    // Third paragraph with GitHub link
+    const p3 = createElement('p');
+    p3.appendChild(document.createTextNode('Source code is available on '));
+    const link2 = createElement('a', {
+        textContent: 'GitHub',
+        attributes: {
+            href: 'https://github.com/PriestSL/s2-dynamicitemgenerator-generator-web',
+            target: '_blank'
+        }
+    });
+    p3.appendChild(link2);
+    container.appendChild(p3);
+    
+    // Remaining paragraphs
+    const remainingTexts = [
+        'For any questions or suggestions you can contact me on NexusMods or Discord (priestsl)',
+        'You free to use sources or colaborate',
+        'If you want to rewrite it all (because front end is absolutely crap, and all site created without any design documents), you are welcome. If you need help with it, you can ask me =)',
+        'All planning features you can see in TODO list'
+    ];
+    
+    remainingTexts.forEach(text => {
+        const p = createElement('p', {
+            textContent: text
+        });
+        container.appendChild(p);
+    });
 
-    createMessageBox('info', text);
-    let closeButton = document.getElementById('btn_close_msg_info');
-    closeButton.addEventListener('click', ()=>removeMessageBox('info'));
+    createMessageBox('info', container);
 };
 
 const openPresetsWindow = async () => {
@@ -804,7 +1167,7 @@ const openPresetsWindow = async () => {
                 modifiedHelmetSpawnSettings = preset.HelmetsSettings;
                 document.getElementById('config_name').value = presetCard.dataset.name;
 
-                contentEl.innerHTML = '';
+                clearContent(contentEl);
                 oCategoryToEvent[chancesCtrl.currentCategory]();
 
                 // Hide the modal
@@ -867,7 +1230,7 @@ const openPresetsWindow = async () => {
                 // Enable the update button
                 document.getElementById('btn_update_preset').disabled = false;
                 
-                contentEl.innerHTML = '';
+                clearContent(contentEl);
                 oCategoryToEvent[chancesCtrl.currentCategory]();
                 
                 // Hide the modal
@@ -916,7 +1279,11 @@ const openPresetsWindow = async () => {
                     // Check if there are no more presets
                     const communityList = document.getElementById('communityPresetsList');
                     if (communityList && communityList.children.length === 0) {
-                        communityList.innerHTML = '<div class="col-12 text-center text-muted py-3">No community presets available</div>';
+                        const emptyMessage = createElement('div', {
+                            className: 'col-12 text-center text-muted py-3',
+                            textContent: 'No community presets available'
+                        });
+                        communityList.appendChild(emptyMessage);
                     }
                 } else {
                     alert("Failed to delete preset. Invalid PIN or server error.");
@@ -963,6 +1330,31 @@ const openPresetsWindow = async () => {
         const version = document.getElementById('preset-version').value.trim();
         const pin = document.getElementById('preset-pin').value.trim();
         const description = document.getElementById('preset-description').value.trim();
+        
+        // Additional validation beyond HTML5 validation
+        const nameValidation = validateConfigName(name);
+        if (!nameValidation.isValid) {
+            document.getElementById('preset-name').classList.add('is-invalid');
+            document.getElementById('preset-name').title = nameValidation.error;
+            alert(`Invalid preset name: ${nameValidation.error}`);
+            return;
+        }
+        
+        const authorValidation = validateString(author, { minLength: 1, maxLength: 30, allowEmpty: false });
+        if (!authorValidation.isValid) {
+            document.getElementById('preset-author').classList.add('is-invalid');
+            document.getElementById('preset-author').title = authorValidation.error;
+            alert(`Invalid author name: ${authorValidation.error}`);
+            return;
+        }
+        
+        const pinValidation = validatePin(pin);
+        if (!pinValidation.isValid) {
+            document.getElementById('preset-pin').classList.add('is-invalid');
+            document.getElementById('preset-pin').title = pinValidation.error;
+            alert(`Invalid PIN: ${pinValidation.error}`);
+            return;
+        }
         
         const presetData = {
             name,
@@ -1091,37 +1483,19 @@ const openPresetsWindow = async () => {
             const communityList = document.getElementById('communityPresetsList');
         
         // Clear any existing content
-        officialList.innerHTML = '';
-        communityList.innerHTML = '';
+        clearContent(officialList);
+        clearContent(communityList);
         
         // Add official presets
         if (officialPresets.length === 0) {
-            officialList.innerHTML = '<div class="col-12 text-center text-muted py-3">No official presets available</div>';
+            const emptyMessage = createElement('div', {
+                className: 'col-12 text-center text-muted py-3',
+                textContent: 'No official presets available'
+            });
+            officialList.appendChild(emptyMessage);
         } else {
             for (let preset of officialPresets) {
-                const col = document.createElement('div');
-                col.className = 'col-md-6 col-lg-4';
-                
-                col.innerHTML = `
-                    <div class="card h-100 border-primary border-opacity-25 card-preset card-preset-official" data-id="${preset._id}" data-type="official" data-name="${preset.name}">
-                        <div class="card-body">
-                            <h5 class="card-title">${preset.name}</h5>
-                            <div class="d-flex justify-content-between">
-                                <span class="badge bg-primary bg-opacity-75 text-dark">
-                                    <i class="fas fa-certificate me-1"></i>Official
-                                </span>
-                                <span class="text-muted small">
-                                    <i class="fas fa-code-branch me-1"></i>v${preset.version || '1.0'}
-                                </span>
-                            </div>
-                            <div class="mt-2 text-end">
-                                <span class="text-muted small">
-                                    <i class="fas fa-eye me-1"></i>${preset.views || 0} views
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                `;
+                const col = createPresetCard(preset, 'official');
                 
                 // Add click event to load the preset
                 const presetCard = col.querySelector('.card-preset');
@@ -1133,43 +1507,14 @@ const openPresetsWindow = async () => {
 
         // Add community presets
         if (publicPresets.length === 0) {
-            communityList.innerHTML = '<div class="col-12 text-center text-muted py-3">No community presets available</div>';
+            const emptyMessage = createElement('div', {
+                className: 'col-12 text-center text-muted py-3',
+                textContent: 'No community presets available'
+            });
+            communityList.appendChild(emptyMessage);
         } else {
             for (let preset of publicPresets) {
-                const col = document.createElement('div');
-                col.className = 'col-md-6 col-lg-4';
-                
-                col.innerHTML = `
-                    <div class="card h-100 border-warning border-opacity-25 card-preset card-preset-community" data-id="${preset._id}" data-type="community" data-name="${preset.name}">
-                        <div class="card-body position-relative">
-                            <h5 class="card-title">${preset.name}</h5>
-                            <div class="d-flex justify-content-between">
-                                <span class="badge bg-warning bg-opacity-75 text-dark">
-                                    <i class="fas fa-users me-1"></i>Community
-                                </span>
-                                <span class="text-muted small">
-                                    <i class="fas fa-user me-1"></i>${preset.author || 'Anonymous'}
-                                </span>
-                            </div>
-                            <div class="mt-2 d-flex justify-content-between">
-                                <span class="text-muted small">
-                                    <i class="fas fa-code-branch me-1"></i>v${preset.version || '1.0'}
-                                </span>
-                                <span class="text-muted small">
-                                    <i class="fas fa-eye me-1"></i>${preset.views || 0} views
-                                </span>
-                            </div>
-                            <div class="position-absolute top-0 end-0 m-2">
-                                <button class="btn btn-sm btn-outline-primary btn-edit" title="Edit">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <button class="btn btn-sm btn-outline-danger btn-delete ms-1" title="Delete">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                `;
+                const col = createPresetCard(preset, 'community');
                 
                 // Add click event to load the preset
                 const presetCard = col.querySelector('.card-preset');
@@ -1196,9 +1541,8 @@ let button = document.getElementById('btn_save');
 button.addEventListener('click', generateConfig);
     button = document.getElementById('btn_help');
 button.addEventListener('click', function() {
-    createMessageBox('help', drawHelp());
-    let closeButton = document.getElementById('btn_close_msg_help');
-    closeButton.addEventListener('click', ()=>removeMessageBox('help'));
+    const helpContent = createElementFromHtml(drawHelp());
+    createMessageBox('help', helpContent);
 });
 button = document.getElementById('btn_export');
 button.addEventListener('click', exportToJSON);
@@ -1206,7 +1550,8 @@ button = document.getElementById('btn_import');
 button.addEventListener('click', importFromJSON);
 button = document.getElementById('btn_file_settings');
 button.addEventListener('click', function() {
-    createMessageBox('settings', drawFileSettings());
+    const settingsContent = createElementFromHtml(drawFileSettings());
+    createMessageBox('settings', settingsContent);
     subscribeFileSettingsEvents();
     let closeButton = document.getElementById('btn_close_msg_settings');
     closeButton.addEventListener('click', ()=>removeMessageBox('settings'));
@@ -1221,3 +1566,32 @@ button.addEventListener('click', () => {
     console.log('Presets button clicked');
     withLoadingSpinner(openPresetsWindow);
 });
+
+// Add validation to the main config name input
+const configNameInput = document.getElementById('config_name');
+if (configNameInput) {
+    configNameInput.addEventListener('input', function() {
+        const validation = validateConfigName(this.value);
+        if (validation.isValid) {
+            this.classList.remove('is-invalid');
+            this.classList.add('is-valid');
+            this.title = '';
+        } else {
+            this.classList.remove('is-valid');
+            this.classList.add('is-invalid');
+            this.title = validation.error;
+        }
+    });
+    
+    configNameInput.addEventListener('change', function(e) {
+        const validation = validateConfigName(e.target.value);
+        if (validation.isValid) {
+            e.target.value = validation.sanitizedValue;
+            e.target.classList.remove('is-invalid');
+            e.target.classList.add('is-valid');
+        } else {
+            e.target.classList.add('is-invalid');
+            e.target.title = validation.error;
+        }
+    });
+}

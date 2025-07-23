@@ -1,4 +1,6 @@
 import { showFreezeDiv, hideFreezeDiv } from './utils.js';
+import { createElement, setTextContent, createButton } from './utils/dom.js';
+import { validateNumber } from './utils/validation.js';
 
 export class chancesController {
     constructor() {
@@ -52,7 +54,7 @@ export class chancesController {
                 resultElement.classList.add('chance');
                 
             if (isNaN(parseFloat(chances[i]))) { //for static text
-                resultElement.innerHTML = chances[i];
+                setTextContent(resultElement, chances[i]);
             }else{ //inputs
                 let faction = this.currentFaction;
                 let itemType = this.currentCategory;
@@ -67,6 +69,36 @@ export class chancesController {
                     chanceElement.dataset.item = item;
                     chanceElement.dataset.attr = attr;
                     chanceElement.dataset.level = i;
+                    chanceElement.min = '0';
+                    chanceElement.max = '1000'; // Allow high values for spawn chances
+
+                // Add real-time validation
+                chanceElement.addEventListener('input', function() {
+                    const validation = validateNumber(this.value, 0, 1000);
+                    if (validation.isValid) {
+                        this.classList.remove('is-invalid');
+                        this.classList.add('is-valid');
+                        this.title = '';
+                    } else {
+                        this.classList.remove('is-valid');
+                        this.classList.add('is-invalid');
+                        this.title = validation.error;
+                    }
+                });
+
+                // Add change validation
+                chanceElement.addEventListener('change', function(e) {
+                    const validation = validateNumber(e.target.value, 0, 1000);
+                    if (validation.isValid) {
+                        e.target.value = validation.sanitizedValue;
+                        e.target.classList.remove('is-invalid');
+                        e.target.classList.add('is-valid');
+                    } else {
+                        e.target.classList.add('is-invalid');
+                        e.target.title = validation.error;
+                        // Don't reset value here to allow user to correct it
+                    }
+                });
 
                 resultElement.appendChild(chanceElement);
 
@@ -89,7 +121,7 @@ export class chancesController {
         row.classList.add(typeof chances=== 'object' && chances.length?'item_row':'item_column');
         let itemElement = document.createElement('div');
         itemElement.classList.add('chances_item');
-        itemElement.innerHTML = item;
+        setTextContent(itemElement, item);
         row.appendChild(itemElement);
 
         let eChances;
@@ -104,7 +136,7 @@ export class chancesController {
                     row.appendChild(innerRow);
                     let attrNameElement = document.createElement('div');
                     attrNameElement.classList.add('attr_item');
-                    attrNameElement.innerHTML = attr;
+                    setTextContent(attrNameElement, attr);
                     innerRow.appendChild(attrNameElement);
                     eChances = this.createChances(item, innerRow, chances[attr], classification, attr);
                 }
@@ -113,9 +145,11 @@ export class chancesController {
         }
 
         if ((this.currentCategory === 'Primary' || this.currentCategory === 'Armor') && this.currentFaction !== 'Generic_settings' && item !== '') {
-            let deleteButton = document.createElement('button');
-            deleteButton.innerHTML = '<i class="fas fa-trash me-1"></i>Delete';
-            deleteButton.className = 'btn btn-danger btn-sm ms-2';
+            let deleteButton = createButton({
+                text: 'Delete',
+                className: 'btn btn-danger btn-sm ms-2',
+                iconClass: 'fas fa-trash'
+            });
             
             deleteButton.addEventListener('click', () => {
                 let GeneralSettings = 'GeneralNPC_'+this.currentFaction;
@@ -203,9 +237,10 @@ export class chancesController {
             });
         });
 
-        let closeButton = document.createElement('button');
-        closeButton.innerHTML = 'Close';
-        closeButton.classList.add('fullscreen_select_close');
+        let closeButton = createButton({
+            text: 'Close',
+            className: 'fullscreen_select_close'
+        });
         closeButton.addEventListener('click', function() {
             fullscreenDiv.remove();
             hideFreezeDiv();
@@ -217,9 +252,16 @@ export class chancesController {
     }
 
     drawAttentionDiv (text = 'This section is for all factions, settings for specific factions are not implemented yet') {
-        let div = document.createElement('div');
-        div.className = 'alert alert-info';
-        div.innerHTML = `<i class="fas fa-info-circle me-2"></i>${text}`;
+        let div = createElement('div', {
+            className: 'alert alert-info'
+        });
+        
+        const icon = createElement('i', {
+            className: 'fas fa-info-circle me-2'
+        });
+        div.appendChild(icon);
+        div.appendChild(document.createTextNode(text));
+        
         return div;
     }
 
@@ -231,7 +273,7 @@ export class chancesController {
 
         for (let item in oSettings) {
             let label = document.getElementById(classification + '-' + item + '-' + 'chances' + '-' + level + '_label');
-            label.innerHTML = '~'+(oSettings[item][level]/total*100).toFixed(2)+'%';
+            setTextContent(label, '~'+(oSettings[item][level]/total*100).toFixed(2)+'%');
         }
 
     }
@@ -347,8 +389,13 @@ export class chancesController {
             
             // Item name cell
             let itemCell = document.createElement('td');
-            itemCell.innerHTML = `<strong>${item}</strong>`;
             itemCell.className = 'align-middle';
+            
+            const strongEl = createElement('strong', {
+                textContent: item
+            });
+            itemCell.appendChild(strongEl);
+            
             row.appendChild(itemCell);
             
             // Check if it's an object with attributes or array of chances
@@ -359,8 +406,8 @@ export class chancesController {
                     attrRow.className = 'table-secondary';
                     
                     let attrCell = document.createElement('td');
-                    attrCell.innerHTML = `&nbsp;&nbsp;${attr}`;
                     attrCell.className = 'align-middle ps-4';
+                    attrCell.appendChild(document.createTextNode('\u00A0\u00A0' + attr)); // Using non-breaking spaces instead of &nbsp;
                     attrRow.appendChild(attrCell);
                     
                     // Add chance inputs for this attribute
@@ -378,6 +425,35 @@ export class chancesController {
                         input.dataset.item = item;
                         input.dataset.attr = attr;
                         input.dataset.level = index;
+                        input.min = '0';
+                        input.max = '1000';
+
+                        // Add real-time validation
+                        input.addEventListener('input', function() {
+                            const validation = validateNumber(this.value, 0, 1000);
+                            if (validation.isValid) {
+                                this.classList.remove('is-invalid');
+                                this.classList.add('is-valid');
+                                this.title = '';
+                            } else {
+                                this.classList.remove('is-valid');
+                                this.classList.add('is-invalid');
+                                this.title = validation.error;
+                            }
+                        });
+
+                        // Add change validation
+                        input.addEventListener('change', function(e) {
+                            const validation = validateNumber(e.target.value, 0, 1000);
+                            if (validation.isValid) {
+                                e.target.value = validation.sanitizedValue;
+                                e.target.classList.remove('is-invalid');
+                                e.target.classList.add('is-valid');
+                            } else {
+                                e.target.classList.add('is-invalid');
+                                e.target.title = validation.error;
+                            }
+                        });
                         
                         let label = document.createElement('small');
                         label.className = 'text-muted position-absolute top-0 end-0 me-1';
@@ -399,7 +475,11 @@ export class chancesController {
                     
                     if (isNaN(parseFloat(chance))) {
                         // Static text
-                        chanceCell.innerHTML = `<span class="badge bg-secondary">${chance}</span>`;
+                        const badge = createElement('span', {
+                            className: 'badge bg-secondary',
+                            textContent: chance
+                        });
+                        chanceCell.appendChild(badge);
                     } else {
                         // Input field
                         let input = document.createElement('input');
@@ -411,6 +491,35 @@ export class chancesController {
                         input.dataset.type = this.currentCategory;
                         input.dataset.item = item;
                         input.dataset.level = index;
+                        input.min = '0';
+                        input.max = '1000';
+
+                        // Add real-time validation
+                        input.addEventListener('input', function() {
+                            const validation = validateNumber(this.value, 0, 1000);
+                            if (validation.isValid) {
+                                this.classList.remove('is-invalid');
+                                this.classList.add('is-valid');
+                                this.title = '';
+                            } else {
+                                this.classList.remove('is-valid');
+                                this.classList.add('is-invalid');
+                                this.title = validation.error;
+                            }
+                        });
+
+                        // Add change validation
+                        input.addEventListener('change', function(e) {
+                            const validation = validateNumber(e.target.value, 0, 1000);
+                            if (validation.isValid) {
+                                e.target.value = validation.sanitizedValue;
+                                e.target.classList.remove('is-invalid');
+                                e.target.classList.add('is-valid');
+                            } else {
+                                e.target.classList.add('is-invalid');
+                                e.target.title = validation.error;
+                            }
+                        });
                         
                         let label = document.createElement('small');
                         label.className = 'text-muted position-absolute top-0 end-0 me-1';
@@ -428,10 +537,11 @@ export class chancesController {
                     let actionsCell = document.createElement('td');
                     actionsCell.className = 'text-center';
                     
-                    let deleteButton = document.createElement('button');
-                    deleteButton.innerHTML = '<i class="fas fa-trash"></i>';
-                    deleteButton.className = 'btn btn-danger btn-sm';
-                    deleteButton.title = 'Delete';
+                    let deleteButton = createButton({
+                        className: 'btn btn-danger btn-sm',
+                        iconClass: 'fas fa-trash',
+                        attributes: { title: 'Delete' }
+                    });
                     
                     deleteButton.addEventListener('click', () => {
                         let GeneralSettings = 'GeneralNPC_'+this.currentFaction;
@@ -461,9 +571,11 @@ export class chancesController {
             let addButtonContainer = document.createElement('div');
             addButtonContainer.className = 'd-flex justify-content-center mb-3';
             
-            let addButton = document.createElement('button');
-            addButton.className = 'btn btn-success btn-sm';
-            addButton.innerHTML = '<i class="fas fa-plus me-1"></i>Add Item';
+            let addButton = createButton({
+                className: 'btn btn-success btn-sm',
+                text: 'Add Item',
+                iconClass: 'fas fa-plus'
+            });
             addButton.addEventListener('click', () => {
                 this.showAddSelection(tableContainer, tableType, classification);
             });
@@ -499,7 +611,7 @@ export class chancesController {
                 
                 let labelEl = document.createElement('label');
                 labelEl.className = 'form-label';
-                labelEl.innerHTML = thisAttr[0];
+                setTextContent(labelEl, thisAttr[0]);
                 
                 let attrElement = null;
                 if (thisAttr[1] === 'select') {
@@ -550,6 +662,47 @@ export class chancesController {
                     attrElement.dataset.type = type;
                     attrElement.dataset.to_item = item;
                     attrElement.dataset.to_attr = thisAttr[0];
+
+                    // Add validation for number inputs
+                    if (thisAttr[1] === 'number') {
+                        // Set appropriate min/max based on attribute type
+                        let min = 0;
+                        let max = 1000;
+                        
+                        if (thisAttr[0].includes('Condition')) {
+                            max = 100; // Condition is percentage
+                        }
+                        
+                        attrElement.min = min;
+                        attrElement.max = max;
+
+                        // Add real-time validation
+                        attrElement.addEventListener('input', function() {
+                            const validation = validateNumber(this.value, min, max);
+                            if (validation.isValid) {
+                                this.classList.remove('is-invalid');
+                                this.classList.add('is-valid');
+                                this.title = '';
+                            } else {
+                                this.classList.remove('is-valid');
+                                this.classList.add('is-invalid');
+                                this.title = validation.error;
+                            }
+                        });
+
+                        // Add change validation
+                        attrElement.addEventListener('change', function(e) {
+                            const validation = validateNumber(e.target.value, min, max);
+                            if (validation.isValid) {
+                                e.target.value = validation.sanitizedValue;
+                                e.target.classList.remove('is-invalid');
+                                e.target.classList.add('is-valid');
+                            } else {
+                                e.target.classList.add('is-invalid');
+                                e.target.title = validation.error;
+                            }
+                        });
+                    }
                 }
 
                 formGroup.appendChild(labelEl);
@@ -567,16 +720,31 @@ export class chancesController {
             
             let cardHeader = document.createElement('div');
             cardHeader.className = 'card-header';
-            cardHeader.innerHTML = `
-                <h6 class="mb-0">
-                    <button class="btn btn-link text-decoration-none p-0 text-start w-100" type="button" 
-                            data-bs-toggle="collapse" data-bs-target="#collapse-${item.replace(/\s+/g, '-')}" 
-                            aria-expanded="true" aria-controls="collapse-${item.replace(/\s+/g, '-')}">
-                        ${item}
-                        <i class="fas fa-chevron-down float-end"></i>
-                    </button>
-                </h6>
-            `;
+            
+            const h6 = createElement('h6', {
+                className: 'mb-0'
+            });
+            
+            const button = createElement('button', {
+                className: 'btn btn-link text-decoration-none p-0 text-start w-100',
+                attributes: {
+                    type: 'button',
+                    'data-bs-toggle': 'collapse',
+                    'data-bs-target': `#collapse-${item.replace(/\s+/g, '-')}`,
+                    'aria-expanded': 'true',
+                    'aria-controls': `collapse-${item.replace(/\s+/g, '-')}`
+                }
+            });
+            
+            button.appendChild(document.createTextNode(item));
+            
+            const chevronIcon = createElement('i', {
+                className: 'fas fa-chevron-down float-end'
+            });
+            button.appendChild(chevronIcon);
+            
+            h6.appendChild(button);
+            cardHeader.appendChild(h6);
             
             let collapseDiv = document.createElement('div');
             collapseDiv.className = 'collapse show';
