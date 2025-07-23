@@ -5,9 +5,25 @@ import { withLoadingSpinner } from './spinner.js';
 import { chancesController } from './chances.js';
 /*ugliest code that I wrote*/
 import * as configs from './configs.js'; 
-import { deepCopy } from './utils.js';
 import { createModal, createElement, createCardHeader, createFormInput, createAlert, escapeHtml, setTextContent, clearContent } from './utils/dom.js';
 import { validateNumber, validatePercentage, validateConfigName, validatePin, validateString, addInputValidation } from './utils/validation.js';
+
+// Import lazy loading system for performance optimization
+import { 
+    configLoader,
+    getWeaponSettings,
+    getArmorSettings,
+    getArmorSpawnSettings,
+    getHelmetSpawnSettings,
+    getGrenadeSettings,
+    getAmmoByWeaponClass,
+    getWeaponList,
+    getDropConfigs,
+    getPistolSettings
+} from './state/ConfigLoader.js';
+
+// Import performance monitoring
+import { performanceMonitor, logPerformanceReport } from './utils/performance.js';
 
 
 // End of bootstrap fixes
@@ -55,16 +71,42 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-export var modifiedWeaponSettings = deepCopy(configs.oWeaponLoadoutSettings);
-export var modifiedArmorSettings = deepCopy(configs.oArmorLoadoutSettings);
-export var modifiedArmorSpawnSettings = deepCopy(configs.oArmorSpawnSettings); 
-export var modifiedHelmetSpawnSettings = deepCopy(configs.oHelmetsGlobalSpawnSettings);
-export var modifiedGrenadeSettings = deepCopy(configs.oGrenadesSettings);
-export var modifiedAmmoByWeaponClass = deepCopy(configs.oAmmoByWeaponClass);
-export var modifiedWeaponList = deepCopy(configs.oWeaponList);
+// Lazy initialization of configuration variables to improve startup performance
+// Variables are initialized only when first accessed
+let _modifiedWeaponSettings = null;
+let _modifiedArmorSettings = null;
+let _modifiedArmorSpawnSettings = null;
+let _modifiedHelmetSpawnSettings = null;
+let _modifiedGrenadeSettings = null;
+let _modifiedAmmoByWeaponClass = null;
+let _modifiedWeaponList = null;
+let _modifiedDropConfigs = null;
+let _modifiedPistolSettings = null;
+
+// Lazy getter functions that initialize on first access
+export const getModifiedWeaponSettings = () => _modifiedWeaponSettings || (_modifiedWeaponSettings = getWeaponSettings(true));
+export const getModifiedArmorSettings = () => _modifiedArmorSettings || (_modifiedArmorSettings = getArmorSettings(true));
+export const getModifiedArmorSpawnSettings = () => _modifiedArmorSpawnSettings || (_modifiedArmorSpawnSettings = getArmorSpawnSettings(true));
+export const getModifiedHelmetSpawnSettings = () => _modifiedHelmetSpawnSettings || (_modifiedHelmetSpawnSettings = getHelmetSpawnSettings(true));
+export const getModifiedGrenadeSettings = () => _modifiedGrenadeSettings || (_modifiedGrenadeSettings = getGrenadeSettings(true));
+export const getModifiedAmmoByWeaponClass = () => _modifiedAmmoByWeaponClass || (_modifiedAmmoByWeaponClass = getAmmoByWeaponClass(true));
+export const getModifiedWeaponList = () => _modifiedWeaponList || (_modifiedWeaponList = getWeaponList(true));
+export const getModifiedDropConfigs = () => _modifiedDropConfigs || (_modifiedDropConfigs = getDropConfigs(true));
+export const getModifiedPistolSettings = () => _modifiedPistolSettings || (_modifiedPistolSettings = getPistolSettings(true));
+
+// Backward compatibility: maintain variable names but use lazy initialization
+export var modifiedWeaponSettings = getModifiedWeaponSettings();
+export var modifiedArmorSettings = getModifiedArmorSettings();
+export var modifiedArmorSpawnSettings = getModifiedArmorSpawnSettings();
+export var modifiedHelmetSpawnSettings = getModifiedHelmetSpawnSettings();
+export var modifiedGrenadeSettings = getModifiedGrenadeSettings();
+export var modifiedAmmoByWeaponClass = getModifiedAmmoByWeaponClass();
+export var modifiedWeaponList = getModifiedWeaponList();
+export var modifiedDropConfigs = getModifiedDropConfigs();
+export var modifiedPistolSettings = getModifiedPistolSettings();
+
+// Non-config variables remain as before
 export var modsCompatibility = {SHA: false}
-export var modifiedDropConfigs = deepCopy(configs.oDropConfigs);
-export var modifiedPistolSettings = deepCopy(configs.oPistolLoadoutSettings);
 export var modifiedPistolSpawnChance = configs.nPistolLootChance;
 export var modifiedMinWeaponDurability = configs.nMinWeaponDurability;
 export var modifiedMaxWeaponDurability = configs.nMaxWeaponDurability;
@@ -730,19 +772,60 @@ const createMessageBox = (wind, contentElement) => {
         ]
     });
     
+    // Register element for cleanup tracking
+    registerElement(messageBox, { type: 'modal', id: wind });
+    
     document.body.appendChild(messageBox);
+};
+
+// WeakMap to track DOM element references for cleanup
+const elementRegistry = new WeakMap();
+
+/**
+ * Store element reference for cleanup tracking
+ * @param {HTMLElement} element - DOM element to track
+ * @param {Object} metadata - Metadata about the element (event listeners, etc.)
+ */
+const registerElement = (element, metadata = {}) => {
+    elementRegistry.set(element, {
+        listeners: [],
+        ...metadata
+    });
+};
+
+/**
+ * Clean up all tracked event listeners for an element
+ * @param {HTMLElement} element - DOM element to clean up
+ */
+const cleanupElement = (element) => {
+    const metadata = elementRegistry.get(element);
+    if (metadata && metadata.listeners) {
+        metadata.listeners.forEach(({ event, handler, options }) => {
+            element.removeEventListener(event, handler, options);
+        });
+    }
+    elementRegistry.delete(element);
 };
 
 const removeMessageBox = (wind) => {
     const messageBox = document.getElementById('messageBox_'+wind);
     if (messageBox && messageBox.parentNode) {
-        // Remove all event listeners before removing the element
-        const newElement = messageBox.cloneNode(false);
-        messageBox.parentNode.replaceChild(newElement, messageBox);
-        newElement.remove();
+        // Clean up tracked event listeners
+        const allElements = messageBox.querySelectorAll('*');
+        [messageBox, ...allElements].forEach(cleanupElement);
+        
+        // Remove the element
+        messageBox.remove();
     }
 };
 
+// Performance debugging function (can be called from console)
+window.debugPerformance = () => {
+    logPerformanceReport();
+    return performanceMonitor.getReport();
+};
+
+// Add performance monitoring to export function
 const exportToJSON = () => {
     let data = {
         WeaponSettings: modifiedWeaponSettings,
@@ -787,15 +870,30 @@ const importFromJSON = () => {
         let reader = new FileReader();
         reader.onload = function(e) {
             let data = JSON.parse(e.target.result);
+            
+            // Update configurations using the configLoader system
+            configLoader.updateConfig('oWeaponLoadoutSettings', data.WeaponSettings);
+            configLoader.updateConfig('oArmorLoadoutSettings', data.ArmorSettings);
+            configLoader.updateConfig('oGrenadesSettings', data.GrenadeSettings);
+            configLoader.updateConfig('oAmmoByWeaponClass', data.AmmoSettings);
+            configLoader.updateConfig('oWeaponList', data.WeaponList);
+            configLoader.updateConfig('oDropConfigs', data.DropConfigs);
+            configLoader.updateConfig('oArmorSpawnSettings', data.ArmorSpawnSettings);
+            configLoader.updateConfig('oHelmetsGlobalSpawnSettings', adoptOldHelmetVersion(data.HelmetsSettings));
+            
+            // Update compatibility data (not managed by configLoader)
+            modsCompatibility = data.Compatibility;
+            
+            // Update the global variables to reflect loaded data
             modifiedWeaponSettings = data.WeaponSettings;
             modifiedArmorSettings = data.ArmorSettings;
             modifiedGrenadeSettings = data.GrenadeSettings;
             modifiedAmmoByWeaponClass = data.AmmoSettings;
             modifiedWeaponList = data.WeaponList;
             modifiedDropConfigs = data.DropConfigs;
-            modsCompatibility = data.Compatibility;
             modifiedArmorSpawnSettings = data.ArmorSpawnSettings;
             modifiedHelmetSpawnSettings = adoptOldHelmetVersion(data.HelmetsSettings);
+            
             clearContent(contentEl);
             oCategoryToEvent[chancesCtrl.currentCategory]();
         };
