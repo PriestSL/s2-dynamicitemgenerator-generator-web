@@ -5,32 +5,9 @@ import { withLoadingSpinner } from './spinner.js';
 import { chancesController } from './chances.js';
 /*ugliest code that I wrote*/
 import * as configs from './configs.js'; 
+import { deepCopy } from './utils.js';
 import { createModal, createElement, createCardHeader, createFormInput, createAlert, escapeHtml, setTextContent, clearContent } from './utils/dom.js';
 import { validateNumber, validatePercentage, validateConfigName, validatePin, validateString, addInputValidation } from './utils/validation.js';
-
-// Import new state management system (Phase 1 of refactor)
-import store from './state/store.js';
-import { configLoader } from './state/ConfigLoader.js';
-
-// Import legacy compatibility exports for backward compatibility
-import {
-    modifiedWeaponSettings,
-    modifiedArmorSettings,
-    modifiedArmorSpawnSettings,
-    modifiedHelmetSpawnSettings,
-    modifiedGrenadeSettings,
-    modifiedAmmoByWeaponClass,
-    modifiedWeaponList,
-    modifiedDropConfigs,
-    modifiedPistolSettings,
-    modsCompatibility,
-    modifiedPistolSpawnChance,
-    modifiedMinWeaponDurability,
-    modifiedMaxWeaponDurability
-} from './state/legacyExports.js';
-
-// Import performance monitoring
-import { performanceMonitor, logPerformanceReport } from './utils/performance.js';
 
 
 // End of bootstrap fixes
@@ -78,9 +55,19 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// @deprecated - Legacy lazy loading replaced by new state management system
-// All configuration access now goes through the state store
-// This comment marks the removal of the old system in Phase 1 refactor
+export var modifiedWeaponSettings = deepCopy(configs.oWeaponLoadoutSettings);
+export var modifiedArmorSettings = deepCopy(configs.oArmorLoadoutSettings);
+export var modifiedArmorSpawnSettings = deepCopy(configs.oArmorSpawnSettings); 
+export var modifiedHelmetSpawnSettings = deepCopy(configs.oHelmetsGlobalSpawnSettings);
+export var modifiedGrenadeSettings = deepCopy(configs.oGrenadesSettings);
+export var modifiedAmmoByWeaponClass = deepCopy(configs.oAmmoByWeaponClass);
+export var modifiedWeaponList = deepCopy(configs.oWeaponList);
+export var modsCompatibility = {SHA: false}
+export var modifiedDropConfigs = deepCopy(configs.oDropConfigs);
+export var modifiedPistolSettings = deepCopy(configs.oPistolLoadoutSettings);
+export var modifiedPistolSpawnChance = configs.nPistolLootChance;
+export var modifiedMinWeaponDurability = configs.nMinWeaponDurability;
+export var modifiedMaxWeaponDurability = configs.nMaxWeaponDurability;
 
 const chancesCtrl = new chancesController();
 // Initialize chances controller with the current settings
@@ -172,11 +159,11 @@ const showPrimarySettings = () => {
     
     // Add event listeners
     document.getElementById('minWeaponCondition').addEventListener('change', function(e) {
-        store.update({ minWeaponDurability: e.target.value });
+        modifiedMinWeaponDurability = e.target.value;
     });
     
     document.getElementById('maxWeaponCondition').addEventListener('change', function(e) {
-        store.update({ maxWeaponDurability: e.target.value });
+        modifiedMaxWeaponDurability = e.target.value;
     });
 
     chancesCtrl.fillAttributesTable(modifiedWeaponList, contentEl, 'weapon');
@@ -279,7 +266,7 @@ const showPistols = ()=>{
         // Add validation with change handler for data updates
         addInputValidation(pistolSpawnChanceInput, validatePercentage, 
             (sanitizedValue) => {
-                store.update({ pistolSpawnChance: sanitizedValue });
+                modifiedPistolSpawnChance = sanitizedValue;
             }, true);
 
         pistolSpawnChance.appendChild(pistolSpawnChanceInput);
@@ -743,60 +730,19 @@ const createMessageBox = (wind, contentElement) => {
         ]
     });
     
-    // Register element for cleanup tracking
-    registerElement(messageBox, { type: 'modal', id: wind });
-    
     document.body.appendChild(messageBox);
-};
-
-// WeakMap to track DOM element references for cleanup
-const elementRegistry = new WeakMap();
-
-/**
- * Store element reference for cleanup tracking
- * @param {HTMLElement} element - DOM element to track
- * @param {Object} metadata - Metadata about the element (event listeners, etc.)
- */
-const registerElement = (element, metadata = {}) => {
-    elementRegistry.set(element, {
-        listeners: [],
-        ...metadata
-    });
-};
-
-/**
- * Clean up all tracked event listeners for an element
- * @param {HTMLElement} element - DOM element to clean up
- */
-const cleanupElement = (element) => {
-    const metadata = elementRegistry.get(element);
-    if (metadata && metadata.listeners) {
-        metadata.listeners.forEach(({ event, handler, options }) => {
-            element.removeEventListener(event, handler, options);
-        });
-    }
-    elementRegistry.delete(element);
 };
 
 const removeMessageBox = (wind) => {
     const messageBox = document.getElementById('messageBox_'+wind);
     if (messageBox && messageBox.parentNode) {
-        // Clean up tracked event listeners
-        const allElements = messageBox.querySelectorAll('*');
-        [messageBox, ...allElements].forEach(cleanupElement);
-        
-        // Remove the element
-        messageBox.remove();
+        // Remove all event listeners before removing the element
+        const newElement = messageBox.cloneNode(false);
+        messageBox.parentNode.replaceChild(newElement, messageBox);
+        newElement.remove();
     }
 };
 
-// Performance debugging function (can be called from console)
-window.debugPerformance = () => {
-    logPerformanceReport();
-    return performanceMonitor.getReport();
-};
-
-// Add performance monitoring to export function
 const exportToJSON = () => {
     let data = {
         WeaponSettings: modifiedWeaponSettings,
@@ -841,33 +787,15 @@ const importFromJSON = () => {
         let reader = new FileReader();
         reader.onload = function(e) {
             let data = JSON.parse(e.target.result);
-            
-            // Update configurations using the configLoader system
-            configLoader.updateConfig('oWeaponLoadoutSettings', data.WeaponSettings);
-            configLoader.updateConfig('oArmorLoadoutSettings', data.ArmorSettings);
-            configLoader.updateConfig('oGrenadesSettings', data.GrenadeSettings);
-            configLoader.updateConfig('oAmmoByWeaponClass', data.AmmoSettings);
-            configLoader.updateConfig('oWeaponList', data.WeaponList);
-            configLoader.updateConfig('oDropConfigs', data.DropConfigs);
-            configLoader.updateConfig('oArmorSpawnSettings', data.ArmorSpawnSettings);
-            configLoader.updateConfig('oHelmetsGlobalSpawnSettings', adoptOldHelmetVersion(data.HelmetsSettings));
-            
-            // Update state using the new store system
-            store.replace({
-                weaponSettings: data.WeaponSettings,
-                armorSettings: data.ArmorSettings,
-                grenadeSettings: data.GrenadeSettings,
-                ammoByWeaponClass: data.AmmoSettings,
-                weaponList: data.WeaponList,
-                dropConfigs: data.DropConfigs,
-                armorSpawnSettings: data.ArmorSpawnSettings,
-                helmetSpawnSettings: adoptOldHelmetVersion(data.HelmetsSettings),
-                compatibility: data.Compatibility || { SHA: false },
-                pistolSpawnChance: data.PistolSpawnChance || configs.nPistolLootChance,
-                minWeaponDurability: data.MinWeaponDurability || configs.nMinWeaponDurability,
-                maxWeaponDurability: data.MaxWeaponDurability || configs.nMaxWeaponDurability
-            });
-            
+            modifiedWeaponSettings = data.WeaponSettings;
+            modifiedArmorSettings = data.ArmorSettings;
+            modifiedGrenadeSettings = data.GrenadeSettings;
+            modifiedAmmoByWeaponClass = data.AmmoSettings;
+            modifiedWeaponList = data.WeaponList;
+            modifiedDropConfigs = data.DropConfigs;
+            modsCompatibility = data.Compatibility;
+            modifiedArmorSpawnSettings = data.ArmorSpawnSettings;
+            modifiedHelmetSpawnSettings = adoptOldHelmetVersion(data.HelmetsSettings);
             clearContent(contentEl);
             oCategoryToEvent[chancesCtrl.currentCategory]();
         };
@@ -1112,20 +1040,15 @@ const openPresetsWindow = async () => {
                 }
                 
                 let preset = data.data;
-                
-                // Update state using the new store system
-                store.replace({
-                    weaponSettings: preset.WeaponSettings,
-                    armorSettings: preset.ArmorSettings,
-                    grenadeSettings: preset.GrenadeSettings,
-                    ammoByWeaponClass: preset.AmmoSettings,
-                    weaponList: preset.WeaponList,
-                    dropConfigs: preset.DropConfigs,
-                    compatibility: preset.Compatibility || { SHA: false },
-                    armorSpawnSettings: preset.ArmorSpawnSettings,
-                    helmetSpawnSettings: preset.HelmetsSettings
-                });
-                
+                modifiedWeaponSettings = preset.WeaponSettings;
+                modifiedArmorSettings = preset.ArmorSettings;
+                modifiedGrenadeSettings = preset.GrenadeSettings;
+                modifiedAmmoByWeaponClass = preset.AmmoSettings;
+                modifiedWeaponList = preset.WeaponList;
+                modifiedDropConfigs = preset.DropConfigs;
+                modsCompatibility = preset.Compatibility;
+                modifiedArmorSpawnSettings = preset.ArmorSpawnSettings;
+                modifiedHelmetSpawnSettings = preset.HelmetsSettings;
                 document.getElementById('config_name').value = presetCard.dataset.name;
 
                 clearContent(contentEl);
@@ -1173,20 +1096,15 @@ const openPresetsWindow = async () => {
                 
                 // Load preset data
                 let preset = data.data;
-                
-                // Update state using the new store system
-                store.replace({
-                    weaponSettings: preset.WeaponSettings,
-                    armorSettings: preset.ArmorSettings,
-                    grenadeSettings: preset.GrenadeSettings,
-                    ammoByWeaponClass: preset.AmmoSettings,
-                    weaponList: preset.WeaponList,
-                    dropConfigs: preset.DropConfigs,
-                    compatibility: preset.Compatibility || { SHA: false },
-                    armorSpawnSettings: preset.ArmorSpawnSettings,
-                    helmetSpawnSettings: preset.HelmetsSettings
-                });
-                
+                modifiedWeaponSettings = preset.WeaponSettings;
+                modifiedArmorSettings = preset.ArmorSettings;
+                modifiedGrenadeSettings = preset.GrenadeSettings;
+                modifiedAmmoByWeaponClass = preset.AmmoSettings;
+                modifiedWeaponList = preset.WeaponList;
+                modifiedDropConfigs = preset.DropConfigs;
+                modsCompatibility = preset.Compatibility;
+                modifiedArmorSpawnSettings = preset.ArmorSpawnSettings;
+                modifiedHelmetSpawnSettings = preset.HelmetsSettings;
                 document.getElementById('config_name').value = presetCard.dataset.name;
                 
                 // Store the preset ID and PIN for later use
