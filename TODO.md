@@ -1,404 +1,171 @@
-# S2 Dynamic Item Generator - Refactoring TODO
+# S2 Dynamic Item Generator - Updated Refactoring & Improvement Plan
 
-## Overview
-This TODO outlines a comprehensive refactoring plan for the S2 Dynamic Item Generator web application. The current codebase has significant architectural, security, and maintainability issues that need to be addressed.
+## Goal
+Lean, maintainable, secure JavaScript (no TypeScript migration for now). Focus on: stability, clarity, user experience, and safe extensibility for generating the config text file.
 
-## Phase 1: Critical Security & Performance Fixes (Priority: HIGH)
+## Phase 1 (DONE): Critical Security & Performance
 
-### 1.1 Security Vulnerabilities
-- [x] **Fix XSS vulnerabilities in DOM manipulation**
-  - ✅ Replaced unsafe `innerHTML` usage in `createMessageBox()` and `drawCloseButton()` 
-  - ✅ Created safe DOM utility functions in `src/js/utils/dom.js`
-  - ✅ Added basic Content Security Policy (CSP) headers
-  - ✅ Replaced critical `innerHTML` usage in card headers and form inputs
-  - ✅ **COMPLETED**: Fixed all XSS vulnerabilities in `chances.js` (11 innerHTML replacements)
-  - ✅ **COMPLETED**: Fixed all user-input related XSS vulnerabilities in `app.js`
-  - ✅ **COMPLETED**: Replaced content clearing with safe `clearContent()` function
-  - 📝 **REMAINING**: Static HTML templates in modals (low risk - no user input)
+### 1.1 Security (Completed)
+- [x] Eliminated unsafe `innerHTML` in dynamic UI flows
+- [x] Added safe DOM helpers (`dom.js`) + `clearContent()`
+- [x] Replaced vulnerable insertions in `app.js` & `chances.js`
+- [x] Added basic CSP header guidance (to document/deploy)
+- [x] Validation utilities cover all user inputs
+- [x] Real‑time validation on key numeric & name fields
+- [x] Sanitized preset import + name handling
+- [ ] (Low risk) Audit static modal template fragments (ensure no user data ever injected there)
 
-- [x] **Input validation and sanitization**
-  - ✅ Created comprehensive validation utility functions in `src/js/utils/validation.js`
-  - ✅ Added real-time input validation for form inputs (weapon condition inputs)
-  - ✅ Implemented validation for numbers, percentages, strings, and configuration names
-  - ✅ **COMPLETED**: Applied validation to all user inputs throughout the application
-    - ✅ Main config name input with real-time validation
-    - ✅ Pistol spawn chance input with percentage validation
-    - ✅ All chance inputs in chances.js with number validation (0-1000)
-    - ✅ All table inputs for armor attributes with appropriate range validation
-    - ✅ File settings inputs (armor chance, min/max condition) with percentage validation
-    - ✅ Preset form inputs with string, config name, and PIN validation
-    - ✅ Weapon condition inputs (min/max) with percentage validation
+### 1.2 Performance (Completed)
+- [x] Lazy config loading via `ConfigLoader`
+- [x] Removed deep copy hotspots / switched to on-demand clones
+- [x] Memory leak prevention (listener tracking + cleanup)
+- [x] Performance utilities + `window.debugPerformance()`
+- [x] Startup memory reduced substantially
 
-### 1.2 Performance Issues
-- [x] **Fix memory leaks**
-  - ✅ Enhanced `removeMessageBox()` function with proper event listener cleanup
-  - ✅ Implemented WeakMap-based element registry for tracking DOM references
-  - ✅ Added `trackEventListener()` and `cleanupElement()` utilities for comprehensive cleanup
-  - ✅ **COMPLETED**: Memory leak prevention system with automatic cleanup on element removal
+### 1.3 Additional Hardening (New Follow-ups)
+- [ ] Add ESLint rule/pattern check to forbid raw `innerHTML` except in vetted utility
+- [ ] Add lightweight content security doc (README section) with recommended meta tag
+- [ ] Add size & line-count guard on imported preset/config files
 
-- [x] **Optimize large data structures**
-  - ✅ Created `ConfigLoader` class in `src/js/state/ConfigLoader.js` for lazy loading
-  - ✅ Replaced expensive global deep copies with lazy initialization system
-  - ✅ Implemented configuration caching and memory management
-  - ✅ Added performance monitoring utilities in `src/js/utils/performance.js`
-  - ✅ **COMPLETED**: Reduced startup memory usage by ~80% through lazy loading
-  - ✅ **COMPLETED**: Added `window.debugPerformance()` function for runtime performance analysis
+## Phase 2: Minimal State & Structure (Priority: HIGH, In Progress)
+Rationale: Avoid over-engineering full reactive system; introduce a tiny pub/sub state wrapper and reduce global mutation.
 
-## Phase 2: Code Architecture Refactoring (Priority: HIGH)
+### 2.1 Central State (Lightweight)
+- [ ] `src/js/state/configState.js` with:
+  - `getState()` returns frozen snapshot
+  - `update(partial)` merges + notifies
+  - `subscribe(key, fn)` for granular listeners
+  - Stored keys: `weaponSettings`, `armorSettings`, `armorSpawnSettings`, `currentPreset`, `dirtyFlags`
+- [ ] Replace globals: `modifiedWeaponSettings`, `modifiedArmorSettings`, `modifiedArmorSpawnSettings`
+- [ ] Add dirty tracking + `beforeunload` warning if unsaved
+- [ ] LocalStorage persistence (debounced) under versioned key
 
-### 2.1 State Management System
-- [ ] **Implement centralized state management**
-  ```javascript
-  // Create src/js/state/ConfigState.js
-  class ConfigState {
-    constructor() {
-      this.subscribers = new Map();
-      this.state = {
-        weaponSettings: null,
-        armorSettings: null,
-        armorSpawnSettings: null,
-        currentPreset: null
-      };
-    }
-  }
-  ```
+### 2.2 Config Module Organization (Pragmatic Split)
+- [ ] Split `configs.js` only where clarity improves (avoid deep tree):
+  - `src/js/configs/weapons.js`
+  - `src/js/configs/armor.js`
+  - `src/js/configs/factions.js`
+  - `src/js/configs/index.js` (re-exports + freeze objects)
+- [ ] Add a `validateConfigShape(config)` runtime check (no TypeScript)
 
-- [ ] **Replace global variables with state management**
-  - Remove `modifiedWeaponSettings`, `modifiedArmorSettings`, `modifiedArmorSpawnSettings`
-  - Implement reactive state updates
-  - Add state persistence to localStorage
+### 2.3 Services Layer (Slim)
+- [ ] `ConfigService.js`: load, clone, validate, reset
+- [ ] `FileService.js`: export/import (wrap existing generator + file I/O)
+- [ ] `PresetService.js`: create/update/delete + PIN validation reuse
 
-### 2.2 Module Reorganization
-- [ ] **Break down monolithic files**
-  - Split `src/js/configs.js` into smaller modules:
-    ```
-    src/js/configs/
-    ├── weapons/
-    │   ├── shotguns.js
-    │   ├── rifles.js
-    │   ├── pistols.js
-    │   └── index.js
-    ├── armor/
-    │   ├── helmets.js
-    │   ├── suits.js
-    │   └── index.js
-    ├── factions/
-    │   └── index.js
-    └── index.js
-    ```
+### 2.4 Error Handling & Logging
+- [ ] Add `utils/logger.js` (levels: error, warn, info, debug; toggle via `window.__DEBUG__`)
+- [ ] Wrap async preset/file operations with try/catch + user-friendly toast/message
+- [ ] Central `handleError(err, context)` producing safe UI message
+- [ ] Console suppression of raw stack traces in production flag
 
-- [ ] **Refactor app.js into smaller modules**
-  ```
-  src/js/
-  ├── components/
-  │   ├── Modal.js
-  │   ├── Table.js
-  │   ├── ConfigGenerator.js
-  │   └── PresetManager.js
-  ├── utils/
-  │   ├── validation.js
-  │   ├── sanitization.js
-  │   └── dom.js
-  └── services/
-      ├── ConfigService.js
-      └── FileService.js
-  ```
+## Phase 3: Persistence, Integrity & UX Safety (Priority: HIGH)
+### 3.1 Persistence Enhancements
+- [ ] Version key: `configState_v1` (future migration hook)
+- [ ] Automatic autosave every 5s (debounced) when dirty
+- [ ] Manual Save button state (disabled if not dirty)
+- [ ] Add Reset to Defaults action (with confirm)
 
-### 2.3 Error Handling & Logging
-- [ ] **Implement comprehensive error handling**
-  - Create error handling middleware
-  - Add user-friendly error messages
-  - Implement error logging system
-  - Add try-catch blocks to all async operations
+### 3.2 Data Integrity
+- [ ] Hash/signature of exported data (simple SHA-256) embedded as comment line for tamper awareness
+- [ ] On import: recompute & warn if mismatch
+- [ ] Add range normalization helper (clamps to allowed domain silently + logs warning)
+- [ ] Config diff generator (original vs modified) for preview before export
 
-- [ ] **Create logging utility**
-  ```javascript
-  // src/js/utils/logger.js
-  export class Logger {
-    static error(message, error) { /* implementation */ }
-    static warn(message) { /* implementation */ }
-    static info(message) { /* implementation */ }
-  }
-  ```
-
-## Phase 3: TypeScript Migration (Priority: MEDIUM)
-
-### 3.1 Setup TypeScript Environment
-- [ ] **Install TypeScript and related dependencies**
-  ```bash
-  npm install -D typescript @types/node @types/file-saver
-  npm install -D vite-plugin-typescript
-  ```
-
-- [ ] **Create TypeScript configuration**
-  ```json
-  // tsconfig.json
-  {
-    "compilerOptions": {
-      "target": "ES2020",
-      "module": "ESNext",
-      "moduleResolution": "node",
-      "strict": true,
-      "noUnusedLocals": true,
-      "noUnusedParameters": true,
-      "exactOptionalPropertyTypes": true
-    }
-  }
-  ```
-
-- [ ] **Update Vite configuration for TypeScript**
-  - Modify `vite.config.js` to handle TypeScript files
-  - Add TypeScript plugin
-
-### 3.2 Type Definitions
-- [ ] **Create core type definitions**
-  ```typescript
-  // src/types/GameConfig.ts
-  export interface WeaponConfig {
-    maxAmmo: number;
-    chances: [number, number, number, number]; // Exactly 4 ranks
-    enabled: boolean;
-  }
-
-  export interface ArmorConfig {
-    durability: {
-      min: number;
-      max: number;
-    };
-    lootChance: number;
-  }
-
-  export interface FactionConfig {
-    name: string;
-    weapons: Record<string, WeaponConfig>;
-    armor: Record<string, ArmorConfig>;
-  }
-  ```
-
-- [ ] **Define API interfaces**
-  ```typescript
-  // src/types/API.ts
-  export interface PresetData {
-    id?: string;
-    name: string;
-    pin: string;
-    data: {
-      WeaponSettings: Record<string, any>;
-      ArmorSettings: Record<string, any>;
-      ArmorSpawnSettings: Record<string, any>;
-    };
-    createdAt?: Date;
-    updatedAt?: Date;
-  }
-  ```
-
-### 3.3 Gradual Migration Strategy
-- [ ] **Phase 3.1: Migrate utilities first**
-  - Convert `src/js/utils.js` → `src/utils/index.ts`
-  - Convert validation functions
-  - Convert DOM utilities
-
-- [ ] **Phase 3.2: Migrate configuration files**
-  - Convert `src/js/configs.js` → `src/configs/index.ts`
-  - Add proper typing for all configuration objects
-  - Implement configuration validation
-
-- [ ] **Phase 3.3: Migrate core modules**
-  - Convert `fileStreamGenerator.js` → `services/FileService.ts`
-  - Convert `restCalls.js` → `services/ApiService.ts`
-  - Convert `chances.js` → `utils/ChanceCalculator.ts`
-
-- [ ] **Phase 3.4: Migrate main application**
-  - Convert `app.js` → `main.ts`
-  - Add proper typing for all DOM interactions
-  - Implement type-safe state management
+### 3.3 Import/Export UX
+- [ ] Preview modal before final export (shows top-level counts + warnings)
+- [ ] File size & structural check on import (reject > X KB or invalid shape)
+- [ ] Graceful fallback if parsing fails (show snippet of offending segment)
 
 ## Phase 4: UI/UX Improvements (Priority: MEDIUM)
+### 4.1 Micro-Templating (No Framework)
+- [ ] Introduce `renderFragment(htmlString, bindings)` using `<template>` + safe text node injection (never raw user input)
+- [ ] Refactor repeated table row creation to a single function
 
-### 4.1 Template System
-- [ ] **Implement template engine or framework**
-  - Consider lightweight options: Lit, Alpine.js, or custom solution
-  - Replace string concatenation with proper templating
-  - Add component-based architecture
+### 4.2 Interaction Improvements
+- [ ] Keyboard shortcuts: Ctrl+S (save), Ctrl+E (export), Esc (close active modal)
+- [ ] Focus management after modal close (return to last focused trigger)
+- [ ] Add inline validation tooltips (pass/fail icons)
+- [ ] Loading spinner standardization (single component)
 
-- [ ] **Create reusable UI components**
-  ```javascript
-  // src/js/components/Modal.js
-  export class Modal {
-    constructor(options) { /* implementation */ }
-    show() { /* implementation */ }
-    hide() { /* implementation */ }
-  }
-  ```
+### 4.3 Accessibility
+- [ ] ARIA roles for modals & tables
+- [ ] Ensure tab order logical; trap focus inside modal
+- [ ] High contrast focus outlines
 
-### 4.2 Form Validation
-- [ ] **Implement real-time form validation**
-  - Add visual feedback for invalid inputs
-  - Implement custom validation rules
-  - Add accessibility improvements (ARIA labels, etc.)
-
-### 4.3 User Experience
-- [ ] **Improve loading states**
-  - Add skeleton loaders
-  - Implement progressive loading for large datasets
-  - Add better error recovery mechanisms
-
-- [ ] **Add keyboard shortcuts**
-  - Ctrl+S for save
-  - Ctrl+E for export
-  - ESC for closing modals
+### 4.4 Feedback & Messaging
+- [ ] Unified message/toast system (success / warning / error)
+- [ ] Non-blocking success notification after export
+- [ ] Undo last field change (single-step per major section)
 
 ## Phase 5: Testing & Documentation (Priority: MEDIUM)
-
-### 5.1 Testing Framework Setup
-- [ ] **Install testing dependencies**
-  ```bash
-  npm install -D vitest @testing-library/dom @testing-library/jest-dom
-  ```
-
-- [ ] **Create test structure**
-  ```
-  tests/
-  ├── unit/
-  │   ├── utils/
-  │   ├── services/
-  │   └── components/
-  ├── integration/
-  └── e2e/
-  ```
+### 5.1 Testing Setup
+- [ ] Add `vitest` + `@testing-library/dom`
+- [ ] Basic test script in `package.json`
+- [ ] Minimal smoke test: config load → modify → export string contains expected markers
 
 ### 5.2 Unit Tests
-- [ ] **Test utility functions**
-  - Test `deepCopy` function
-  - Test validation functions
-  - Test configuration generators
-
-- [ ] **Test state management**
-  - Test state updates
-  - Test persistence
-  - Test error handling
+- [ ] Validation utilities (edge ranges, invalid formats)
+- [ ] State module (subscribe/update, deep immutability)
+- [ ] Config diff + hash utilities
+- [ ] Generation output stable for known seed/sample
 
 ### 5.3 Integration Tests
-- [ ] **Test file generation**
-  - Test complete config generation flow
-  - Test export functionality
-  - Test import functionality
-
-- [ ] **Test API interactions**
-  - Test preset CRUD operations
-  - Test error handling
-  - Test network failures
+- [ ] Import malformed file (expect graceful error)
+- [ ] Full export flow with modified settings
+- [ ] Preset save/load cycle persists changes
 
 ### 5.4 Documentation
-- [ ] **Create comprehensive README**
-  - Setup instructions
-  - Development guide
-  - API documentation
+- [ ] Update README: architecture overview (no TypeScript, rationale)
+- [ ] Add security notes (CSP, safe DOM rules)
+- [ ] Add contribution guide (coding, commit, lint rules)
+- [ ] Inline JSDoc for public functions (inputs/outputs)
 
-- [ ] **Add inline documentation**
-  - JSDoc comments for all functions
-  - Type documentation
-  - Usage examples
+## Phase 6: Build & Deployment (Priority: LOW)
+### 6.1 Build & Quality
+- [ ] ESLint config: forbid `innerHTML` (except allow-list), `no-console` warn, enforce const
+- [ ] Add Prettier + formatting script
+- [ ] Husky + lint-staged pre-commit (lint + format + vitest --run)
 
-## Phase 6: Build & Deployment Improvements (Priority: LOW)
+### 6.2 Performance Tweaks
+- [ ] Check bundle (Vite analyze) – identify large images / compress
+- [ ] Lazy-load image assets not immediately needed
+- [ ] Defer non-critical initialization until user interaction
 
-### 6.1 Build Optimization
-- [ ] **Optimize bundle size**
-  - Implement code splitting
-  - Add tree shaking
-  - Optimize assets
+### 6.3 CI (Optional if repo public)
+- [ ] GitHub Action: install, lint, test, build
+- [ ] Cache node_modules for speed
+- [ ] Add Dependabot (security updates)
 
-- [ ] **Add development tools**
-  - Hot module replacement
-  - Source maps
-  - Development proxy
+## Phase 7 (Optional Future): Type Definition Layer (Deferred)
+If complexity grows, revisit either JSDoc typedefs expansion or partial TypeScript migration. Currently deferred for speed & simplicity.
 
-### 6.2 Code Quality
-- [ ] **Enhance linting configuration**
-  ```javascript
-  // eslint.config.mjs
-  export default [
-    {
-      rules: {
-        'no-console': 'warn',
-        'no-debugger': 'error',
-        'prefer-const': 'error',
-        'no-var': 'error'
-      }
-    }
-  ];
-  ```
+## Timeline (Adjusted)
+Weeks 1-2: (Done) Security + performance
+Weeks 3-4: Phase 2 (state + modular split) & start Phase 3 persistence
+Weeks 5-6: Finish Phase 3 + targeted UI/UX (shortcuts, validation feedback)
+Weeks 7-8: Testing + docs + basic CI
+Weeks 9+: Optional optimizations & deferred items
 
-- [ ] **Add pre-commit hooks**
-  ```bash
-  npm install -D husky lint-staged
-  ```
+## Notes / Rationale Changes
+- Removed full TypeScript migration (overhead vs current scope). Added deferred phase for possible future adoption.
+- Simplified module reorganization to avoid deep nesting that harms discoverability.
+- Chose runtime validation + hashing over static type system for now.
+- Focused on user safety (integrity, diff, preview) since exported file correctness is core value.
+- Introduced minimal state pattern instead of heavy framework.
 
-- [ ] **Add automated formatting**
-  ```bash
-  npm install -D prettier
-  ```
+## Quick Win Order (If Bandwidth Limited)
+1. Central state + persistence
+2. Hash + diff + safer import
+3. Export preview + keyboard shortcuts
+4. Logger + unified messaging
+5. Tests (core utilities + export flow)
 
-### 6.3 CI/CD Pipeline
-- [ ] **Setup GitHub Actions**
-  - Automated testing
-  - Build verification
-  - Deployment to staging
+## Definition of Done (Core)
+- No uncaught errors in normal flows
+- All exports reproducible & validated
+- Import rejects malformed/tampered input with clear message
+- Lint passes (no unsafe DOM) & tests green
 
-- [ ] **Add security scanning**
-  - Dependency vulnerability scanning
-  - Code security analysis
-
-## Implementation Timeline
-
-### Week 1-2: Critical Security & Performance
-- Fix XSS vulnerabilities
-- Implement input validation
-- Fix memory leaks
-- Basic error handling
-
-### Week 3-4: Architecture Refactoring
-- Implement state management
-- Break down monolithic files
-- Create modular structure
-
-### Week 5-8: TypeScript Migration
-- Setup TypeScript environment
-- Create type definitions
-- Gradual migration (utilities → configs → core → main)
-
-### Week 9-10: UI/UX Improvements
-- Implement template system
-- Create reusable components
-- Improve user experience
-
-### Week 11-12: Testing & Documentation
-- Setup testing framework
-- Write comprehensive tests
-- Create documentation
-
-### Week 13-14: Build & Deployment
-- Optimize build process
-- Setup CI/CD pipeline
-- Final polish and deployment
-
-## Notes
-
-### Why TypeScript is Recommended
-1. **Type Safety**: Current codebase has many magic numbers and unclear data structures
-2. **Better IDE Support**: IntelliSense will help with the complex configuration objects
-3. **Refactoring Safety**: Large-scale refactoring will be safer with compile-time checks
-4. **Documentation**: Types serve as living documentation
-5. **Error Prevention**: Many runtime errors can be caught at compile time
-
-### Migration Strategy
-- **Gradual**: Migrate incrementally to avoid breaking changes
-- **Bottom-up**: Start with utilities and work up to main application
-- **Type-first**: Define interfaces before implementing
-- **Validation**: Add runtime validation alongside static typing
-
-### Risk Mitigation
-- Create feature branches for each phase
-- Maintain backward compatibility during migration
-- Comprehensive testing before merging
-- Rollback plan for each phase
+---
+Feel free to mark items as complete inline as they are implemented. This file intentionally stays JavaScript-focused and pragmatic.

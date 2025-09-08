@@ -8,19 +8,26 @@ import * as configs from './configs.js';
 import { createModal, createElement, createCardHeader, createFormInput, createAlert, escapeHtml, setTextContent, clearContent } from './utils/dom.js';
 import { validateNumber, validatePercentage, validateConfigName, validatePin, validateString, addInputValidation } from './utils/validation.js';
 
-// Import lazy loading system for performance optimization
-import { 
-    configLoader,
-    getWeaponSettings,
-    getArmorSettings,
-    getArmorSpawnSettings,
-    getHelmetSpawnSettings,
-    getGrenadeSettings,
-    getAmmoByWeaponClass,
-    getWeaponList,
-    getDropConfigs,
-    getPistolSettings
-} from './state/ConfigLoader.js';
+// Import new state management system (Phase 1 of refactor)
+import store from './state/store.js';
+import { configLoader } from './state/ConfigLoader.js';
+
+// Import legacy compatibility exports for backward compatibility
+import {
+    modifiedWeaponSettings,
+    modifiedArmorSettings,
+    modifiedArmorSpawnSettings,
+    modifiedHelmetSpawnSettings,
+    modifiedGrenadeSettings,
+    modifiedAmmoByWeaponClass,
+    modifiedWeaponList,
+    modifiedDropConfigs,
+    modifiedPistolSettings,
+    modsCompatibility,
+    modifiedPistolSpawnChance,
+    modifiedMinWeaponDurability,
+    modifiedMaxWeaponDurability
+} from './state/legacyExports.js';
 
 // Import performance monitoring
 import { performanceMonitor, logPerformanceReport } from './utils/performance.js';
@@ -71,45 +78,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// Lazy initialization of configuration variables to improve startup performance
-// Variables are initialized only when first accessed
-let _modifiedWeaponSettings = null;
-let _modifiedArmorSettings = null;
-let _modifiedArmorSpawnSettings = null;
-let _modifiedHelmetSpawnSettings = null;
-let _modifiedGrenadeSettings = null;
-let _modifiedAmmoByWeaponClass = null;
-let _modifiedWeaponList = null;
-let _modifiedDropConfigs = null;
-let _modifiedPistolSettings = null;
-
-// Lazy getter functions that initialize on first access
-export const getModifiedWeaponSettings = () => _modifiedWeaponSettings || (_modifiedWeaponSettings = getWeaponSettings(true));
-export const getModifiedArmorSettings = () => _modifiedArmorSettings || (_modifiedArmorSettings = getArmorSettings(true));
-export const getModifiedArmorSpawnSettings = () => _modifiedArmorSpawnSettings || (_modifiedArmorSpawnSettings = getArmorSpawnSettings(true));
-export const getModifiedHelmetSpawnSettings = () => _modifiedHelmetSpawnSettings || (_modifiedHelmetSpawnSettings = getHelmetSpawnSettings(true));
-export const getModifiedGrenadeSettings = () => _modifiedGrenadeSettings || (_modifiedGrenadeSettings = getGrenadeSettings(true));
-export const getModifiedAmmoByWeaponClass = () => _modifiedAmmoByWeaponClass || (_modifiedAmmoByWeaponClass = getAmmoByWeaponClass(true));
-export const getModifiedWeaponList = () => _modifiedWeaponList || (_modifiedWeaponList = getWeaponList(true));
-export const getModifiedDropConfigs = () => _modifiedDropConfigs || (_modifiedDropConfigs = getDropConfigs(true));
-export const getModifiedPistolSettings = () => _modifiedPistolSettings || (_modifiedPistolSettings = getPistolSettings(true));
-
-// Backward compatibility: maintain variable names but use lazy initialization
-export var modifiedWeaponSettings = getModifiedWeaponSettings();
-export var modifiedArmorSettings = getModifiedArmorSettings();
-export var modifiedArmorSpawnSettings = getModifiedArmorSpawnSettings();
-export var modifiedHelmetSpawnSettings = getModifiedHelmetSpawnSettings();
-export var modifiedGrenadeSettings = getModifiedGrenadeSettings();
-export var modifiedAmmoByWeaponClass = getModifiedAmmoByWeaponClass();
-export var modifiedWeaponList = getModifiedWeaponList();
-export var modifiedDropConfigs = getModifiedDropConfigs();
-export var modifiedPistolSettings = getModifiedPistolSettings();
-
-// Non-config variables remain as before
-export var modsCompatibility = {SHA: false}
-export var modifiedPistolSpawnChance = configs.nPistolLootChance;
-export var modifiedMinWeaponDurability = configs.nMinWeaponDurability;
-export var modifiedMaxWeaponDurability = configs.nMaxWeaponDurability;
+// @deprecated - Legacy lazy loading replaced by new state management system
+// All configuration access now goes through the state store
+// This comment marks the removal of the old system in Phase 1 refactor
 
 const chancesCtrl = new chancesController();
 // Initialize chances controller with the current settings
@@ -201,11 +172,11 @@ const showPrimarySettings = () => {
     
     // Add event listeners
     document.getElementById('minWeaponCondition').addEventListener('change', function(e) {
-        modifiedMinWeaponDurability = e.target.value;
+        store.update({ minWeaponDurability: e.target.value });
     });
     
     document.getElementById('maxWeaponCondition').addEventListener('change', function(e) {
-        modifiedMaxWeaponDurability = e.target.value;
+        store.update({ maxWeaponDurability: e.target.value });
     });
 
     chancesCtrl.fillAttributesTable(modifiedWeaponList, contentEl, 'weapon');
@@ -308,7 +279,7 @@ const showPistols = ()=>{
         // Add validation with change handler for data updates
         addInputValidation(pistolSpawnChanceInput, validatePercentage, 
             (sanitizedValue) => {
-                modifiedPistolSpawnChance = sanitizedValue;
+                store.update({ pistolSpawnChance: sanitizedValue });
             }, true);
 
         pistolSpawnChance.appendChild(pistolSpawnChanceInput);
@@ -881,18 +852,21 @@ const importFromJSON = () => {
             configLoader.updateConfig('oArmorSpawnSettings', data.ArmorSpawnSettings);
             configLoader.updateConfig('oHelmetsGlobalSpawnSettings', adoptOldHelmetVersion(data.HelmetsSettings));
             
-            // Update compatibility data (not managed by configLoader)
-            modsCompatibility = data.Compatibility;
-            
-            // Update the global variables to reflect loaded data
-            modifiedWeaponSettings = data.WeaponSettings;
-            modifiedArmorSettings = data.ArmorSettings;
-            modifiedGrenadeSettings = data.GrenadeSettings;
-            modifiedAmmoByWeaponClass = data.AmmoSettings;
-            modifiedWeaponList = data.WeaponList;
-            modifiedDropConfigs = data.DropConfigs;
-            modifiedArmorSpawnSettings = data.ArmorSpawnSettings;
-            modifiedHelmetSpawnSettings = adoptOldHelmetVersion(data.HelmetsSettings);
+            // Update state using the new store system
+            store.replace({
+                weaponSettings: data.WeaponSettings,
+                armorSettings: data.ArmorSettings,
+                grenadeSettings: data.GrenadeSettings,
+                ammoByWeaponClass: data.AmmoSettings,
+                weaponList: data.WeaponList,
+                dropConfigs: data.DropConfigs,
+                armorSpawnSettings: data.ArmorSpawnSettings,
+                helmetSpawnSettings: adoptOldHelmetVersion(data.HelmetsSettings),
+                compatibility: data.Compatibility || { SHA: false },
+                pistolSpawnChance: data.PistolSpawnChance || configs.nPistolLootChance,
+                minWeaponDurability: data.MinWeaponDurability || configs.nMinWeaponDurability,
+                maxWeaponDurability: data.MaxWeaponDurability || configs.nMaxWeaponDurability
+            });
             
             clearContent(contentEl);
             oCategoryToEvent[chancesCtrl.currentCategory]();
@@ -1138,15 +1112,20 @@ const openPresetsWindow = async () => {
                 }
                 
                 let preset = data.data;
-                modifiedWeaponSettings = preset.WeaponSettings;
-                modifiedArmorSettings = preset.ArmorSettings;
-                modifiedGrenadeSettings = preset.GrenadeSettings;
-                modifiedAmmoByWeaponClass = preset.AmmoSettings;
-                modifiedWeaponList = preset.WeaponList;
-                modifiedDropConfigs = preset.DropConfigs;
-                modsCompatibility = preset.Compatibility;
-                modifiedArmorSpawnSettings = preset.ArmorSpawnSettings;
-                modifiedHelmetSpawnSettings = preset.HelmetsSettings;
+                
+                // Update state using the new store system
+                store.replace({
+                    weaponSettings: preset.WeaponSettings,
+                    armorSettings: preset.ArmorSettings,
+                    grenadeSettings: preset.GrenadeSettings,
+                    ammoByWeaponClass: preset.AmmoSettings,
+                    weaponList: preset.WeaponList,
+                    dropConfigs: preset.DropConfigs,
+                    compatibility: preset.Compatibility || { SHA: false },
+                    armorSpawnSettings: preset.ArmorSpawnSettings,
+                    helmetSpawnSettings: preset.HelmetsSettings
+                });
+                
                 document.getElementById('config_name').value = presetCard.dataset.name;
 
                 clearContent(contentEl);
@@ -1194,15 +1173,20 @@ const openPresetsWindow = async () => {
                 
                 // Load preset data
                 let preset = data.data;
-                modifiedWeaponSettings = preset.WeaponSettings;
-                modifiedArmorSettings = preset.ArmorSettings;
-                modifiedGrenadeSettings = preset.GrenadeSettings;
-                modifiedAmmoByWeaponClass = preset.AmmoSettings;
-                modifiedWeaponList = preset.WeaponList;
-                modifiedDropConfigs = preset.DropConfigs;
-                modsCompatibility = preset.Compatibility;
-                modifiedArmorSpawnSettings = preset.ArmorSpawnSettings;
-                modifiedHelmetSpawnSettings = preset.HelmetsSettings;
+                
+                // Update state using the new store system
+                store.replace({
+                    weaponSettings: preset.WeaponSettings,
+                    armorSettings: preset.ArmorSettings,
+                    grenadeSettings: preset.GrenadeSettings,
+                    ammoByWeaponClass: preset.AmmoSettings,
+                    weaponList: preset.WeaponList,
+                    dropConfigs: preset.DropConfigs,
+                    compatibility: preset.Compatibility || { SHA: false },
+                    armorSpawnSettings: preset.ArmorSpawnSettings,
+                    helmetSpawnSettings: preset.HelmetsSettings
+                });
+                
                 document.getElementById('config_name').value = presetCard.dataset.name;
                 
                 // Store the preset ID and PIN for later use

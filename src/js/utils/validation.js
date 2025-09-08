@@ -1,326 +1,167 @@
 /**
- * Input validation and sanitization utilities
- * Provides safe validation for user inputs to prevent security vulnerabilities
+ * Input validation & sanitization utilities (lean version)
+ * Design goals:
+ *  - Small, predictable, pure validation helpers
+ *  - Uniform result shape (backward compatible: retains isValid/sanitizedValue)
+ *  - No hidden DOM side‑effects inside validators
  */
 
-/**
- * Validates if a value is a number within specified range
- * @param {any} value - The value to validate
- * @param {number} min - Minimum allowed value
- * @param {number} max - Maximum allowed value
- * @returns {Object} Validation result with isValid and sanitizedValue
- */
-export function validateNumber(value, min = -Infinity, max = Infinity) {
-    const result = {
-        isValid: false,
-        sanitizedValue: null,
-        error: null
-    };
-    
-    // Convert to number
-    const num = Number(value);
-    
-    if (isNaN(num)) {
-        result.error = 'Value must be a valid number';
-        return result;
-    }
-    
-    if (num < min) {
-        result.error = `Value must be at least ${min}`;
-        return result;
-    }
-    
-    if (num > max) {
-        result.error = `Value must be at most ${max}`;
-        return result;
-    }
-    
-    result.isValid = true;
-    result.sanitizedValue = num;
-    return result;
+// Precompiled patterns
+const CONFIG_NAME_RX = /^[a-zA-Z0-9_\-\s]{1,50}$/;
+const PIN_RX = /^[0-9]{4,8}$/;
+
+// Result factory (keeps legacy keys + new concise keys)
+function ok(value) {
+    return { ok: true, isValid: true, value, sanitizedValue: value, error: null };
+}
+function fail(error) {
+    return { ok: false, isValid: false, value: null, sanitizedValue: null, error };
 }
 
 /**
- * Validates if a value is a percentage (0-100)
- * @param {any} value - The value to validate
- * @returns {Object} Validation result
+ * Generic number validator
+ * @param {*} raw
+ * @param {number} min
+ * @param {number} max
+ * @param {boolean} integer - if true enforce integer form
  */
-export function validatePercentage(value) {
-    return validateNumber(value, 0, 100);
+export function validateNumber(raw, min = -Infinity, max = Infinity, integer = false) {
+    if (raw === '' || raw == null) return fail('Value required');
+    const num = Number(raw);
+    if (Number.isNaN(num)) return fail('Not a number');
+    if (integer && !Number.isInteger(num)) return fail('Must be integer');
+    if (num < min) return fail(`Min ${min}`);
+    if (num > max) return fail(`Max ${max}`);
+    return ok(num);
+}
+
+export function validatePercentage(raw) {
+    return validateNumber(raw, 0, 100);
+}
+
+export function validateProbability(raw) {
+    return validateNumber(raw, 0, 1);
 }
 
 /**
- * Validates if a value is a probability (0-1)
- * @param {any} value - The value to validate
- * @returns {Object} Validation result
+ * String validator
+ * @param {*} raw
+ * @param {object} opt
  */
-export function validateProbability(value) {
-    return validateNumber(value, 0, 1);
+export function validateString(raw, opt = {}) {
+    const { minLength = 0, maxLength = Infinity, pattern, allowEmpty = false, label = 'Value' } = opt;
+    const str = (raw == null ? '' : String(raw)).trim();
+    if (!allowEmpty && str.length === 0) return fail(`${label} required`);
+    if (str.length < minLength) return fail(`Min length ${minLength}`);
+    if (str.length > maxLength) return fail(`Max length ${maxLength}`);
+    if (pattern && !pattern.test(str)) return fail('Invalid format');
+    return ok(str);
+}
+
+export function validateConfigName(raw) {
+    return validateString(raw, { pattern: CONFIG_NAME_RX, minLength: 1, maxLength: 50, label: 'Config name' });
+}
+
+export function validatePin(raw) {
+    // Single pattern covers length + digits
+    return PIN_RX.test(String(raw).trim()) ? ok(String(raw).trim()) : fail('PIN must be 4-8 digits');
+}
+
+export function validateWeaponChances(raw) {
+    if (!Array.isArray(raw)) return fail('Chances must be array');
+    if (raw.length !== 4) return fail('Exactly 4 values required');
+    const sanitized = new Array(4);
+    for (let i = 0; i < 4; i++) {
+        const r = validatePercentage(raw[i]);
+        if (!r.isValid) return fail(`Index ${i + 1}: ${r.error}`);
+        sanitized[i] = r.sanitizedValue;
+    }
+    return ok(sanitized);
+}
+
+export function validateArmorDurability(raw) {
+    if (!raw || typeof raw !== 'object') return fail('Object required');
+    const minR = validateProbability(raw.min);
+    if (!minR.isValid) return fail(`Min: ${minR.error}`);
+    const maxR = validateProbability(raw.max);
+    if (!maxR.isValid) return fail(`Max: ${maxR.error}`);
+    if (minR.sanitizedValue > maxR.sanitizedValue) return fail('Min > Max');
+    return ok({ min: minR.sanitizedValue, max: maxR.sanitizedValue });
 }
 
 /**
- * Validates and sanitizes a string input
- * @param {any} value - The value to validate
- * @param {Object} options - Validation options
- * @param {number} options.minLength - Minimum string length
- * @param {number} options.maxLength - Maximum string length
- * @param {RegExp} options.pattern - Pattern to match
- * @param {boolean} options.allowEmpty - Whether empty strings are allowed
- * @returns {Object} Validation result
- */
-export function validateString(value, options = {}) {
-    const result = {
-        isValid: false,
-        sanitizedValue: null,
-        error: null
-    };
-    
-    // Convert to string and trim
-    const str = String(value).trim();
-    
-    if (!options.allowEmpty && str.length === 0) {
-        result.error = 'Value cannot be empty';
-        return result;
-    }
-    
-    if (options.minLength && str.length < options.minLength) {
-        result.error = `Value must be at least ${options.minLength} characters long`;
-        return result;
-    }
-    
-    if (options.maxLength && str.length > options.maxLength) {
-        result.error = `Value must be at most ${options.maxLength} characters long`;
-        return result;
-    }
-    
-    if (options.pattern && !options.pattern.test(str)) {
-        result.error = 'Value format is invalid';
-        return result;
-    }
-    
-    result.isValid = true;
-    result.sanitizedValue = str;
-    return result;
-}
-
-/**
- * Validates a configuration name
- * @param {any} value - The value to validate
- * @returns {Object} Validation result
- */
-export function validateConfigName(value) {
-    return validateString(value, {
-        minLength: 1,
-        maxLength: 50,
-        pattern: /^[a-zA-Z0-9_\-\s]+$/,
-        allowEmpty: false
-    });
-}
-
-/**
- * Validates a PIN code
- * @param {any} value - The value to validate
- * @returns {Object} Validation result
- */
-export function validatePin(value) {
-    return validateString(value, {
-        minLength: 4,
-        maxLength: 8,
-        pattern: /^[0-9]+$/,
-        allowEmpty: false
-    });
-}
-
-/**
- * Validates weapon chances array (should be 4 numbers between 0-100)
- * @param {any} value - The value to validate
- * @returns {Object} Validation result
- */
-export function validateWeaponChances(value) {
-    const result = {
-        isValid: false,
-        sanitizedValue: null,
-        error: null
-    };
-    
-    if (!Array.isArray(value)) {
-        result.error = 'Weapon chances must be an array';
-        return result;
-    }
-    
-    if (value.length !== 4) {
-        result.error = 'Weapon chances must contain exactly 4 values';
-        return result;
-    }
-    
-    const sanitizedChances = [];
-    for (let i = 0; i < value.length; i++) {
-        const validation = validatePercentage(value[i]);
-        if (!validation.isValid) {
-            result.error = `Chance ${i + 1}: ${validation.error}`;
-            return result;
-        }
-        sanitizedChances.push(validation.sanitizedValue);
-    }
-    
-    result.isValid = true;
-    result.sanitizedValue = sanitizedChances;
-    return result;
-}
-
-/**
- * Validates armor durability settings
- * @param {any} value - The value to validate
- * @returns {Object} Validation result
- */
-export function validateArmorDurability(value) {
-    const result = {
-        isValid: false,
-        sanitizedValue: null,
-        error: null
-    };
-    
-    if (!value || typeof value !== 'object') {
-        result.error = 'Armor durability must be an object';
-        return result;
-    }
-    
-    const minValidation = validateProbability(value.min);
-    if (!minValidation.isValid) {
-        result.error = `Minimum durability: ${minValidation.error}`;
-        return result;
-    }
-    
-    const maxValidation = validateProbability(value.max);
-    if (!maxValidation.isValid) {
-        result.error = `Maximum durability: ${maxValidation.error}`;
-        return result;
-    }
-    
-    if (minValidation.sanitizedValue > maxValidation.sanitizedValue) {
-        result.error = 'Minimum durability cannot be greater than maximum durability';
-        return result;
-    }
-    
-    result.isValid = true;
-    result.sanitizedValue = {
-        min: minValidation.sanitizedValue,
-        max: maxValidation.sanitizedValue
-    };
-    return result;
-}
-
-/**
- * Sanitizes HTML content by removing dangerous elements and attributes
- * This is a basic sanitizer - for production use, consider using DOMPurify
- * @param {string} html - The HTML to sanitize
- * @returns {string} Sanitized HTML
+ * Very small HTML sanitizer (defensive; prefer avoiding HTML input entirely)
+ * Strips <script> & inline handlers & javascript: URLs.
  */
 export function sanitizeHtml(html) {
-    // Create a temporary div to parse HTML
+    if (html == null || html === '') return '';
+    if (typeof html !== 'string') html = String(html);
+    if (!/[<>&]/.test(html)) return html; // fast path: no tags
     const temp = document.createElement('div');
     temp.innerHTML = html;
-    
-    // Remove script tags and on* attributes
-    const scripts = temp.querySelectorAll('script');
-    scripts.forEach(script => script.remove());
-    
-    // Remove dangerous attributes
-    const allElements = temp.querySelectorAll('*');
-    allElements.forEach(element => {
-        // Remove event handler attributes
-        Array.from(element.attributes).forEach(attr => {
-            if (attr.name.startsWith('on')) {
-                element.removeAttribute(attr.name);
-            }
-        });
-        
-        // Remove javascript: URLs
-        ['href', 'src', 'action'].forEach(attrName => {
-            const attr = element.getAttribute(attrName);
-            if (attr && attr.toLowerCase().startsWith('javascript:')) {
-                element.removeAttribute(attrName);
+    temp.querySelectorAll('script').forEach(n => n.remove());
+    temp.querySelectorAll('*').forEach(el => {
+        // remove on* handlers
+        [...el.attributes].forEach(attr => {
+            const name = attr.name.toLowerCase();
+            if (name.startsWith('on')) el.removeAttribute(attr.name);
+            else if ((name === 'href' || name === 'src' || name === 'action') && /^javascript:/i.test(attr.value)) {
+                el.removeAttribute(attr.name);
             }
         });
     });
-    
     return temp.innerHTML;
 }
 
 /**
- * Validates a complete configuration object
- * @param {Object} config - The configuration to validate
- * @returns {Object} Validation result with detailed errors
+ * Validate a high‑level game config object.
+ * Currently only weapon chances – extend as needed.
  */
 export function validateGameConfig(config) {
-    const result = {
-        isValid: true,
-        errors: [],
-        sanitizedConfig: {}
-    };
-    
-    // Validate weapon settings
-    if (config.WeaponSettings) {
-        Object.entries(config.WeaponSettings).forEach(([weaponName, weaponConfig]) => {
-            if (weaponConfig.chances) {
-                const validation = validateWeaponChances(weaponConfig.chances);
-                if (!validation.isValid) {
-                    result.isValid = false;
-                    result.errors.push(`Weapon ${weaponName}: ${validation.error}`);
+    const errors = [];
+    if (!config || typeof config !== 'object') {
+        return { isValid: false, ok: false, errors: ['Config must be object'], sanitizedConfig: null };
+    }
+    // Shallow clone for sanitized output (extend later for deep sanitation)
+    const sanitizedConfig = { ...config };
+    if (config.WeaponSettings && typeof config.WeaponSettings === 'object') {
+        Object.entries(config.WeaponSettings).forEach(([name, w]) => {
+            if (w && Array.isArray(w.chances)) {
+                const r = validateWeaponChances(w.chances);
+                if (!r.isValid) errors.push(`Weapon ${name}: ${r.error}`);
+                else {
+                    // assign sanitized chances
+                    if (!sanitizedConfig.WeaponSettings) sanitizedConfig.WeaponSettings = {};
+                    sanitizedConfig.WeaponSettings[name] = { ...w, chances: r.sanitizedValue };
                 }
             }
         });
     }
-    
-    // Add more validation rules as needed
-    
-    return result;
+    return { isValid: errors.length === 0, ok: errors.length === 0, errors, sanitizedConfig: errors.length === 0 ? sanitizedConfig : null };
 }
 
 /**
- * Helper function to handle validation UI feedback consistently
- * @param {HTMLElement} input - The input element to validate
- * @param {Object} validation - The validation result object
- * @param {boolean} showSuccess - Whether to show success state (default: false)
+ * UI helpers kept separate from pure validators
  */
 export function applyValidationUI(input, validation, showSuccess = false) {
-    // Remove all validation classes first
+    if (!input) return; // defensive
     input.classList.remove('validation-error', 'validation-success');
-    
-    // Remove any existing error tooltip
     input.removeAttribute('title');
-    
     if (validation.isValid) {
-        if (showSuccess) {
-            input.classList.add('validation-success');
-        }
+        if (showSuccess) input.classList.add('validation-success');
     } else {
         input.classList.add('validation-error');
-        input.title = validation.error;
+        if (validation.error) input.title = validation.error;
     }
 }
 
-/**
- * Creates event listeners for real-time validation with consistent UI feedback
- * @param {HTMLElement} input - The input element
- * @param {Function} validationFunction - The validation function to use
- * @param {Function} onValidChange - Callback when valid value changes (optional)
- * @param {boolean} showSuccess - Whether to show success state (default: false)
- */
 export function addInputValidation(input, validationFunction, onValidChange = null, showSuccess = false) {
-    // Real-time validation on input
-    input.addEventListener('input', function() {
-        const validation = validationFunction(this.value);
-        applyValidationUI(this, validation, showSuccess);
-    });
-    
-    // Final validation on change
-    input.addEventListener('change', function(e) {
-        const validation = validationFunction(e.target.value);
-        applyValidationUI(e.target, validation, showSuccess);
-        
-        if (validation.isValid && onValidChange) {
-            onValidChange(validation.sanitizedValue);
-        }
-    });
+    if (!input || typeof validationFunction !== 'function') return;
+    const handler = (val) => {
+        const v = validationFunction(val);
+        applyValidationUI(input, v, showSuccess);
+        if (v.isValid && onValidChange) onValidChange(v.sanitizedValue);
+    };
+    input.addEventListener('input', (e) => handler(e.target.value));
+    input.addEventListener('change', (e) => handler(e.target.value));
 }
