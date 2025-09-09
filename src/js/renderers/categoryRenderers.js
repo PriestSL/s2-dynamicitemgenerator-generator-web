@@ -14,8 +14,6 @@ export class CategoryRenderers {
     }
     
     renderPrimary() {
-        console.log('CategoryRenderers: Rendering Primary category for faction:', this.chancesCtrl.curentFaction);
-        
         if (this.chancesCtrl.curentFaction === 'Generic_settings') {
             this.renderPrimarySettings();
             return;
@@ -30,8 +28,6 @@ export class CategoryRenderers {
         }
         
         for (let classification in WeaponSettings) {
-            console.log('Rendering weapon classification:', classification);
-            
             // Create Bootstrap card for each weapon classification
             let card = document.createElement('div');
             card.className = 'card mb-3';
@@ -94,8 +90,6 @@ export class CategoryRenderers {
     }
     
     renderPrimarySettings() {
-        console.log('CategoryRenderers: Rendering Primary Settings');
-        
         // Create Bootstrap card for global settings
         let globalCard = document.createElement('div');
         globalCard.className = 'card mb-3';

@@ -47,12 +47,10 @@ class Application {
         try {
             // Wait for DOM to be fully loaded first
             if (document.readyState === 'loading') {
-                console.log('Waiting for DOM to load...');
                 await new Promise(resolve => {
                     document.addEventListener('DOMContentLoaded', resolve);
                 });
             }
-            console.log('DOM is ready, document.readyState:', document.readyState);
             
             // Setup UI components
             UIHelpers.initializeSpinner();
@@ -61,7 +59,6 @@ class Application {
             await new Promise(resolve => setTimeout(resolve, 100));
             
             // Initialize event listeners
-            console.log('Initializing event listeners...');
             this.eventManager.initializeEventListeners();
             
             // Add preset loaded event listener
@@ -72,11 +69,6 @@ class Application {
             
             // Subscribe to existing category/faction events (if they exist)
             this.subscribeToExistingEvents();
-            
-            console.log('Application initialized successfully');
-            
-            // Test event binding (can be removed in production)
-            this.testEventBinding();
             
         } catch (error) {
             console.error('Failed to initialize application:', error);
@@ -90,9 +82,7 @@ class Application {
     
     setupPresetEventListener() {
         // Listen for preset loaded events from PresetsManager
-        window.addEventListener('presetLoaded', (event) => {
-            console.log('Preset loaded:', event.detail);
-            
+        window.addEventListener('presetLoaded', () => {
             // Clear current content
             const contentEl = document.getElementById('content');
             if (contentEl) {
@@ -101,7 +91,6 @@ class Application {
             
             // Re-render current category to show updated data
             const currentCategory = this.chancesCtrl.currentCategory;
-            console.log('Re-rendering category after preset load:', currentCategory);
             
             // Call the appropriate renderer based on current category
             if (this.categoryRenderers && currentCategory) {
@@ -144,19 +133,6 @@ class Application {
     
     getChancesController() {
         return this.chancesCtrl;
-    }
-    
-    // Debug method to test functionality
-    testEventBinding() {
-        console.log('Testing event binding...');
-        console.log('Category elements found:', document.getElementsByClassName('category_item').length);
-        console.log('Faction elements found:', document.getElementsByClassName('faction_item').length);
-        console.log('Button elements found:');
-        const buttonIds = ['btn_save', 'btn_help', 'btn_export', 'btn_import', 'btn_file_settings', 'btn_todo', 'btn_info', 'btn_presets'];
-        buttonIds.forEach(id => {
-            const element = document.getElementById(id);
-            console.log(`  ${id}:`, element ? 'found' : 'NOT FOUND');
-        });
     }
     
     showModal(type) {

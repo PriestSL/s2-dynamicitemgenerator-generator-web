@@ -67,7 +67,6 @@ export class UIHelpers {
             
             // Explicitly ensure spinner is hidden after creation
             spinnerDiv.style.display = 'none';
-            console.log('Spinner created and hidden on page load');
         }
     }
     

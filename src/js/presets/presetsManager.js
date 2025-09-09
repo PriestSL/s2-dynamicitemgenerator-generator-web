@@ -322,25 +322,36 @@ export class PresetsManager {
         });
         
         if (type === 'official') {
-            const compatibility = createElement('small', {
-                className: 'text-muted'
+            const viewsSpan = createElement('span', {
+                className: 'text-muted small'
             });
-            const compatIcon = createElement('i', {
-                className: 'fas fa-gamepad me-1'
+            const viewsIcon = createElement('i', {
+                className: 'fas fa-eye me-1'
             });
-            compatibility.appendChild(compatIcon);
-            compatibility.appendChild(document.createTextNode(preset.gameVersion || 'Unknown'));
-            infoRow.appendChild(compatibility);
+            viewsSpan.appendChild(viewsIcon);
+            viewsSpan.appendChild(document.createTextNode(`${preset.views || 0} views`));
+            infoRow.appendChild(viewsSpan);
         } else {
-            const downloads = createElement('small', {
-                className: 'text-muted'
+            const versionSpan = createElement('span', {
+                className: 'text-muted small'
             });
-            const downloadIcon = createElement('i', {
-                className: 'fas fa-download me-1'
+            const versionIcon = createElement('i', {
+                className: 'fas fa-code-branch me-1'
             });
-            downloads.appendChild(downloadIcon);
-            downloads.appendChild(document.createTextNode(`${preset.downloads || 0} downloads`));
-            infoRow.appendChild(downloads);
+            versionSpan.appendChild(versionIcon);
+            versionSpan.appendChild(document.createTextNode(`v${preset.version || '1.0'}`));
+            
+            const viewsSpan = createElement('span', {
+                className: 'text-muted small'
+            });
+            const viewsIcon = createElement('i', {
+                className: 'fas fa-eye me-1'
+            });
+            viewsSpan.appendChild(viewsIcon);
+            viewsSpan.appendChild(document.createTextNode(`${preset.views || 0} views`));
+            
+            infoRow.appendChild(versionSpan);
+            infoRow.appendChild(viewsSpan);
         }
         
         cardBody.appendChild(infoRow);
@@ -456,8 +467,8 @@ export class PresetsManager {
     handleEditPresetClick(e) {
         e.stopPropagation();
         const presetId = e.target.closest('[data-id]').dataset.id;
-        // Implementation for editing preset
-        console.log('Edit preset:', presetId);
+        //TODO - Implement edit functionality
+        alert(`Edit preset functionality for ID: ${presetId} is not implemented yet.`);
     }
     
     handleDeletePresetClick(e) {
@@ -493,8 +504,8 @@ export class PresetsManager {
     }
     
     handleUpdatePreset() {
-        // Implementation for updating existing preset
-        console.log('Update preset functionality');
+        //TODO - Implement update functionality
+        alert('Update preset functionality is not implemented yet.');
     }
     
     async handleSavePresetSubmit() {
