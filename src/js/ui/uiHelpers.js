@@ -90,7 +90,7 @@ export class UIHelpers {
         }
     }
     
-    static withLoadingSpinner(asyncFunction) {
+    static withLoadingSpinner(asyncFunction) { //REVIEW - is this used anywhere?
         return async (...args) => {
             UIHelpers.showSpinner();
             try {

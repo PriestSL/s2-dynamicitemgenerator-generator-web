@@ -8,7 +8,7 @@ import { CategoryRenderers } from './renderers/categoryRenderers.js';
 import { ModalManager } from './ui/modalManager.js';
 import { PresetsManager } from './presets/presetsManager.js';
 import { EventManager } from './events/eventManager.js';
-import { UIHelpers, withLoadingSpinner } from './ui/uiHelpers.js';
+import { UIHelpers } from './ui/uiHelpers.js';
 import { chancesController } from './chances.js';
 import { generateConfig } from './fileStreamGenerator.js';
 
@@ -22,7 +22,7 @@ class Application {
         this.chancesCtrl = new chancesController();
         this.chancesCtrl.fillSettings(this.state.getChancesSettings());
         this.chancesCtrl.typeToTable = this.state.typeToTable;
-        this.chancesCtrl.curentFaction = 'Generic_settings'; // Set default faction
+        this.chancesCtrl.currentFaction = 'Generic_settings'; // Set default faction
         
         this.categoryRenderers = new CategoryRenderers(this.state, this.chancesCtrl);
         
@@ -133,27 +133,6 @@ class Application {
     
     getChancesController() {
         return this.chancesCtrl;
-    }
-    
-    showModal(type) {
-        switch (type) {
-            case 'help':
-                this.modalManager.showHelpModal();
-                break;
-            case 'info':
-                this.modalManager.showInfoModal();
-                break;
-            case 'settings':
-                this.modalManager.showFileSettingsModal(this.state);
-                break;
-            case 'todo':
-                this.modalManager.showToDoModal();
-                break;
-            case 'presets':
-                return withLoadingSpinner(() => this.presetsManager.openPresetsWindow())();
-            default:
-                console.warn('Unknown modal type:', type);
-        }
     }
 }
 

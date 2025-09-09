@@ -14,12 +14,12 @@ export class CategoryRenderers {
     }
     
     renderPrimary() {
-        if (this.chancesCtrl.curentFaction === 'Generic_settings') {
+        if (this.chancesCtrl.currentFaction === 'Generic_settings') {
             this.renderPrimarySettings();
             return;
         }
         
-        let GeneralSettings = 'GeneralNPC_' + this.chancesCtrl.curentFaction;
+        let GeneralSettings = 'GeneralNPC_' + this.chancesCtrl.currentFaction;
         let WeaponSettings = this.state.modifiedWeaponSettings[GeneralSettings];
         
         if (!WeaponSettings) {
@@ -177,9 +177,9 @@ export class CategoryRenderers {
     }
     
     renderPistols() {
-        let GeneralSettings = 'GeneralNPC_' + this.chancesCtrl.curentFaction;
+        let GeneralSettings = 'GeneralNPC_' + this.chancesCtrl.currentFaction;
         
-        if (this.chancesCtrl.curentFaction === 'Generic_settings') {
+        if (this.chancesCtrl.currentFaction === 'Generic_settings') {
             // Handle generic settings for pistols
             let pistolSpawnChance = document.createElement('div');
             pistolSpawnChance.className = 'mb-3';
@@ -235,12 +235,12 @@ export class CategoryRenderers {
     }
     
     renderArmor() {
-        if (this.chancesCtrl.curentFaction === 'Generic_settings') {
+        if (this.chancesCtrl.currentFaction === 'Generic_settings') {
             this.renderArmorSettings();
             return;
         }
 
-        let GeneralSettings = 'GeneralNPC_' + this.chancesCtrl.curentFaction;
+        let GeneralSettings = 'GeneralNPC_' + this.chancesCtrl.currentFaction;
         let ArmorSettings = this.state.modifiedArmorSettings[GeneralSettings];
         
         if (!ArmorSettings) {

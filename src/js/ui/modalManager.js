@@ -19,10 +19,17 @@ export class ModalManager {
             this.removeMessageBox(id);
         }
 
+        let content;
+        if (typeof contentElement === 'string') {
+            content = UIHelpers.createElementFromHtml(`<p>${contentElement}</p>`);
+        } else {
+            content = contentElement;
+        }
+
         // Create modal with safe content
         const messageBox = createModal({
             id: modalId,
-            content: contentElement,
+            content: content,
             buttons: [
                 {
                     text: options.closeText || 'Close',
@@ -33,14 +40,55 @@ export class ModalManager {
             ]
         });
         
-        document.body.appendChild(messageBox);
         this.activeModals.set(id, messageBox);
         
         return messageBox;
     }
+
+    createConfirmationBox(id, contentElement, options = {}) {
+        const modalId = `confirmBox_${id}`;
+        // Remove existing modal if it exists
+        if (document.getElementById(modalId)) {
+            this.removeMessageBox(id, 'confirmBox_');
+        }
+
+        let content;
+        if (typeof contentElement === 'string') {
+            content = UIHelpers.createElementFromHtml(`<p>${contentElement}</p>`);
+        } else {
+            content = contentElement;
+        }
+
+        const messageBox = createModal({
+            id: modalId,
+            content: content,
+            buttons: [
+                {
+                    text: options.cancelText || 'Cancel',
+                    className: 'btn btn-secondary',
+                    iconClass: 'fas fa-times',
+                    onClick: () => this.removeMessageBox(id, 'confirmBox_')
+                },
+                {
+                    text: options.confirmText || 'Confirm',
+                    className: 'btn btn-primary',
+                    iconClass: 'fas fa-check',
+                    onClick: () => {
+                        if (options.confirmValidation && !options.confirmValidation()) {
+                            return;
+                        }
+                        if (options.onConfirm) options.onConfirm();
+                        this.removeMessageBox(id, 'confirmBox_');
+                    }
+                }
+            ]
+        });
+        this.activeModals.set(id, messageBox);
+        return messageBox;
+    }
     
-    removeMessageBox(id) {
-        const modalId = `messageBox_${id}`;
+    removeMessageBox(id, prefix = 'messageBox_') {
+        const modalId = `${prefix}${id}`;
         const messageBox = document.getElementById(modalId);
         if (messageBox && messageBox.parentNode) {
             // Close modal if it's open

@@ -240,60 +240,99 @@ export function createAlert(options = {}) {
 }
 
 /**
- * Creates a modal dialog with safe content
+ * Creates a Bootstrap modal dialog with safe content
  * @param {Object} options - Modal configuration
  * @param {string} options.id - Modal ID
  * @param {string} options.title - Modal title
  * @param {HTMLElement} options.content - Modal content element
  * @param {Array} options.buttons - Array of button configurations
- * @returns {HTMLElement} The modal element
+ * @param {boolean} options.backdrop - Whether to include backdrop (default: true)
+ * @param {boolean} options.keyboard - Whether to close with keyboard (default: true)
+ * @returns {HTMLElement} The Bootstrap modal element
  */
 export function createModal(options = {}) {
-    const overlay = createElement('div', {
-        className: 'position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center',
+    const modal = createElement('div', {
+        className: 'modal fade',
         attributes: {
             id: options.id,
-            style: 'background-color: rgba(0, 0, 0, 0.5); z-index: 1050;'
+            tabindex: '-1',
+            'aria-labelledby': `${options.id}Label`,
+            'aria-hidden': 'true',
+            'data-bs-backdrop': options.backdrop !== false ? 'true' : 'static',
+            'data-bs-keyboard': options.keyboard !== false ? 'true' : 'false'
         }
+    });
+    
+    const modalDialog = createElement('div', {
+        className: 'modal-dialog'
     });
     
     const modalContent = createElement('div', {
-        className: 'bg-white rounded shadow p-4',
-        attributes: {
-            style: 'max-width: 90vw; max-height: 90vh; overflow-y: auto;'
-        }
+        className: 'modal-content'
     });
     
+    // Modal Header
     if (options.title) {
-        const header = createElement('div', {
-            className: 'mb-3'
+        const modalHeader = createElement('div', {
+            className: 'modal-header'
         });
         
-        const title = createElement('h4', {
-            textContent: options.title
+        const title = createElement('h5', {
+            className: 'modal-title',
+            textContent: options.title,
+            attributes: { id: `${options.id}Label` }
         });
         
-        header.appendChild(title);
-        modalContent.appendChild(header);
+        const closeButton = createElement('button', {
+            className: 'btn-close',
+            attributes: {
+                type: 'button',
+                'data-bs-dismiss': 'modal',
+                'aria-label': 'Close'
+            }
+        });
+        
+        modalHeader.appendChild(title);
+        modalHeader.appendChild(closeButton);
+        modalContent.appendChild(modalHeader);
     }
     
+    // Modal Body
     if (options.content) {
-        modalContent.appendChild(options.content);
+        const modalBody = createElement('div', {
+            className: 'modal-body'
+        });
+        modalBody.appendChild(options.content);
+        modalContent.appendChild(modalBody);
     }
     
+    // Modal Footer
     if (options.buttons && options.buttons.length > 0) {
-        const buttonContainer = createElement('div', {
-            className: 'd-flex justify-content-end mt-3'
+        const modalFooter = createElement('div', {
+            className: 'modal-footer'
         });
         
         options.buttons.forEach(buttonConfig => {
-            const button = createButton(buttonConfig);
-            buttonContainer.appendChild(button);
+            const button = createButton({
+                ...buttonConfig,
+                attributes: {
+                    ...buttonConfig.attributes,
+                    'data-bs-dismiss': buttonConfig.dismiss ? 'modal' : undefined
+                }
+            });
+            modalFooter.appendChild(button);
         });
         
-        modalContent.appendChild(buttonContainer);
+        modalContent.appendChild(modalFooter);
     }
     
-    overlay.appendChild(modalContent);
-    return overlay;
+    modalDialog.appendChild(modalContent);
+    modal.appendChild(modalDialog);
+
+    document.body.appendChild(modal);
+
+    const bootstrapModal = new window.bootstrap.Modal(modal);
+    bootstrapModal.show();
+
+    return bootstrapModal;
 }

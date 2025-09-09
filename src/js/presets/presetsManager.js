@@ -4,11 +4,13 @@
  */
 
 import { createElement, escapeHtml } from '../utils/dom.js';
-import { fetchHeaders, getPreset } from '../restCalls.js';
+import { fetchHeaders, getPreset, deletePreset, createPreset } from '../restCalls.js';
+import { ModalManager } from '../ui/modalManager.js';
 
 export class PresetsManager {
     constructor(appState) {
         this.state = appState;
+        this.modalManager = new ModalManager();
     }
     
     async openPresetsWindow() {
@@ -71,38 +73,6 @@ export class PresetsManager {
                     </div>
                 </div>
             </div>
-            
-            <!-- Save Preset Modal -->
-            <div class="modal fade" id="savePresetModal" tabindex="-1" aria-labelledby="savePresetModalLabel" aria-hidden="true">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="savePresetModalLabel">Save Preset</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body">
-                            <form id="savePresetForm">
-                                <div class="mb-3">
-                                    <label for="presetName" class="form-label">Preset Name</label>
-                                    <input type="text" class="form-control" id="presetName" required maxlength="50">
-                                </div>
-                                <div class="mb-3">
-                                    <label for="presetAuthor" class="form-label">Author</label>
-                                    <input type="text" class="form-control" id="presetAuthor" maxlength="30">
-                                </div>
-                                <div class="mb-3">
-                                    <label for="presetDescription" class="form-label">Description</label>
-                                    <textarea class="form-control" id="presetDescription" rows="3" maxlength="200"></textarea>
-                                </div>
-                            </form>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                            <button type="button" class="btn btn-success" id="savePresetBtn">Save Preset</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
         `;
         
         document.body.insertAdjacentHTML('beforeend', modalHTML);
@@ -114,7 +84,6 @@ export class PresetsManager {
     _setupEventHandlers() {
         document.getElementById('btn_save_new_preset').addEventListener('click', () => this.handleSaveNewPreset());
         document.getElementById('btn_update_preset').addEventListener('click', () => this.handleUpdatePreset());
-        document.getElementById('savePresetBtn').addEventListener('click', () => this.handleSavePresetSubmit());
         
         // Add click handler to presets container for delegation
         document.getElementById('presets-container').addEventListener('click', (e) => this.handlePresetClick(e));
@@ -411,17 +380,20 @@ export class PresetsManager {
         const presetId = card.dataset.id;
         const presetType = card.dataset.type;
         const presetName = card.dataset.name;
-        
-        if (confirm(`Load preset "${presetName}"? This will replace your current settings.`)) {
-            this._loadPreset(presetId, presetType);
-        }
+
+        this.modalManager.createConfirmationBox('loadPreset', `Load preset "${presetName}"? This will replace your current settings.`, {
+            onConfirm: () => {
+                this._loadPreset(presetId, presetType, presetName);
+            }
+        });
+
     }
     
-    async _loadPreset(presetId, type) {
+    async _loadPreset(presetId, type, presetName) {
         try {
             const data = await getPreset(presetId, type);
             if (!data) { 
-                alert('Error loading preset'); 
+                this.modalManager.createMessageBox('presetLoadError', 'Error loading preset. Please try again.');
                 return;
             }
             
@@ -440,8 +412,9 @@ export class PresetsManager {
             
             // Update config name if element exists
             const configNameEl = document.getElementById('config_name');
+            console.log(preset);
             if (configNameEl) {
-                configNameEl.value = preset.name;
+                configNameEl.value = presetName;
             }
 
             // Close modal
@@ -460,7 +433,7 @@ export class PresetsManager {
             
         } catch (error) {
             console.error('Error loading preset:', error);
-            alert('Error loading preset. Please try again.');
+            this.modalManager.createMessageBox('presetLoadError', 'Error loading preset. Please try again.');
         }
     }
     
@@ -468,44 +441,94 @@ export class PresetsManager {
         e.stopPropagation();
         const presetId = e.target.closest('[data-id]').dataset.id;
         //TODO - Implement edit functionality
-        alert(`Edit preset functionality for ID: ${presetId} is not implemented yet.`);
+        this.modalManager.createMessageBox('editPreset', `Edit preset functionality for ID: ${presetId} is not implemented yet.`);
     }
     
     handleDeletePresetClick(e) {
         e.stopPropagation();
         const presetId = e.target.closest('[data-id]').dataset.id;
-        if (confirm('Are you sure you want to delete this preset?')) {
-            this._deletePreset(presetId);
-        }
-    }
-    
-    async _deletePreset(presetId) {
-        try {
-            const response = await fetch(`/api/presets/community/${presetId}`, {
-                method: 'DELETE'
-            });
-            if (response.ok) {
-                // Refresh presets list
-                await this._loadPresets();
+        this.modalManager.createConfirmationBox('deletePreset', `Are you sure you want to delete this preset?`, {
+            onConfirm: () => {
+                const pinInput = document.createElement('input');
+                pinInput.type = 'text';
+                pinInput.id = 'pinInput';
+                pinInput.className = 'form-control';
+                pinInput.placeholder = 'Enter PIN to confirm';
+
+                this.modalManager.createConfirmationBox('confirmDelete', pinInput, {
+                    onConfirm: () => {
+                        const pin = document.getElementById('pinInput').value;
+                        if (!pin || pin.length !== 8 || !/^\d+$/.test(pin)) {
+                            this.modalManager.createMessageBox('invalidPin', 'Invalid PIN.');
+                            return;
+                        }
+                        deletePreset(presetId, pin).then(response => {
+                            if (response && !response.error) {
+                                this.modalManager.createMessageBox('presetDeleted', 'Preset deleted successfully');
+                                this._loadPresets();
+                            } else {
+                                this.modalManager.createMessageBox('presetDeleteError', `Error deleting preset: ${response?.error || 'Unknown error'}`);
+                            }
+                        });
+                    }
+                });
             }
-        } catch (error) {
-            console.error('Error deleting preset:', error);
-            alert('Error deleting preset. Please try again.');
-        }
+        });
     }
     
     handleSaveNewPreset() {
-        if (window.bootstrap) {
-            const saveModal = new window.bootstrap.Modal(document.getElementById('savePresetModal'));
-            document.getElementById('savePresetModalLabel').textContent = 'Save New Preset';
-            document.getElementById('savePresetForm').reset();
-            saveModal.show();
-        }
+        const modal = `
+            <form id="savePresetForm">
+                <div class="mb-3">
+                    <label for="presetName" class="form-label">Preset Name</label>
+                    <input type="text" class="form-control" id="presetName" required maxlength="50">
+                </div>
+                <div class="mb-3">
+                    <label for="presetAuthor" class="form-label">Author</label>
+                    <input type="text" class="form-control" id="presetAuthor" maxlength="30">
+                </div>
+                <div class="mb-3">
+                    <label for="presetDescription" class="form-label">Description</label>
+                    <textarea class="form-control" id="presetDescription" rows="3" maxlength="200"></textarea>
+                </div>
+                <div class="mb-3">
+                    <label for="presetVersion" class="form-label">Version</label>
+                    <input type="text" class="form-control" id="presetVersion" required maxlength="10">
+                </div>
+                <div class="mb-3">
+                    <label for="presetPin" class="form-label">PIN</label>
+                    <input type="password" class="form-control" id="presetPin" required minlength="8" maxlength="8">
+                </div>
+            </form>
+            `;
+
+            this.modalManager.createConfirmationBox('savePreset', modal, {
+                onConfirm: () => this.handleSavePresetSubmit(),
+                confirmValidation: () => {
+                    const presetName = document.getElementById('presetName').value.trim();
+                    const presetPin = document.getElementById('presetPin').value.trim();
+                    if (!presetName) {
+                        this.modalManager.createMessageBox('invalidPresetName', 'Preset name is required.');
+                        return false;
+                    }
+
+                    if (!presetPin || presetPin.length !== 8 || !/^\d+$/.test(presetPin)) {
+                        this.modalManager.createMessageBox('invalidPin', 'PIN must be exactly 8 digits.');
+                        return false;
+                    }
+
+                    return true;
+
+                },
+                title: 'Save Preset',
+                closeText: 'Cancel',
+                confirmText: 'Save Preset'
+            });
     }
     
     handleUpdatePreset() {
         //TODO - Implement update functionality
-        alert('Update preset functionality is not implemented yet.');
+        this.modalManager.createMessageBox('updatePreset', 'Update preset functionality is not implemented yet.');
     }
     
     async handleSavePresetSubmit() {
@@ -513,41 +536,23 @@ export class PresetsManager {
             name: document.getElementById('presetName').value.trim(),
             author: document.getElementById('presetAuthor').value.trim(),
             description: document.getElementById('presetDescription').value.trim(),
-            settings: this.state.exportState(),
-            created: new Date().toISOString()
+            data: this.state.exportState(),
+            created: new Date().toISOString(),
+            version: document.getElementById('presetVersion').value.trim(),
+            pin: document.getElementById('presetPin').value.trim()
         };
-        
-        if (!presetData.name) {
-            alert('Please enter a preset name.');
-            return;
-        }
-        
+
         try {
-            const response = await fetch('/api/presets/community', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(presetData)
-            });
-            
-            if (response.ok) {
-                // Close save modal
-                if (window.bootstrap) {
-                    const saveModal = window.bootstrap.Modal.getInstance(document.getElementById('savePresetModal'));
-                    if (saveModal) saveModal.hide();
-                }
-                
-                // Refresh presets list
-                await this._loadPresets();
-                
-                alert('Preset saved successfully!');
+            const response = await createPreset(presetData);
+            if (response && !response.error) {
+                this.modalManager.createMessageBox('presetCreated', 'Preset created successfully');
+                this._loadPresets();
             } else {
-                throw new Error('Failed to save preset');
+                this.modalManager.createMessageBox('presetCreateError', `Error creating preset: ${response?.error || 'Unknown error'}`);
             }
         } catch (error) {
-            console.error('Error saving preset:', error);
-            alert('Error saving preset. Please try again.');
+            console.error('Error creating preset:', error);
+            this.modalManager.createMessageBox('presetCreateError', 'Error creating preset. Please try again.');
         }
     }
 }
