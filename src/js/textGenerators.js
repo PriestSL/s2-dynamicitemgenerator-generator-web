@@ -1,12 +1,23 @@
 import * as config from './configs.js';
-import {modifiedMinWeaponDurability, modifiedMaxWeaponDurability, modifiedPistolSpawnChance, 
-    modifiedWeaponSettings, modifiedArmorSettings, modifiedWeaponList, modifiedAmmoByWeaponClass, 
-    modifiedGrenadeSettings, modsCompatibility, modifiedDropConfigs, modifiedArmorSpawnSettings,
-    modifiedHelmetSpawnSettings, modifiedPistolSettings} from './app.js';
 import { objCompare } from './utils.js';
 
 import FactionPatchesCompatibility from '../Mods/FactionPatches.cfg?raw';
 import ProjectItemizationCompatibility from '../Mods/ProjectItemization.cfg?raw';
+
+// Module-level variables that will be set when createLoadout is called
+let modifiedArmorSettings;
+let modifiedWeaponSettings;
+let modifiedWeaponList;
+let modifiedArmorSpawnSettings;
+let modifiedHelmetSpawnSettings;
+let modifiedDropConfigs;
+let modifiedPistolSettings;
+let modifiedPistolSpawnChance;
+let modifiedMinWeaponDurability;
+let modifiedMaxWeaponDurability;
+let modifiedGrenadeSettings;
+let modifiedAmmoByWeaponClass;
+let modsCompatibility;
 
 var oArmorLoadoutSettings;
 var oWeaponLoadoutSettings;
@@ -568,7 +579,26 @@ const createProjectItemization = ()=>{
 };
 
 
-export const createLoadout = async ()=>{
+export const createLoadout = async (appState)=>{
+    if (!appState) {
+        console.error('AppState is required for createLoadout function');
+        return '';
+    }
+    
+    // Set module-level variables from appState
+    modifiedArmorSettings = appState.modifiedArmorSettings;
+    modifiedWeaponSettings = appState.modifiedWeaponSettings;
+    modifiedWeaponList = appState.modifiedWeaponList;
+    modifiedArmorSpawnSettings = appState.modifiedArmorSpawnSettings;
+    modifiedHelmetSpawnSettings = appState.modifiedHelmetSpawnSettings;
+    modifiedDropConfigs = appState.modifiedDropConfigs;
+    modifiedPistolSettings = appState.modifiedPistolSettings;
+    modifiedPistolSpawnChance = appState.modifiedPistolSpawnChance;
+    modifiedMinWeaponDurability = appState.modifiedMinWeaponDurability;
+    modifiedMaxWeaponDurability = appState.modifiedMaxWeaponDurability;
+    modifiedGrenadeSettings = appState.modifiedGrenadeSettings;
+    modifiedAmmoByWeaponClass = appState.modifiedAmmoByWeaponClass;
+    modsCompatibility = appState.modsCompatibility;
     let cRet = '//Generated with https://s2-loadout-creator.cc/ \n\n';
 
     oArmorLoadoutSettings = modifiedArmorSettings;
