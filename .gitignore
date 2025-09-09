@@ -131,3 +131,6 @@ dist
 
 #generated files
 eslint.config.mjs
+
+#dev files
+app-original.js
