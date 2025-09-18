@@ -116,7 +116,7 @@ export function createButton(options = {}) {
     
     if (options.iconClass) {
         const icon = createElement('i', {
-            className: options.iconClass + ' me-1'
+            className: options.iconClass
         });
         button.appendChild(icon);
     }

@@ -197,7 +197,7 @@ export class chancesController {
         }
 
         divContent.querySelectorAll('.fullscreen_select_item').forEach((el) => {
-            el.addEventListener('click', function(e) {
+            el.addEventListener('click', (e) => {
                 let item = e.target.value;
                 if (type === 'weapon') {
                     this.addWeaponToClass(target, classification, item);
@@ -407,7 +407,7 @@ export class chancesController {
                         addInputValidation(input, (value) => validateNumber(value, 0, 1000), null, true);
                         
                         let label = document.createElement('small');
-                        label.className = 'text-muted position-absolute top-0 end-0 me-1';
+                        label.className = 'text-muted me-1 chance_persent';
                         label.id = `${classification}-${item}-${attr}-${index}_label`;
                         
                         chanceCell.appendChild(input);
@@ -449,7 +449,7 @@ export class chancesController {
                         addInputValidation(input, (value) => validateNumber(value, 0, 1000), null, true);
                         
                         let label = document.createElement('small');
-                        label.className = 'text-muted position-absolute top-0 end-0 me-1';
+                        label.className = 'text-muted me-1 chance_persent';
                         label.id = `${classification}-${item}-chances-${index}_label`;
                         
                         chanceCell.appendChild(input);

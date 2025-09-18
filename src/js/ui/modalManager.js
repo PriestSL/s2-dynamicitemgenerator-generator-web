@@ -144,7 +144,7 @@ export class ModalManager {
                                         <div class="ms-2 me-auto">
                                             <div class="fw-bold">Configure Settings</div>
                                             After configuring all settings press the download 
-                                            <img src="img/file.png" style="width:20px" class="mx-1" alt="download"> icon
+                                            <img src="./img/file.png" style="width:20px" class="mx-1" alt="download"> icon
                                         </div>
                                     </li>
                                     <li class="list-group-item d-flex justify-content-between align-items-start">
