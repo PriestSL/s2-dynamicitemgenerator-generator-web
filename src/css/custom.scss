@@ -1,0 +1,17 @@
+@use "sass:map";
+
+@import "bootstrap/scss/functions";
+
+$warning: rgb(212, 212, 14);
+
+
+@import "bootstrap/scss/variables";
+@import "bootstrap/scss/variables-dark";
+
+@import "bootstrap/scss/maps";
+@import "bootstrap/scss/mixins";
+@import "bootstrap/scss/root";
+
+@import "bootstrap/scss/bootstrap";
+
+@import "bootstrap/scss/utilities/api";

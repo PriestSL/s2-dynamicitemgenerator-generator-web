@@ -11,6 +11,7 @@ import { EventManager } from './events/eventManager.js';
 import { UIHelpers } from './ui/uiHelpers.js';
 import { chancesController } from './chances.js';
 import { generateConfig } from './fileStreamGenerator.js';
+import '../css/custom.scss';
 
 class Application {
     constructor() {

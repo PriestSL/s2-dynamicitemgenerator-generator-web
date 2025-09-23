@@ -1,0 +1,21 @@
+
+/* Bootstrap card enhancements */
+.card-preset {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
+}
+
+.card-preset:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Official preset card styling */
+.card-preset-official {
+  border-left: 4px solid var(--bs-primary);
+}
+
+/* Community preset card styling */
+.card-preset-community {
+  border-left: 4px solid var(--bs-warning);
+}
