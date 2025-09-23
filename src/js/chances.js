@@ -91,57 +91,89 @@ export class chancesController {
         return chancesElement;
     }
 
-    addRow (parentElement, item, classification, chances){
-        let row = document.createElement('div');
-        row.classList.add(typeof chances=== 'object' && chances.length?'item_row':'item_column');
-        let itemElement = document.createElement('div');
-        itemElement.classList.add('chances_item');
-        setTextContent(itemElement, item);
-        row.appendChild(itemElement);
+    addRow (parentElement, item, classification, chances){ //TODO rewrite to dot use dublicate code
+        let row = document.createElement('tr');
+            
+            // Item name cell
+            let itemCell = document.createElement('td');
+            itemCell.className = 'align-middle';
+            
+            const strongEl = createElement('strong', {
+                textContent: item
+            });
+            itemCell.appendChild(strongEl);
+            
+            row.appendChild(itemCell);
+            
+            chances.forEach((chance, index) => {
+                let chanceCell = document.createElement('td');
+                chanceCell.className = 'text-center position-relative';
+                
+                if (isNaN(parseFloat(chance))) {
+                    // Static text
+                    const badge = createElement('span', {
+                        className: 'badge bg-secondary',
+                        textContent: chance
+                    });
+                    chanceCell.appendChild(badge);
+                } else {
+                    // Input field
+                    let input = document.createElement('input');
+                    input.type = 'number';
+                    input.className = 'form-control form-control-sm text-center';
+                    input.value = chance;
+                    input.dataset.faction = this.currentFaction;
+                    input.dataset.classification = classification;
+                    input.dataset.type = this.currentCategory;
+                    input.dataset.item = item;
+                    input.dataset.level = index;
+                    input.min = '0';
+                    input.max = '1000';
 
-        let eChances;
-
-        if (typeof chances === 'object'){
-            if (chances.length){
-                eChances = this.createChances(item, row, chances, classification);
-            }else{
-                for (let attr in chances) {
-                    let innerRow = document.createElement('div');
-                    innerRow.classList.add('attr_row');
-                    row.appendChild(innerRow);
-                    let attrNameElement = document.createElement('div');
-                    attrNameElement.classList.add('attr_item');
-                    setTextContent(attrNameElement, attr);
-                    innerRow.appendChild(attrNameElement);
-                    eChances = this.createChances(item, innerRow, chances[attr], classification, attr);
+                    // Add validation using helper function
+                    addInputValidation(input, (value) => validateNumber(value, 0, 1000), null, true);
+                    
+                    let label = document.createElement('small');
+                    label.className = 'text-muted me-1 chance_persent';
+                    label.id = `${classification}-${item}-chances-${index}_label`;
+                    
+                    chanceCell.appendChild(input);
+                    chanceCell.appendChild(label);
                 }
+                
+                row.appendChild(chanceCell);
+            });
+            
+            // Add delete button if needed
+            if ((this.currentCategory === 'Primary' || this.currentCategory === 'Armor') && this.currentFaction !== 'Generic_settings' && item !== '') {
+                let actionsCell = document.createElement('td');
+                actionsCell.className = 'text-center';
+                
+                let deleteButton = createButton({
+                    className: 'btn btn-danger btn-sm',
+                    iconClass: 'fas fa-trash',
+                    attributes: { title: 'Delete' }
+                });
+                
+                deleteButton.addEventListener('click', () => {
+                    let GeneralSettings = 'GeneralNPC_'+this.currentFaction;
+                    if (this.currentCategory === 'Primary') {
+                        delete this.settings.weapon[GeneralSettings][classification][item];
+                        this.updateAllLabels(this.settings.weapon[GeneralSettings][classification], classification);
+                    } else if (this.currentCategory === 'Armor') {
+                        delete this.settings.armor[GeneralSettings][item];
+                        this.updateAllLabels(this.settings.armor[GeneralSettings]);
+                    }
+                    row.remove();
+                });
+                
+                actionsCell.appendChild(deleteButton);
+                row.appendChild(actionsCell);
             }
             
-        }
+            parentElement.appendChild(row);
 
-        if ((this.currentCategory === 'Primary' || this.currentCategory === 'Armor') && this.currentFaction !== 'Generic_settings' && item !== '') {
-            let deleteButton = createButton({
-                text: 'Delete',
-                className: 'btn btn-danger btn-sm ms-2',
-                iconClass: 'fas fa-trash'
-            });
-            
-            deleteButton.addEventListener('click', () => {
-                let GeneralSettings = 'GeneralNPC_'+this.currentFaction;
-                if (this.currentCategory === 'Primary') {
-                    delete this.settings.weapon[GeneralSettings][classification][item];
-                    this.updateAllLabels(this.settings.weapon[GeneralSettings][classification], classification);
-                }else if (this.currentCategory === 'Armor') {
-                    delete this.settings.armor[GeneralSettings][item];
-                    this.updateAllLabels(this.settings.armor[GeneralSettings]);
-                }
-                row.remove();
-            });
-            row.appendChild(deleteButton);
-        }
-
-        parentElement.appendChild(row);
-        return eChances;
+            return row;
     }
 
     addWeaponToClass (parentEl, classification, weapon) {
@@ -504,7 +536,7 @@ export class chancesController {
                 iconClass: 'fas fa-plus'
             });
             addButton.addEventListener('click', () => {
-                this.showAddSelection(tableContainer, tableType, classification);
+                this.showAddSelection(tbody, tableType, classification);
             });
             
             addButtonContainer.appendChild(addButton);
