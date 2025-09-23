@@ -1,3 +1,5 @@
+import mkcert from 'vite-plugin-mkcert'
+
 export default {
     build: {
         minify: true
@@ -11,5 +13,8 @@ export default {
         host: true,
         port: process.env.PORT || 3000, 
         allowedHosts: true
-    }
+    },
+    plugins: [
+        mkcert()
+    ]
 }

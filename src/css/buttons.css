@@ -1,0 +1,62 @@
+#settings_button{
+    display: -webkit-flex;
+    cursor: pointer;
+    width: 100%;
+    height: 100%;
+    align-self: center;
+}
+
+.btn-edit {
+    color: #4a90e2;
+}
+
+.btn-delete {
+    color: #e25a4a;
+}
+
+.btn-primary, .btn-secondary {
+    padding: 8px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: all 0.2s;
+}
+
+.btn-primary {
+    background-color: #4a90e2;
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: #3a80d2;
+}
+
+.btn-secondary {
+    background-color: #f0f0f0;
+    color: #333;
+}
+
+.btn-secondary:hover {
+    background-color: #e0e0e0;
+}
+
+.btn-secondary:disabled {
+    background-color: #f0f0f0;
+    color: #999;
+    cursor: not-allowed;
+}
+
+/* Button styling to match Bootstrap but keep your custom colors */
+.btn-primary {
+  background-color: var(--bs-brown);
+  border-color: var(--bs-brown-dark);
+}
+
+.btn-primary:hover {
+  background-color: var(--bs-brown-dark);
+  border-color: var(--bs-brown-darker);
+}
