@@ -5,8 +5,7 @@
     "eslint": "^9.31.0",
     "globals": "^16.3.0",
     "sass": "^1.93.1",
-    "vite": "^7.0.5",
-    "vite-plugin-mkcert": "^1.17.8"
+    "vite": "^7.0.5"
   },
   "name": "s2-dynamicitemgenerator-generator-web",
   "description": "Pure JS website to generating NPC Loadout mod to STALKER 2. That's all...\r Deployed: https://s2-loadout-creator.cc/",
