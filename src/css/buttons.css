@@ -24,6 +24,9 @@
     align-items: center;
     gap: 5px;
     transition: all 0.2s;
+
+    background-color: var(--bs-brown);
+    border-color: var(--bs-brown-dark);
 }
 
 .btn-primary {
@@ -32,7 +35,8 @@
 }
 
 .btn-primary:hover {
-    background-color: #3a80d2;
+    background-color: var(--bs-brown-dark);
+    border-color: var(--bs-brown-darker);
 }
 
 .btn-secondary {
@@ -48,15 +52,4 @@
     background-color: #f0f0f0;
     color: #999;
     cursor: not-allowed;
-}
-
-/* Button styling to match Bootstrap but keep your custom colors */
-.btn-primary {
-  background-color: var(--bs-brown);
-  border-color: var(--bs-brown-dark);
-}
-
-.btn-primary:hover {
-  background-color: var(--bs-brown-dark);
-  border-color: var(--bs-brown-darker);
 }
