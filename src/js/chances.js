@@ -351,7 +351,7 @@ export class chancesController {
     fillChancesTable (oSettings, newRowReplace, tableType, classification = '') {
         // Create Bootstrap table structure
         let tableContainer = document.createElement('div');
-        tableContainer.className = 'table-responsive mb-3';
+        tableContainer.className = 'table-responsive';
         
         let table = document.createElement('table');
         table.className = 'table table-striped table-hover table-sm';
@@ -528,7 +528,7 @@ export class chancesController {
         // Add "Add Item" button if table type is specified
         if (tableType) {
             let addButtonContainer = document.createElement('div');
-            addButtonContainer.className = 'd-flex justify-content-center mb-3';
+            addButtonContainer.className = 'd-flex justify-content-center';
             
             let addButton = createButton({
                 className: 'btn btn-success btn-sm',
