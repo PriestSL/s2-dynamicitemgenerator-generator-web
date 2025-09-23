@@ -20,9 +20,9 @@
     <script type="module" src="src/js/app.js"></script>
 </head>
 <body>
-    <div id="canvas" class="d-flex h-100">
+    <div id="canvas" class="d-flex">
         <!-- Factions sidebar - fixed width, full height -->
-        <div id="factions_bar" class="d-flex flex-column">
+        <div id="factions_bar">
             <img id="Generic_settings" title="Generic" src="src/img/gear.png" alt="settings" class="faction_item">
             <!--TODO Should be changed to local images!!! IDK what guys can do with img on links-->
             <img id="Neutral" title="Neutrals" src="src/img/T_icon_fraction_neutrals.png" alt="Generic settings" class="faction_item">
@@ -57,7 +57,7 @@
                 </div>
                 
                 <!-- Toolbar -->
-                <div class="d-flex align-items-center justify-content-end flex-grow-1 pe-3" id="toolbar">
+                <div class="align-items-center justify-content-end flex-grow-1 pe-3" id="toolbar">
                     <div class="input-group input-group-sm me-2" style="max-width: 200px;">
                         <input id="config_name" type="text" class="form-control" placeholder="Config name" value="My new loadout">
                     </div>
