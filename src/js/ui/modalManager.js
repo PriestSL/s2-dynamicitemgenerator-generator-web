@@ -452,26 +452,27 @@ export class ModalManager {
     
     _createToDoContent() {
         const TODOList = [
-            "Public presets",
-            "Some style fixes",
-            "Import config",
+            "Presets editing",
+            "Presets sharing",
+            "More style fixes",
+            "Rewrite and clean some AI slop",
+            "Create as splitted files and override for better compatibility",
+            "OXA compatibility",
+            "Lootable Zone compatibility",
+            "Import .cfg or .pak file",
             "Local storage of settings",
             "Tutorial",
             "Guard configuration",
             "Alphabetical sorting",
             "Search",
             "Site localization",
-            "Separate site for more files",
-            "Create as splitted files and override",
             "Helmets drops",
-            "Full item list from game",
-            "Rewrite it all...",
+            "Full item list from game (do we need unique items?)",
             "Armor Loot chances by player rank",
             "Ammo count by player rank",
             "Consumables settings",
             "Artifacts settings",
             "Secondary weapons settings",
-            "packing into .pak file"
         ];
         
         const container = createElement('div');
