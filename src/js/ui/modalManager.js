@@ -34,7 +34,6 @@ export class ModalManager {
                 {
                     text: options.closeText || 'Close',
                     className: 'btn btn-secondary',
-                    iconClass: 'fas fa-times',
                     onClick: () => this.removeMessageBox(id)
                 }
             ]
@@ -128,7 +127,7 @@ export class ModalManager {
         this.createMessageBox('todo', todoContent);
     }
     
-    _createHelpContent() {
+    _createHelpContent_legacy() {
         return UIHelpers.createElementFromHtml(`
             <div class="container-fluid">
                 <div class="row">
@@ -144,7 +143,7 @@ export class ModalManager {
                                         <div class="ms-2 me-auto">
                                             <div class="fw-bold">Configure Settings</div>
                                             After configuring all settings press the download 
-                                            <img src="./img/file.png" style="width:20px" class="mx-1" alt="download"> icon
+                                            <img src="./src/img/file.png" style="width:20px" class="mx-1" alt="download"> icon
                                         </div>
                                     </li>
                                     <li class="list-group-item d-flex justify-content-between align-items-start">
@@ -174,6 +173,54 @@ export class ModalManager {
                                             <div class="fw-bold">Install Mod</div>
                                             Copy created .pak file from <code class="bg-light p-1">3-repacked-pak-files</code> to<br>
                                             <code class="bg-light p-1">Stalker 2 Game Folder\\Stalker2\\Content\\Paks\\~mods\\</code>
+                                        </div>
+                                    </li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `);
+    }
+
+    _createHelpContent() {
+        return UIHelpers.createElementFromHtml(`
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-12">
+                        <h4 class="mb-4">
+                            <i class="fas fa-question-circle me-2"></i>Installation Guide
+                        </h4>
+                        
+                        <div class="card">
+                            <div class="card-body">
+                                <ol class="list-group list-group-numbered">
+                                    <li class="list-group-item d-flex justify-content-between align-items-start">
+                                        <div class="ms-2 me-auto">
+                                            <div class="fw-bold">Configure Settings</div>
+                                            After configuring all settings press the download 
+                                            <img src="./src/img/file.png" style="width:20px" class="mx-1" alt="download"> icon
+                                        </div>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-start">
+                                        <div class="ms-2 me-auto">
+                                            <div class="fw-bold">Install Mod</div>
+                                            Copy downloaded .pak file to<br>
+                                            <code class="bg-light p-1">Stalker 2 Game Folder\\Stalker2\\Content\\Paks\\~mods\\</code>
+                                        </div>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-start">
+                                        <div class="ms-2 me-auto">
+                                            <div class="fw-bold">Enjoy</div>
+                                            Yes. That's all. You can now run the game with your custom configurations.
+                                        </div>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-start">
+                                        <div class="ms-2 me-auto">
+                                            <div class="fw-bold">Save preset for others (optional)</div>
+                                            If you want to share your configuration with others, you can save it as a preset using the
+                                            <img src="./src/img/list.png" style="width:20px" class="mx-1" alt="save"> icon and save preset to be used by others.
                                         </div>
                                     </li>
                                 </ol>
@@ -304,6 +351,46 @@ export class ModalManager {
                 </div>
             </div>
         `);
+    }
+
+    _createDeveloperWarningContent() {
+        return UIHelpers.createElementFromHtml(`
+            <div class="container-fluid">
+            <div class="row">
+                <div class="col-12">
+                <h4 class="mb-4 text-warning">
+                    <i class="fas fa-exclamation-triangle me-2"></i>Developer Warning
+                </h4>
+                
+                <div class="alert alert-warning" role="alert">
+                    <div class="d-flex align-items-center mb-3">
+                    <i class="fas fa-code text-warning me-2" style="font-size: 1.5em;"></i>
+                    <h5 class="mb-0">Development Version</h5>
+                    </div>
+                    <p class="mb-2">
+                    <strong>This is a development version of the website.</strong>
+                    </p>
+                    <p class="mb-2">
+                    You may experience bugs, incomplete features, or unexpected behavior. 
+                    This version is intended for testing and development purposes only.
+                    </p>
+                    <p class="mb-0">
+                    <i class="fas fa-info-circle me-1"></i>
+                    For the stable version, please visit the 
+                    <a href="https://https://s2-loadout-creator.cc/" target="_blank">main release</a>.
+                    </p>
+                </div>
+                </div>
+            </div>
+            </div>
+        `);
+    }
+    
+    showDeveloperWarning() {
+        const warningContent = this._createDeveloperWarningContent();
+        this.createMessageBox('dev-warning', warningContent, {
+            closeText: 'I Understand'
+        });
     }
     
     _subscribeFileSettingsEvents(appState, onSettingsChange) {

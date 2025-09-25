@@ -37,6 +37,8 @@ class Application {
         
         // Set up global Bootstrap reference for modules
         this.setupGlobalReferences();
+
+        this.modalManager.showDeveloperWarning();
     }
     
     async setupGlobalReferences() {
