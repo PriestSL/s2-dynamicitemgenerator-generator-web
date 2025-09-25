@@ -328,17 +328,17 @@ export class ModalManager {
                                     <div class="armor_drop_settings" style="display:${appState.modifiedDropConfigs.createDroppableArmor ? 'block' : 'none'}">
                                         <div class="row g-3">
                                             <div class="col-md-4">
-                                                <label for="armor_chance" class="form-label">Armor drop chance (%)</label>
+                                                <label for="armor_chance" class="form-label">Armor drop chance (0.1=10%)</label>
                                                 <input type="number" class="form-control" id="armor_chance" value="${appState.modifiedDropConfigs.nLootChance}" min="0" max="100">
                                                 <div class="form-text">Percentage chance that armor will drop</div>
                                             </div>
                                             <div class="col-md-4">
-                                                <label for="min_condition" class="form-label">Minimal condition (%)</label>
+                                                <label for="min_condition" class="form-label">Minimal condition (0.1=10%)</label>
                                                 <input type="number" class="form-control" id="min_condition" value="${appState.modifiedDropConfigs.nMinDurability}" min="0" max="100">
                                                 <div class="form-text">Minimum durability of dropped armor</div>
                                             </div>
                                             <div class="col-md-4">
-                                                <label for="max_condition" class="form-label">Maximal condition (%)</label>
+                                                <label for="max_condition" class="form-label">Maximal condition (0.1=10%)</label>
                                                 <input type="number" class="form-control" id="max_condition" value="${appState.modifiedDropConfigs.nMaxDurability}" min="0" max="100">
                                                 <div class="form-text">Maximum durability of dropped armor</div>
                                             </div>
