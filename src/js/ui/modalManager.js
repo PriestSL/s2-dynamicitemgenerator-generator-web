@@ -377,7 +377,7 @@ export class ModalManager {
                     <p class="mb-0">
                     <i class="fas fa-info-circle me-1"></i>
                     For the stable version, please visit the 
-                    <a href="https://https://s2-loadout-creator.cc/" target="_blank">main release</a>.
+                    <a href="https://s2-loadout-creator.cc/" target="_blank">main release</a>.
                     </p>
                 </div>
                 </div>
