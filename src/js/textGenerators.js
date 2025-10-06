@@ -525,6 +525,17 @@ const createGrenades = (clas)=>{
     return cRet;
 };
 
+const createNVG = (faction)=>
+    `[*] : struct.begin
+         Category = EItemGenerationCategory::SubItemGenerator
+         PossibleItems : struct.begin
+            [0] : struct.begin
+               ItemGeneratorPrototypeSID = ${faction}_NVG
+               Chance = 1
+            struct.end
+         struct.end
+      struct.end`;
+
 const getModdedItemGenerators = async ()=>{
     let cRet = '';
 
@@ -648,6 +659,7 @@ export const createLoadout = async (appState)=>{
             cRet +=        createDetector(faction); //is it works? 
             //cRet +=        createArtifact(faction); //Why grenade uses artifact category?
             cRet +=        createGrenades(clas);
+            cRet +=        createNVG(faction);
             cRet += `   struct.end\n`;
             cRet += `struct.end\n`;
         }

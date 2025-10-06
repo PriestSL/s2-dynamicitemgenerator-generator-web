@@ -452,6 +452,7 @@ export class ModalManager {
     
     _createToDoContent() {
         const TODOList = [
+            "NVG editing",
             "Presets editing",
             "Presets sharing",
             "More style fixes",
