@@ -409,16 +409,16 @@ export let oArmorLoadoutSettings = {
 };
 
 export let oHelmetsGlobalSpawnSettings = {
-    Light_Neutral_Helmet: [30, 50, 60, 70],
-    Light_Bandit_Helmet: [0, 50, 60, 70],
-    Light_Mercenaries_Helmet: [30, 50, 60, 70],
-    Light_Military_Helmet: [30, 0, 0, 0],
-    Battle_Military_Helmet: [0, 50, 60, 70],
-    Light_Duty_Helmet: [30, 0, 0, 0],
-    Heavy_Duty_Helmet: [0, 50, 60, 70],
-    Heavy_Svoboda_Helmet: [20, 50, 60, 70],
-    Heavy_Varta_Helmet: [30, 50, 60, 70],
-    Heavy_Military_Helmet: [0, 0, 60, 70]
+    Light_Neutral_Helmet: [50, 70, 70, 70],
+    Light_Bandit_Helmet: [0, 50, 70, 70],
+    Light_Mercenaries_Helmet: [70, 70, 70, 70],
+    Light_Military_Helmet: [70, 70, 70, 70],
+    Battle_Military_Helmet: [70, 70, 70, 70],
+    Light_Duty_Helmet: [70, 70, 70, 70],
+    Heavy_Duty_Helmet: [70, 70, 70, 70],
+    Heavy_Svoboda_Helmet: [70, 70, 70, 70],
+    Heavy_Varta_Helmet: [70, 70, 70, 70],
+    Heavy_Military_Helmet: [70, 70, 70, 70]
 }
 
 export let oWeaponLoadoutSettings = {
