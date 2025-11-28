@@ -525,16 +525,19 @@ const createGrenades = (clas)=>{
     return cRet;
 };
 
-const createNVG = (faction)=>
-    `[*] : struct.begin
-         Category = EItemGenerationCategory::SubItemGenerator
-         PossibleItems : struct.begin
-            [0] : struct.begin
-               ItemGeneratorPrototypeSID = ${faction}_NVG
-               Chance = 1
-            struct.end
-         struct.end
-      struct.end`;
+const createNVG = (faction)=>{
+    let cRet = '';
+    cRet += '      [*] : struct.begin\n';
+    cRet += `         Category = EItemGenerationCategory::SubItemGenerator\n`;
+    cRet += `         PossibleItems : struct.begin\n`;
+    cRet += `            [0] : struct.begin\n`;
+    cRet += `               ItemGeneratorPrototypeSID = ${faction}_NVG\n`;
+    cRet += `               Chance = 1\n`;
+    cRet += `            struct.end\n`;
+    cRet += `         struct.end\n`;
+    cRet += `      struct.end\n`;
+    return cRet;
+};
 
 const getModdedItemGenerators = async ()=>{
     let cRet = '';
