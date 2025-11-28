@@ -613,7 +613,7 @@ export const createLoadout = async (appState)=>{
     modifiedGrenadeSettings = appState.modifiedGrenadeSettings;
     modifiedAmmoByWeaponClass = appState.modifiedAmmoByWeaponClass;
     modsCompatibility = appState.modsCompatibility;
-    let cRet = '//Generated with https://s2-loadout-creator.cc/ \n\n';
+    let cRet = '//Generated with https://dev.s2-loadout-creator.cc/ \n\n';
 
     oArmorLoadoutSettings = modifiedArmorSettings;
     oWeaponLoadoutSettings = modifiedWeaponSettings;
