@@ -100,7 +100,7 @@ export class AppState {
             grenade: this.modifiedGrenadeSettings,
             ammo: this.modifiedAmmoByWeaponClass,
             weaponList: this.modifiedWeaponList,
-            armorList: this.modifiedArmorSettings,
+            armorList: this.modifiedArmorSpawnSettings,
             helmetList: this.modifiedHelmetSpawnSettings
         };
     }

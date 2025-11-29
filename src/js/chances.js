@@ -551,6 +551,16 @@ export class chancesController {
             weapon: [['minAmmo', 'number'], ['maxAmmo','number'], ['minCondition', 'number'], ['maxCondition', 'number']],
             armor: [['drop', 'checkbox'], ['dropItem', 'select'], ['helmet', 'select'], ['helmetSpawn', 'number']]
         };
+        const attributeToTitle = {
+            minAmmo: 'Minimum Ammo',
+            maxAmmo: 'Maximum Ammo',
+            minCondition: 'Minimum Condition (%)',
+            maxCondition: 'Maximum Condition (%)',
+            drop: 'Can Drop (if enabled)',
+            dropItem: 'Drop item (if enabled)',
+            helmet: 'Helmet',   
+            helmetSpawn: 'Helmet Spawn Chance (%)'
+        };
 
 
         let attributesTable = document.createElement('div');
@@ -570,7 +580,7 @@ export class chancesController {
                 
                 let labelEl = document.createElement('label');
                 labelEl.className = 'form-label';
-                setTextContent(labelEl, thisAttr[0]);
+                setTextContent(labelEl, attributeToTitle[thisAttr[0]] || thisAttr[0]);
                 
                 let attrElement = null;
                 if (thisAttr[1] === 'select') {
