@@ -472,7 +472,7 @@ export class PresetsManager {
             </form>
         `;
         this.modalManager.createConfirmationBox('editPreset', modal, {
-            onConfirm: () => this.handleSavePresetSubmit(presetId),
+            onConfirm: () => this.handleEditPresetSubmit(presetId),
             confirmValidation: () => {
                 const presetName = document.getElementById('presetName').value.trim();
                 const presetPin = document.getElementById('presetPin').value.trim();
