@@ -557,10 +557,10 @@ export class chancesController {
             minCondition: 'Minimum Condition (%)',
             maxCondition: 'Maximum Condition (%)',
             drop: 'Can Drop (if enabled)',
-            dropItem: 'Drop item (if enabled)',
+            dropItem: 'Alter item drop (for NPC armor)',
             helmet: 'Helmet',   
             helmetSpawn: 'Helmet Spawn Chance (%)'
-        };
+        }; //TODO add tooltips on hover
 
 
         let attributesTable = document.createElement('div');
