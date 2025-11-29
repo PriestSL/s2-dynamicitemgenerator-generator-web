@@ -4,7 +4,7 @@
  */
 
 import { createElement, escapeHtml } from '../utils/dom.js';
-import { fetchHeaders, getPreset, deletePreset, createPreset } from '../restCalls.js';
+import { fetchHeaders, getPreset, deletePreset, createPreset, updatePreset } from '../restCalls.js';
 import { ModalManager } from '../ui/modalManager.js';
 
 export class PresetsManager {
@@ -444,7 +444,53 @@ export class PresetsManager {
         e.stopPropagation();
         const presetId = e.target.closest('[data-id]').dataset.id;
         //TODO - Implement edit functionality
-        this.modalManager.createMessageBox('editPreset', `Edit preset functionality for ID: ${presetId} is not implemented yet.`);
+        //this.modalManager.createMessageBox('editPreset', `Edit preset functionality for ID: ${presetId} is not implemented yet.`);
+        const modal = `
+            <form id="editPresetForm">
+                <div class="mb-3">
+                    <label for="editPresetName" class="form-label">Preset Name</label>
+                    <input type="text" class="form-control" id="editPresetName" required maxlength="50">
+                </div>
+                <div class="mb-3">
+                    <label for="editPresetAuthor" class="form-label">Author</label>
+                    <input type="text" class="form-control" id="editPresetAuthor" maxlength="30">
+                </div>
+                <div class="mb-3">
+                    <label for="presetDescription" class="form-label">Description</label>
+                    <textarea class="form-control" id="presetDescription" rows="3" maxlength="200"></textarea>
+                </div>
+                <div class="mb-3">
+                    <label for="presetVersion" class="form-label">Version</label>
+                    <input type="text" class="form-control" id="presetVersion" required maxlength="10">
+                </div>
+                <div class="mb-3">
+                    <label for="presetPin" class="form-label">PIN</label>
+                    <input type="password" class="form-control" id="presetPin" required minlength="8" maxlength="8">
+                </div>
+            </form>
+        `;
+        this.modalManager.createConfirmationBox('editPreset', modal, {
+            onConfirm: () => this.handleSavePresetSubmit(presetId),
+            confirmValidation: () => {
+                const presetName = document.getElementById('presetName').value.trim();
+                const presetPin = document.getElementById('presetPin').value.trim();
+                if (!presetName) {
+                    this.modalManager.createMessageBox('invalidPresetName', 'Preset name is required.');
+                    return false;
+                }
+
+                if (!presetPin || presetPin.length !== 8 || !/^\d+$/.test(presetPin)) {
+                    this.modalManager.createMessageBox('invalidPin', 'PIN must be exactly 8 digits.');
+                    return false;
+                }
+
+                return true;
+
+            },
+            title: 'Save changes',
+            closeText: 'Cancel',
+            confirmText: 'Save changes'
+        });
     }
     
     handleDeletePresetClick(e) {
@@ -529,11 +575,6 @@ export class PresetsManager {
             });
     }
     
-    handleUpdatePreset() {
-        //TODO - Implement update functionality
-        this.modalManager.createMessageBox('updatePreset', 'Update preset functionality is not implemented yet.');
-    }
-    
     async handleSavePresetSubmit() {
         const presetData = {
             name: document.getElementById('presetName').value.trim(),
@@ -556,6 +597,31 @@ export class PresetsManager {
         } catch (error) {
             console.error('Error creating preset:', error);
             this.modalManager.createMessageBox('presetCreateError', 'Error creating preset. Please try again.');
+        }
+    }
+
+    async handleEditPresetSubmit(presetId) {
+        const presetData = {
+            name: document.getElementById('editPresetName').value.trim(),
+            author: document.getElementById('editPresetAuthor').value.trim(),
+            description: document.getElementById('presetDescription').value.trim(),
+            data: this.state.exportState(),
+            version: document.getElementById('presetVersion').value.trim(),
+            pin: document.getElementById('presetPin').value.trim(),
+            created: new Date().toISOString()
+        };
+
+        try {
+            const response = await updatePreset(presetId, presetData);
+            if (response && !response.error) {
+                this.modalManager.createMessageBox('presetUpdated', 'Preset updated successfully');
+                this._loadPresets();
+            } else {
+                this.modalManager.createMessageBox('presetUpdateError', `Error updating preset: ${response?.error || 'Unknown error'}`);
+            }
+        } catch (error) {
+            console.error('Error updating preset:', error);
+            this.modalManager.createMessageBox('presetUpdateError', 'Error updating preset. Please try again.');
         }
     }
 }
