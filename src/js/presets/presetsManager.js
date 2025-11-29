@@ -240,7 +240,9 @@ export class PresetsManager {
             attributes: {
                 'data-id': preset._id,
                 'data-type': type,
-                'data-name': escapeHtml(preset.name)
+                'data-name': escapeHtml(preset.name),
+                'data-author': escapeHtml(preset.author || ''),
+                'data-version': escapeHtml(preset.version || '1.0')
             }
         });
         
@@ -443,25 +445,25 @@ export class PresetsManager {
     handleEditPresetClick(e) {
         e.stopPropagation();
         const presetId = e.target.closest('[data-id]').dataset.id;
-        //TODO - Implement edit functionality
-        //this.modalManager.createMessageBox('editPreset', `Edit preset functionality for ID: ${presetId} is not implemented yet.`);
+        const card = e.target.closest('.card-preset');
+
         const modal = `
             <form id="editPresetForm">
                 <div class="mb-3">
                     <label for="editPresetName" class="form-label">Preset Name</label>
-                    <input type="text" class="form-control" id="editPresetName" required maxlength="50">
+                    <input type="text" class="form-control" id="editPresetName" required maxlength="50" value="${card.dataset.name}">
                 </div>
                 <div class="mb-3">
                     <label for="editPresetAuthor" class="form-label">Author</label>
-                    <input type="text" class="form-control" id="editPresetAuthor" maxlength="30">
+                    <input type="text" class="form-control" id="editPresetAuthor" maxlength="30" value="${card.dataset.author}">
                 </div>
-                <div class="mb-3">
+                <div class="mb-3" style="display: none;">
                     <label for="presetDescription" class="form-label">Description</label>
                     <textarea class="form-control" id="presetDescription" rows="3" maxlength="200"></textarea>
                 </div>
                 <div class="mb-3">
                     <label for="presetVersion" class="form-label">Version</label>
-                    <input type="text" class="form-control" id="presetVersion" required maxlength="10">
+                    <input type="text" class="form-control" id="presetVersion" required maxlength="10" value="${card.dataset.version}">
                 </div>
                 <div class="mb-3">
                     <label for="presetPin" class="form-label">PIN</label>
@@ -536,7 +538,7 @@ export class PresetsManager {
                     <label for="presetAuthor" class="form-label">Author</label>
                     <input type="text" class="form-control" id="presetAuthor" maxlength="30">
                 </div>
-                <div class="mb-3">
+                <div class="mb-3" style="display: none;">
                     <label for="presetDescription" class="form-label">Description</label>
                     <textarea class="form-control" id="presetDescription" rows="3" maxlength="200"></textarea>
                 </div>
@@ -576,6 +578,13 @@ export class PresetsManager {
     }
     
     async handleSavePresetSubmit() {
+        const pin = document.getElementById('pinInput').value;
+        if (!pin || pin.length !== 8 || !/^\d+$/.test(pin)) {
+            this.modalManager.createMessageBox('invalidPin', 'Invalid PIN.');
+            return;
+        }
+
+
         const presetData = {
             name: document.getElementById('presetName').value.trim(),
             author: document.getElementById('presetAuthor').value.trim(),
@@ -583,7 +592,7 @@ export class PresetsManager {
             data: this.state.exportState(),
             created: new Date().toISOString(),
             version: document.getElementById('presetVersion').value.trim(),
-            pin: document.getElementById('presetPin').value.trim()
+            pin: pin
         };
 
         try {
