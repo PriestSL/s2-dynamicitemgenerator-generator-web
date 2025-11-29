@@ -611,8 +611,8 @@ export class PresetsManager {
 
     async handleEditPresetSubmit(presetId) {
         const presetData = {
-            name: document.getElementById('editPresetName').value.trim(),
-            author: document.getElementById('editPresetAuthor').value.trim(),
+            name: document.getElementById('presetName').value.trim(),
+            author: document.getElementById('presetAuthor').value.trim(),
             description: document.getElementById('presetDescription').value.trim(),
             data: this.state.exportState(),
             version: document.getElementById('presetVersion').value.trim(),
