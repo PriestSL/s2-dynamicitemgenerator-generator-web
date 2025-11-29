@@ -17,10 +17,10 @@ class Application {
     constructor() {
         this.state = new AppState();
         this.modalManager = new ModalManager();
-        this.presetsManager = new PresetsManager(this.state);
         
         // Initialize chances controller with state
         this.chancesCtrl = new chancesController();
+        this.presetsManager = new PresetsManager(this.state, this.chancesCtrl);
         this.chancesCtrl.fillSettings(this.state.getChancesSettings());
         this.chancesCtrl.typeToTable = this.state.typeToTable;
         this.chancesCtrl.currentFaction = 'Generic_settings'; // Set default faction

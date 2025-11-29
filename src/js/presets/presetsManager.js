@@ -8,8 +8,9 @@ import { fetchHeaders, getPreset, deletePreset, createPreset } from '../restCall
 import { ModalManager } from '../ui/modalManager.js';
 
 export class PresetsManager {
-    constructor(appState) {
+    constructor(appState, chancesCtrl) {
         this.state = appState;
+        this.chancesCtrl = chancesCtrl;
         this.modalManager = new ModalManager();
     }
     
@@ -425,6 +426,8 @@ export class PresetsManager {
                     presetsModal.hide();
                 }
             }
+
+            this.chancesCtrl.fillSettings(this.state.getChancesSettings());
             
             // Trigger UI refresh - emit event for app to handle
             window.dispatchEvent(new CustomEvent('presetLoaded', { 
