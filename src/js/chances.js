@@ -559,7 +559,7 @@ export class chancesController {
             drop: 'Can Drop (if enabled)',
             dropItem: 'Alter item drop (for NPC armor)',
             helmet: 'Helmet',   
-            helmetSpawn: 'Helmet Drop Chance (%) (seems not working)'
+            helmetSpawn: 'Helmet Drop Chance (%) (seems not working, spawn in helmet settings)'
         }; //TODO add tooltips on hover
 
 
