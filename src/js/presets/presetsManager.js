@@ -450,12 +450,12 @@ export class PresetsManager {
         const modal = `
             <form id="editPresetForm">
                 <div class="mb-3">
-                    <label for="editPresetName" class="form-label">Preset Name</label>
-                    <input type="text" class="form-control" id="editPresetName" required maxlength="50" value="${card.dataset.name}">
+                    <label for="presetName" class="form-label">Preset Name</label>
+                    <input type="text" class="form-control" id="presetName" required maxlength="50" value="${card.dataset.name}">
                 </div>
                 <div class="mb-3">
-                    <label for="editPresetAuthor" class="form-label">Author</label>
-                    <input type="text" class="form-control" id="editPresetAuthor" maxlength="30" value="${card.dataset.author}">
+                    <label for="presetAuthor" class="form-label">Author</label>
+                    <input type="text" class="form-control" id="presetAuthor" maxlength="30" value="${card.dataset.author}">
                 </div>
                 <div class="mb-3" style="display: none;">
                     <label for="presetDescription" class="form-label">Description</label>
