@@ -500,15 +500,15 @@ export class PresetsManager {
         const presetId = e.target.closest('[data-id]').dataset.id;
         this.modalManager.createConfirmationBox('deletePreset', `Are you sure you want to delete this preset?`, {
             onConfirm: () => {
-                const pinInput = document.createElement('input');
-                pinInput.type = 'text';
-                pinInput.id = 'pinInput';
-                pinInput.className = 'form-control';
-                pinInput.placeholder = 'Enter PIN to confirm';
+                const presetPin = document.createElement('input');
+                presetPin.type = 'text';
+                presetPin.id = 'presetPin';
+                presetPin.className = 'form-control';
+                presetPin.placeholder = 'Enter PIN to confirm';
 
-                this.modalManager.createConfirmationBox('confirmDelete', pinInput, {
+                this.modalManager.createConfirmationBox('confirmDelete', presetPin, {
                     onConfirm: () => {
-                        const pin = document.getElementById('pinInput').value;
+                        const pin = document.getElementById('presetPin').value;
                         if (!pin || pin.length !== 8 || !/^\d+$/.test(pin)) {
                             this.modalManager.createMessageBox('invalidPin', 'Invalid PIN.');
                             return;
@@ -578,7 +578,7 @@ export class PresetsManager {
     }
     
     async handleSavePresetSubmit() {
-        const pin = document.getElementById('pinInput').value;
+        const pin = document.getElementById('presetPin').value;
         if (!pin || pin.length !== 8 || !/^\d+$/.test(pin)) {
             this.modalManager.createMessageBox('invalidPin', 'Invalid PIN.');
             return;
