@@ -193,7 +193,7 @@ const createWeaponStruct = (oWeapon, faction)=>{
     let cRet = '';
     let iterator = 0;
     for (let weapon in oWeapon){
-        let weaponClass = weapon.substring(weapon.length - 2);
+        let weaponClass = weapon.substring(weapon.lastIndexOf('_') + 1);
         if (oWeapon[weapon] === 0){
             continue;
         }
