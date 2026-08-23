@@ -21,6 +21,7 @@ export const oWeaponList = {
     GunBucket_PP: {},
     GunIntegral_PP: {},
     GunZubr_PP: {},
+    GunFora230_PP: {},
     GunAK74_ST: {},
     GunM16_ST: {},
     GunFora_ST: {},
@@ -30,12 +31,15 @@ export const oWeaponList = {
     GunLavina_ST: {},
     GunDnipro_ST: {},
     GunKharod_ST: {},
+    GunArev_ST: {},
     GunThreeLine_SP: {},
     GunSVDM_SP: {},
     GunSVU_SP: {},
     GunMark_SP: {},
     GunM701_SP: {},
     GunGauss_SP: {},
+    GunSKP_DMR: {},
+    GunGP3A_DMR: {},
     GunM10_HG: {},
     GunPM_HG: {},
     GunKora_HG: {},
@@ -435,7 +439,8 @@ export let oWeaponLoadoutSettings = {
             GunViper_PP: [90, 42, 20, 0],
             GunAKU_PP: [10, 52.5, 25, 20],
             GunBucket_PP: [0, 5.5, 50, 40],
-            GunIntegral_PP: [0, 0, 5, 40]
+            GunIntegral_PP: [0, 0, 5, 40],
+            GunFora230_PP: [0, 40, 25, 30]
         },
         Sniper:{
             GunAK74_ST: [20, 5, 0, 0],
@@ -443,7 +448,9 @@ export let oWeaponLoadoutSettings = {
             GunFora_ST: [0, 5, 20, 10],
             GunGvintar_ST: [0, 5, 20, 20],
             GunSVDM_SP: [0, 5, 40, 60],
-            GunThreeLine_SP: [70, 75, 20, 10]
+            GunThreeLine_SP: [70, 75, 20, 10],
+            GunSKP_DMR: [0, 75, 40, 60],
+            GunGP3A_DMR: [0, 0, 0, 5]
         },
         Stormtrooper:{
             GunAK74_ST: [50, 29.4, 0, 0],
@@ -452,7 +459,8 @@ export let oWeaponLoadoutSettings = {
             GunGvintar_ST: [0, 5.9, 45.5, 19.2],
             GunG37_ST: [0, 0, 4.6, 19.2],
             GunGrim_ST: [0, 0, 4.6, 38.5],
-            GunLavina_ST: [0, 0, 0, 3.9]
+            GunLavina_ST: [0, 0, 0, 3.9],
+            GunArev_ST: [0, 0, 4.6, 38.5]
         }
     },
     GeneralNPC_Bandit:{
@@ -468,7 +476,8 @@ export let oWeaponLoadoutSettings = {
             GunViper_PP: [83.3, 33.33, 20, 5],
             GunAKU_PP: [16.6, 47.7, 45, 55],
             GunBucket_PP: [0, 4.8, 15, 29],
-            GunIntegral_PP: [0, 0, 1, 5]
+            GunIntegral_PP: [0, 0, 1, 5],
+            GunFora230_PP: [0, 40, 25, 30]
         },
         Stormtrooper:{
             GunViper_PP: [90, 0, 0, 0],
@@ -478,7 +487,8 @@ export let oWeaponLoadoutSettings = {
             GunFora_ST: [0, 10, 10, 7],
             GunGvintar_ST: [0, 0, 6, 6],
             GunG37_ST: [0, 10, 32, 35],
-            GunGrim_ST: [0, 0, 0, 10]
+            GunGrim_ST: [0, 0, 0, 10],
+            GunArev_ST: [0, 0, 2, 10]
         },
         Heavy:{
             GunThreeLine_SP: [45, 20, 10, 5],
@@ -501,14 +511,16 @@ export let oWeaponLoadoutSettings = {
             GunRam2_SG: [0, 0, 0, 10],
         },
         Recon:{
-            GunViper_PP: [100, 100, 71.4, 28.6],
-            GunIntegral_PP: [0, 0, 28.6, 71.4]
+            GunViper_PP: [100, 50, 50, 28.6],
+            GunIntegral_PP: [0, 0, 30, 71.4],
+            GunFora230_PP: [0, 50, 30, 30]
         },
         Stormtrooper:{
             GunM16_ST: [90.9, 70, 30, 16.7],
             GunFora_ST: [0, 5, 10, 16.7],
             GunG37_ST: [9.1, 25, 60, 33.3],
-            GunKharod_ST: [0, 0, 0, 33.3]
+            GunKharod_ST: [0, 0, 0, 33.3],
+            GunArev_ST: [0, 0, 30, 33.3]
         },
         Sniper:{
             GunSVDM_SP: [90.9, 70, 28.6, 0],
@@ -538,9 +550,10 @@ export let oWeaponLoadoutSettings = {
             GunSPSA_SG: [0, 0, 10, 21]
         },
         Recon:{
-            GunAKU_PP: [100, 83.3, 42.1, 20],
+            GunAKU_PP: [100, 63, 42.1, 20],
             GunBucket_PP: [0, 16.7, 52.6, 30],
-            GunZubr_PP: [0, 0, 5.3, 50]
+            GunZubr_PP: [0, 0, 5.3, 50],
+            GunFora230_PP: [0, 20, 25, 30]
         },
         Stormtrooper:{
             GunAK74_ST: [80, 73, 15, 7],
@@ -578,7 +591,8 @@ export let oWeaponLoadoutSettings = {
             GunBucket_PP: [4.8, 16, 42, 25],
             GunIntegral_PP: [0, 0, 8, 30],
             GunZubr_PP: [0, 0, 0, 25],
-            GunGauss_SP: [0, 0, 0, 5]
+            GunGauss_SP: [0, 0, 0, 5],
+            GunFora230_PP: [0, 40, 25, 30]
 
         },
         Stormtrooper:{
@@ -593,9 +607,11 @@ export let oWeaponLoadoutSettings = {
         Sniper:{
             GunSVDM_SP: [90.9, 70, 33, 20],
             GunMark_SP: [9.1, 30, 33, 40],
-            GunM701_SP: [0, 0, 33, 17],
+            GunM701_SP: [0, 0, 33, 9],
             GunSVU_SP: [0, 0, 0, 17],
-            GunGauss_SP: [0, 0, 0, 6]
+            GunGauss_SP: [0, 0, 0, 6],
+            GunSKP_DMR: [0, 0, 33, 40],
+            GunGP3A_DMR: [0, 0, 0, 9]
         }
     },
     GeneralNPC_Duty:{
@@ -622,7 +638,8 @@ export let oWeaponLoadoutSettings = {
             GunAK74_ST: [50, 20, 0, 0],
             GunGvintar_ST: [8.3, 30, 30, 20],
             GunSVDM_SP: [8.3, 30, 60, 45],
-            GunSVU_SP: [0, 0, 0, 30]
+            GunSVU_SP: [0, 0, 0, 30],
+            GunSKP_DMR: [0, 0, 30, 60]
         },
         Heavy:{
             GunThreeLine_SP: [21, 0, 0, 0],
@@ -640,18 +657,21 @@ export let oWeaponLoadoutSettings = {
             GunRam2_SG: [0, 0, 0, 27.8]
         },
         Recon:{
-            GunViper_PP: [100, 100, 83.3, 62.5],
-            GunIntegral_PP: [0, 0, 16.7, 37.5]
+            GunViper_PP: [100, 60, 50, 32.5],
+            GunIntegral_PP: [0, 0, 16.7, 37.5],
+            GunFora230_PP: [0, 40, 40, 30]
         },
         Stormtrooper:{
             GunM16_ST: [90.9, 70, 40, 20],
             GunFora_ST: [0, 10, 20, 20],
             GunG37_ST: [9.1, 20, 40, 40],
-            GunKharod_ST: [0, 0, 0, 20]
+            GunKharod_ST: [0, 0, 0, 20],
+            GunArev_ST: [0, 0, 20, 20]
         },
         Sniper:{
-            GunMark_SP: [100, 100, 62.5, 62.5],
-            GunM701_SP: [0, 0, 37.5, 37.5],
+            GunMark_SP: [100, 100, 62.5, 37.5],
+            GunM701_SP: [0, 0, 37.5, 62.5],
+            GunGP3A_DMR: [0, 0, 0, 37.5]
         }
     },
     GeneralNPC_Varta:{
@@ -668,7 +688,8 @@ export let oWeaponLoadoutSettings = {
             GunAKU_PP: [50, 52.6, 27, 8],
             GunBucket_PP: [0, 5.3, 52, 12],
             GunIntegral_PP: [0, 0, 6, 50],
-            GunZubr_PP: [0, 0, 0, 25]
+            GunZubr_PP: [0, 0, 0, 25],
+            GunFora230_PP: [0, 40, 25, 20]
         },
         Stormtrooper:{
             GunAK74_ST: [90.9, 30, 10, 5],
@@ -676,7 +697,8 @@ export let oWeaponLoadoutSettings = {
             GunFora_ST: [0, 10, 60, 40],
             GunG37_ST: [0, 0, 10, 20],
             GunKharod_ST: [0, 0, 0, 15],
-            GunDnipro_ST: [0, 0, 0, 15]
+            GunDnipro_ST: [0, 0, 0, 15],
+            GunArev_ST: [0, 0, 20, 40]
         },
         Sniper:{
             GunThreeLine_SP: [50, 50, 10, 5],
@@ -704,7 +726,8 @@ export let oWeaponLoadoutSettings = {
         Recon:{
             GunViper_PP: [50, 42.1, 42.1, 42.1],
             GunAKU_PP: [50, 52.6, 52.6, 52.6],
-            GunBucket_PP: [0, 5.3, 5.3, 5.3]
+            GunBucket_PP: [0, 5.3, 5.3, 5.3],
+            GunFora230_PP: [0, 40, 40, 30]
         },
         Stormtrooper:{
             GunAK74_ST: [100, 76.9, 76.9, 76.9],
@@ -715,7 +738,8 @@ export let oWeaponLoadoutSettings = {
             GunAK74_ST: [50,30, 62.5, 62.5],
             GunM16_ST: [0, 18.8, 18.8, 18.8],
             GunSVDM_SP: [0, 12.5, 12.5, 12.5],
-            GunMark_SP: [0, 6.2, 6.2, 6.2]
+            GunMark_SP: [0, 6.2, 6.2, 6.2],
+            GunSKP_DMR: [0, 50, 50, 50]
         }
     },
     GeneralNPC_Spark:{
@@ -748,8 +772,9 @@ export let oWeaponLoadoutSettings = {
             GunM16_ST: [20, 20, 0, 0],
             GunFora_ST: [4.4, 4.4, 0, 0],
             GunGvintar_ST: [4.4, 4.4, 5, 0],
-            GunSVDM_SP: [4.4, 4.4, 95, 90.9],
-            GunSVU_SP: [0, 0, 0, 9.1]
+            GunSVDM_SP: [4.4, 4.4, 95, 60],
+            GunSVU_SP: [0, 0, 0, 9.1],
+            GunSKP_DMR: [0, 0, 40, 60]
         }
     },
     GeneralNPC_Corpus:{
@@ -759,8 +784,9 @@ export let oWeaponLoadoutSettings = {
             GunRam2_SG: [0, 0, 0, 6.7]
         },
         Recon:{
-            GunBucket_PP: [90.9, 90.9, 90.9, 33.3],
-            GunZubr_PP: [9.1, 9.1, 9.1, 66.7]
+            GunBucket_PP: [90.9, 50.9, 50.9, 33.3],
+            GunZubr_PP: [9.1, 9.1, 9.1, 66.7],
+            GunFora230_PP: [0, 40, 40, 30]
         },
         Stormtrooper:{
             GunGvintar_ST: [90.9, 90.9, 90.9, 0],
@@ -839,7 +865,9 @@ export let oWeaponLoadoutSettings = {
         },
         Sniper:{
             GunSVDM_SP: [76.9, 76.9, 76.9, 76.9],
-            GunMark_SP: [23.1, 23.1, 23.1, 23.1]
+            GunMark_SP: [23.1, 23.1, 23.1, 23.1],
+            GunSKP_DMR: [10, 10, 10, 50],
+            GunGP3A_DMR: [0, 0, 0, 50]
         }
     },
     GuardNPC_Duty:{
@@ -857,7 +885,8 @@ export let oWeaponLoadoutSettings = {
             GunLavina_ST: [0, 0, 0, 50]
         },
         Sniper:{
-            GunSVDM_SP: [100, 100, 100, 100]
+            GunSVDM_SP: [100, 100, 70, 70],
+            GunSKP_DMR: [0, 0, 30, 30]
         },
         Heavy:{
             GunPKP_MG: [100, 100, 100, 100]
@@ -878,7 +907,8 @@ export let oWeaponLoadoutSettings = {
         },
         Sniper:{
             GunSVDM_SP: [100, 100, 0, 0],
-            GunM701_SP: [0, 0, 100, 100]
+            GunM701_SP: [0, 0, 100, 100],
+            GunGP3A_DMR: [0, 0, 0, 100]
         }
     },
     GuardNPC_Varta:{
@@ -919,7 +949,8 @@ export let oWeaponLoadoutSettings = {
         },
         Sniper:{
             GunSVDM_SP: [50, 50, 50, 50],
-            GunMark_SP: [50, 50, 50, 50]
+            GunMark_SP: [50, 50, 50, 50],
+            GunSKP_DMR: [10, 10, 10, 10]
         }
     },
     GuardNPC_Corpus:{
@@ -939,7 +970,8 @@ export let oWeaponLoadoutSettings = {
             GunDnipro_ST: [0, 0, 0, 100]
         },
         Sniper:{
-            GunSVU_SP: [100, 100, 100, 100]
+            GunSVU_SP: [100, 100, 100, 100],
+            GunGP3A_DMR: [0, 0, 0, 100]
         },
         Heavy:{
             GunPKP_MG: [100, 100, 100, 100]
@@ -1061,7 +1093,8 @@ export const oAmmoByWeaponClass = {
     SP: [0, 10],
     HG: [5, 10],
     MG: [10, 50],
-    GL: [0, 2]
+    GL: [0, 2],
+    DMR: [0, 10]
 };
 
 
