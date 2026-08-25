@@ -45,6 +45,7 @@ export class EventManager {
                 
                 // Get the category from the element's ID or title
                 const category = e.target.id || e.target.getAttribute('title') || e.target.textContent.trim();
+                this.categoryRenderers.chancesCtrl.currentCategory = category; // Update current category in chances controller
                 if (this.oCategoryToEvent[category]) {
                     this.oCategoryToEvent[category]();
                 } else {
