@@ -407,6 +407,14 @@ export class chancesController {
             
             // Check if it's an object with attributes or array of chances
             if (typeof oSettings[item] === 'object' && !Array.isArray(oSettings[item])) {
+                let colCount = levelHeaders.length + 1;
+                if ((this.currentCategory === 'Primary' || this.currentCategory === 'Armor') && this.currentFaction !== 'Generic_settings') {
+                    colCount += 1;
+                }
+                itemCell.colSpan = colCount;
+                row.className = 'table-light';
+                tbody.appendChild(row);
+
                 // Handle objects with attributes (like grenades)
                 for (let attr in oSettings[item]) {
                     let attrRow = document.createElement('tr');

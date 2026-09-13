@@ -293,23 +293,6 @@ export class ModalManager {
                         </h4>
                         
                         <form class="needs-validation" novalidate>
-                            <div class="card mb-3">
-                                <div class="card-header">
-                                    <h5 class="card-title mb-0">
-                                        <i class="fas fa-puzzle-piece me-2"></i>Mod Compatibility
-                                    </h5>
-                                </div>
-                                <div class="card-body">
-                                    <div class="form-check mb-3">
-                                        <input class="form-check-input" type="checkbox" id="copm_SHA" ${appState.modsCompatibility.SHA ? 'checked' : ''}>
-                                        <label class="form-check-label" for="copm_SHA">
-                                            <strong>Separated Helmets and Armor</strong>
-                                            <small class="d-block text-muted">Enable if you're using mods that separate helmet and armor systems</small>
-                                        </label>
-                                    </div>
-                                </div>
-                            </div>
-                            
                             <div class="card">
                                 <div class="card-header">
                                     <h5 class="card-title mb-0">
@@ -394,13 +377,13 @@ export class ModalManager {
     }
     
     _subscribeFileSettingsEvents(appState, onSettingsChange) {
-        const SHAComp = document.getElementById('copm_SHA');
+        /*const SHAComp = document.getElementById('copm_SHA');
         if (SHAComp) {
             SHAComp.addEventListener('change', (e) => {
                 appState.modsCompatibility.SHA = e.target.checked;
                 if (onSettingsChange) onSettingsChange('compatibility', appState.modsCompatibility);
             });
-        }
+        }*/
 
         const dropArmor = document.getElementById('drop_armor');
         if (dropArmor) {

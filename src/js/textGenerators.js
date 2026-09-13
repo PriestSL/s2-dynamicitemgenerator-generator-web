@@ -1,8 +1,9 @@
 import * as config from './configs.js';
 import { objCompare } from './utils.js';
 
+/*
 import FactionPatchesCompatibility from '../Mods/FactionPatches.cfg?raw';
-import ProjectItemizationCompatibility from '../Mods/ProjectItemization.cfg?raw';
+import ProjectItemizationCompatibility from '../Mods/ProjectItemization.cfg?raw';*/
 
 // Module-level variables that will be set when createLoadout is called
 let modifiedArmorSettings;
@@ -17,7 +18,7 @@ let modifiedMinWeaponDurability;
 let modifiedMaxWeaponDurability;
 let modifiedGrenadeSettings;
 let modifiedAmmoByWeaponClass;
-let modsCompatibility;
+//let modsCompatibility;
 
 var oArmorLoadoutSettings;
 var oWeaponLoadoutSettings;
@@ -36,7 +37,7 @@ const createArmorItemGenerator = (cArmorName)=>{
             if (!oTemp[aChances[i]]){
                 oTemp[aChances[i]] = [];
             }
-            oTemp[aChances[i]].push('ERank::'+aERanks[i]);
+            oTemp[aChances[i]].push(aERanks[i]);
         }
     
         let oRet = {};
@@ -161,9 +162,9 @@ const createArmorLoadoutGenerators = ()=>{
 
     let cArmorGenerators = '';
     for (let faction in oPrepared){
-        cArmorGenerators += `${faction}_Armor_Override : struct.begin {refurl=../ItemGeneratorPrototypes.cfg;refkey=[0]}\n`;
+        cArmorGenerators += `${faction}_Armor : struct.begin {bpatch}\n`;
         cArmorGenerators += `   SID = ${faction}_Armor\n`;
-        cArmorGenerators += `   ItemGenerator : struct.begin\n`;
+        cArmorGenerators += `   ItemGenerator : struct.begin {bpatch}\n`;
         for (let rank in oPrepared[faction]){
             cArmorGenerators += `      [*] : struct.begin\n`;
             cArmorGenerators += `         Category = EItemGenerationCategory::SubItemGenerator\n`;
@@ -354,9 +355,9 @@ const createPistolsItemGenerators = ()=>{
     let cPistolGenerators = '';
 
     for (let faction in oPrepared){
-        cPistolGenerators += `${faction}_WeaponPistol_Override : struct.begin {refurl=../ItemGeneratorPrototypes.cfg;refkey=[0]}\n`;
+        cPistolGenerators += `${faction}_WeaponPistol : struct.begin {bpatch}\n`;
         cPistolGenerators += `   SID = ${faction}_WeaponPistol\n`;
-        cPistolGenerators += `   ItemGenerator : struct.begin\n`;
+        cPistolGenerators += `   ItemGenerator : struct.begin {bpatch}\n`;
         for (let rank in oPrepared[faction]){
             cPistolGenerators += `      [*] : struct.begin\n`;
             cPistolGenerators += `         Category = EItemGenerationCategory::WeaponSecondary\n`;
@@ -539,7 +540,7 @@ const createNVG = (faction)=>{
     return cRet;
 };
 
-const getModdedItemGenerators = async ()=>{
+/*const getModdedItemGenerators = async ()=>{
     let cRet = '';
 
     cRet += FactionPatchesCompatibility;
@@ -548,50 +549,7 @@ const getModdedItemGenerators = async ()=>{
     cRet += '\n';
 
     return cRet;
-};
-
-const createFactionPatches = (faction)=>{
-    const oFactionToPatch = {
-        CL_Scientists: 'CL_Scientist',
-        CL_Militaries: 'CL_ISPF',
-        CL_Bandit: 'CL_Bandits',
-    };
-
-    let cRet = '';
-
-    faction = faction.replace(faction.substring(0, 8) === 'GuardNPC'?'GuardNPC':'GeneralNPC', 'CL');
-    
-    cRet += `      [*] : struct.begin\n`;
-    cRet += `         Category = EItemGenerationCategory::SubItemGenerator\n`;
-    cRet += `         PossibleItems : struct.begin\n`;
-    cRet += `            [0] : struct.begin\n`;
-    cRet += `               ItemGeneratorPrototypeSID = ${oFactionToPatch[faction] || faction}NPC_Patch\n`;
-    cRet += `               Chance = 1\n`;
-    cRet += `            struct.end\n`;
-    cRet += `         struct.end\n`;
-    cRet += `      struct.end\n`;
-
-    return cRet;
-}
-
-
-const createProjectItemization = ()=>{
-    let cRet = '';
-
-    cRet += `      [*] : struct.begin\n`;
-    cRet += `         Category = EItemGenerationCategory::SubItemGenerator\n`;
-    cRet += `         PossibleItems : struct.begin\n`;
-    cRet += `            [0] : struct.begin\n`;
-    cRet += `               ItemGeneratorPrototypeSID = ProjectItemization_ItemGenerator\n`;
-    cRet += `               Chance = 1\n`;
-    cRet += `            struct.end\n`;
-    cRet += `         struct.end\n`;
-    cRet += `      struct.end\n`;
-
-    return cRet;
-
-};
-
+};*/
 
 export const createLoadout = async (appState)=>{
     if (!appState) {
@@ -612,7 +570,7 @@ export const createLoadout = async (appState)=>{
     modifiedMaxWeaponDurability = appState.modifiedMaxWeaponDurability;
     modifiedGrenadeSettings = appState.modifiedGrenadeSettings;
     modifiedAmmoByWeaponClass = appState.modifiedAmmoByWeaponClass;
-    modsCompatibility = appState.modsCompatibility;
+    //modsCompatibility = appState.modsCompatibility;
     let cRet = '//Generated with https://dev.s2-loadout-creator.cc/ \n\n';
 
     oArmorLoadoutSettings = modifiedArmorSettings;
@@ -635,11 +593,11 @@ export const createLoadout = async (appState)=>{
     cRet += `//Grenades itemgenerators\n`;
     cRet += createGrenadesItemGenerators();
 
-    cRet += `//Itemgenerators from another mods\n\n`;
+    /*cRet += `//Itemgenerators from another mods\n\n`;
     let response = await getModdedItemGenerators(modsCompatibility);
     if (response) {
         cRet += response;
-    }
+    }*/
     cRet += `\n\n`;
 
     cRet += `//Armor loadout generators, just in top to beautiful structure\n`;
@@ -649,16 +607,12 @@ export const createLoadout = async (appState)=>{
     cRet += `//Generated itemgenerators\n`;
     for (let faction in oPrepared){
         for (let clas in oPrepared[faction]){
-            cRet += `${faction}_${clas}_ItemGenerator_Override : struct.begin {refurl=../ItemGeneratorPrototypes.cfg;refkey=[0]}\n`;
-            cRet += `   SID = ${faction}_${clas}_ItemGenerator\n`;
-            cRet += `   RefreshTime = 1d\n`;
-            cRet += `   ItemGenerator : struct.begin\n`;
+            cRet += `${faction}_${clas}_ItemGenerator : struct.begin {bpatch}\n`;
+            cRet += `   ItemGenerator : struct.begin {bpatch}\n`;
             cRet +=        createPrimaryWeapons(oPrepared, faction, clas);
             cRet +=        createSecondaryWeapons(oPreparedSecondary, faction, clas);
             cRet +=        createArmorAndPistol(faction); //may be splitted in future
             cRet +=        createConsumables(faction, clas); //TODO restructure to faction itemgenerators
-            cRet +=        createFactionPatches(faction);
-            cRet +=        createProjectItemization();
             cRet +=        createDetector(faction); //is it works? 
             //cRet +=        createArtifact(faction); //Why grenade uses artifact category?
             cRet +=        createGrenades(clas);
