@@ -128,6 +128,10 @@ export class ModalManager {
     }
     
     _createHelpContent_legacy() {
+        const presetsIconUrl = new URL('../../img/list.png', import.meta.url).href;
+        const fileIconUrl = new URL('../../img/file.png', import.meta.url).href;
+        const zipperIconUrl = new URL('../../img/zipper.png', import.meta.url).href;
+
         return UIHelpers.createElementFromHtml(`
             <div class="container-fluid">
                 <div class="row">
@@ -141,9 +145,17 @@ export class ModalManager {
                                 <ol class="list-group list-group-numbered">
                                     <li class="list-group-item d-flex justify-content-between align-items-start">
                                         <div class="ms-2 me-auto">
+                                            <div class="fw-bold">Choose preset</div>
+                                            If you don't want use standart preset, you need to choose a different one. To choose preset click 
+                                            <img src="${presetsIconUrl}" style="width:20px" class="mx-1" alt="presets icon"> icon and choose what you want
+                                        </div>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-start">
+                                        <div class="ms-2 me-auto">
                                             <div class="fw-bold">Configure Settings</div>
-                                            After configuring all settings press the download 
-                                            <img src="./src/img/file.png" style="width:20px" class="mx-1" alt="download"> icon
+                                            After choosing preset and configuring all settings (if needed) press the download 
+                                            <img src="${fileIconUrl}" style="width:20px" class="mx-1" alt="download pak"> icon to download .pak file or 
+                                            <img src="${zipperIconUrl}" style="width:20px" class="mx-1" alt="download zip"> icon to download unpacked config file 
                                         </div>
                                     </li>
                                     <li class="list-group-item d-flex justify-content-between align-items-start">
@@ -185,6 +197,10 @@ export class ModalManager {
     }
 
     _createHelpContent() {
+        const presetsIconUrl = new URL('../../img/list.png', import.meta.url).href;
+        const fileIconUrl = new URL('../../img/file.png', import.meta.url).href;
+        const zipperIconUrl = new URL('../../img/zipper.png', import.meta.url).href;
+
         return UIHelpers.createElementFromHtml(`
             <div class="container-fluid">
                 <div class="row">
@@ -198,9 +214,17 @@ export class ModalManager {
                                 <ol class="list-group list-group-numbered">
                                     <li class="list-group-item d-flex justify-content-between align-items-start">
                                         <div class="ms-2 me-auto">
+                                            <div class="fw-bold">Choose preset</div>
+                                            If you don't want use standart preset, you need to choose a different one. To choose preset click 
+                                            <img src="${presetsIconUrl}" style="width:20px" class="mx-1" alt="presets icon"> icon and choose what you want
+                                        </div>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-start">
+                                        <div class="ms-2 me-auto">
                                             <div class="fw-bold">Configure Settings</div>
-                                            After configuring all settings press the download 
-                                            <img src="./src/img/file.png" style="width:20px" class="mx-1" alt="download"> icon
+                                            After choosing preset and configuring all settings (if needed) press the download 
+                                            <img src="${fileIconUrl}" style="width:20px" class="mx-1" alt="download pak"> icon to download .pak file or 
+                                            <img src="${zipperIconUrl}" style="width:20px" class="mx-1" alt="download zip"> icon to download unpacked config file 
                                         </div>
                                     </li>
                                     <li class="list-group-item d-flex justify-content-between align-items-start">
@@ -220,7 +244,7 @@ export class ModalManager {
                                         <div class="ms-2 me-auto">
                                             <div class="fw-bold">Save preset for others (optional)</div>
                                             If you want to share your configuration with others, you can save it as a preset using the
-                                            <img src="./src/img/list.png" style="width:20px" class="mx-1" alt="save"> icon and save preset to be used by others.
+                                            <img src="${presetsIconUrl}" style="width:20px" class="mx-1" alt="save"> icon and save preset to be used by others.
                                         </div>
                                     </li>
                                 </ol>
@@ -351,6 +375,7 @@ export class ModalManager {
                     <h5 class="mb-0">Development Version</h5>
                     </div>
                     <p class="mb-2">
+                    <span style="color: red; font-size: 24px">CURRENTY UNDER TESTS OF NEW VERSION, GENERATED FILES CAN BE BROKEN!</span>
                     <strong>This is a development version of the website.</strong>
                     </p>
                     <p class="mb-2">

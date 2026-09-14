@@ -90,8 +90,8 @@ const createArmorItemGenerator = (cArmorName)=>{
 
 
 
-    return `${cArmorName}_Kit : struct.begin {refurl=../ItemGeneratorPrototypes.cfg;refkey=[0]}
-   SID = General${cArmorName}
+    return `BNPL_${cArmorName}_Kit : struct.begin {refurl=../ItemGeneratorPrototypes.cfg;refkey=[0]}
+   SID = BNPL_${cArmorName}_Kit
    ItemGenerator : struct.begin
       [*] : struct.begin
          Category = EItemGenerationCategory::BodyArmor
@@ -162,9 +162,9 @@ const createArmorLoadoutGenerators = ()=>{
 
     let cArmorGenerators = '';
     for (let faction in oPrepared){
-        cArmorGenerators += `${faction}_Armor : struct.begin {bpatch}\n`;
-        cArmorGenerators += `   SID = ${faction}_Armor\n`;
-        cArmorGenerators += `   ItemGenerator : struct.begin {bpatch}\n`;
+        cArmorGenerators += `BNPL_${faction}_Armor : struct.begin {refurl=../ItemGeneratorPrototypes.cfg;refkey=[0]}\n`;
+        cArmorGenerators += `   SID = BNPL_${faction}_Armor\n`;
+        cArmorGenerators += `   ItemGenerator : struct.begin\n`;
         for (let rank in oPrepared[faction]){
             cArmorGenerators += `      [*] : struct.begin\n`;
             cArmorGenerators += `         Category = EItemGenerationCategory::SubItemGenerator\n`;
@@ -176,7 +176,7 @@ const createArmorLoadoutGenerators = ()=>{
                     continue;
                 }
                 cArmorGenerators += `            [${iterator}] : struct.begin\n`;
-                cArmorGenerators += `               ItemGeneratorPrototypeSID = General${armor}\n`;
+                cArmorGenerators += `               ItemGeneratorPrototypeSID = BNPL_${armor}_Kit\n`;
                 cArmorGenerators += `               Weight = ${oPrepared[faction][rank][armor]}\n`;
                 cArmorGenerators += `            struct.end\n`;
                 iterator++;
@@ -211,38 +211,76 @@ const createWeaponStruct = (oWeapon, faction)=>{
     return cRet;
 };
 
-const createPrimaryWeapons = (oWeapons, faction, clas)=>{
-    if (!oWeapons || !oWeapons[faction] || !oWeapons[faction][clas]) return '';
-    oWeapons = oWeapons[faction][clas];
+const createPrimaryGenerators = (preparedData)=>{
     let cRet = '';
-
-    for (let rank in oWeapons){
-        cRet += `      [*] : struct.begin\n`;
-        cRet += `         Category = EItemGenerationCategory::WeaponPrimary\n`;
-        cRet += `         PlayerRank = ${rank}\n`;
-        cRet += `         PossibleItems : struct.begin\n`;
-        cRet += createWeaponStruct(oWeapons[rank], faction);
-        cRet += `         struct.end\n`;
-        cRet += `      struct.end\n`;
+    for (let faction in preparedData){
+        for (let clas in preparedData[faction]){
+            cRet += `BNPL_${faction}_${clas}_Primary_ItemGenerator : struct.begin {refurl=../ItemGeneratorPrototypes.cfg;refkey=[0]}\n`;
+            cRet += `   SID = BNPL_${faction}_${clas}_Primary_ItemGenerator\n`;
+            cRet += '   ItemGenerator : struct.begin\n';
+            for (let rank in preparedData[faction][clas]){
+                cRet += `      [*] : struct.begin\n`;
+                cRet += `         Category = EItemGenerationCategory::WeaponPrimary\n`;
+                cRet += `         PlayerRank = ${rank}\n`;
+                cRet += `         PossibleItems : struct.begin\n`;
+                cRet += createWeaponStruct(preparedData[faction][clas][rank], faction);
+                cRet += `         struct.end\n`;
+                cRet += `      struct.end\n`;
+            }
+            cRet += `   struct.end\n`;
+            cRet += `struct.end\n`;
+        }
     }
+    return cRet;
+};
+
+const createPrimaryWeapons = (faction, clas)=>{
+    let cRet =  '      BNPL_PrimaryWeapons : struct.begin\n';
+        cRet += '         Category = EItemGenerationCategory::SubItemGenerator\n';
+        cRet += '         PossibleItems : struct.begin\n';
+        cRet += '            [0] : struct.begin\n';
+        cRet += `                ItemGeneratorPrototypeSID = BNPL_${faction}_${clas}_Primary_ItemGenerator\n`;
+        cRet += '                Weight = 1\n';
+        cRet += '            struct.end\n';
+        cRet += '         struct.end\n';
+        cRet += '      struct.end\n';
 
     return cRet;
 };
 
-const createSecondaryWeapons = (oWeapons, faction, clas)=>{
-    if (!oWeapons || !oWeapons[faction] || !oWeapons[faction][clas]) return '';
-    oWeapons = oWeapons[faction][clas];
+const createSecondaryGenerators = (preparedData)=>{
     let cRet = '';
-
-    for (let rank in oWeapons){
-        cRet += `      [*] : struct.begin\n`;
-        cRet += `         Category = EItemGenerationCategory::WeaponSecondary\n`;
-        cRet += `         PlayerRank = ${rank}\n`;
-        cRet += `         PossibleItems : struct.begin\n`;
-        cRet += createWeaponStruct(oWeapons[rank], faction);
-        cRet += `         struct.end\n`;
-        cRet += `      struct.end\n`;
+    for (let faction in preparedData){
+        for (let clas in preparedData[faction]){
+            cRet += `BNPL_${faction}_${clas}_Secondary_ItemGenerator : struct.begin {refurl=../ItemGeneratorPrototypes.cfg;refkey=[0]}\n`;
+            cRet += `   SID = BNPL_${faction}_${clas}_Secondary_ItemGenerator\n`;
+            cRet += '   ItemGenerator : struct.begin\n';
+            for (let rank in preparedData[faction][clas]){
+                cRet += `      [*] : struct.begin\n`;
+                cRet += `         Category = EItemGenerationCategory::WeaponSecondary\n`;
+                cRet += `         PlayerRank = ${rank}\n`;
+                cRet += `         PossibleItems : struct.begin\n`;
+                cRet += createWeaponStruct(preparedData[faction][clas][rank], faction);
+                cRet += `         struct.end\n`;
+                cRet += `      struct.end\n`;
+            }
+            cRet += `   struct.end\n`;
+            cRet += `struct.end\n`;
+        }
     }
+    return cRet;
+};
+
+const createSecondaryWeapons = (faction, clas)=>{
+    let cRet =  '      BNPL_SecondaryWeapons : struct.begin\n';
+        cRet += '         Category = EItemGenerationCategory::SubItemGenerator\n';
+        cRet += '         PossibleItems : struct.begin\n';
+        cRet += '            [0] : struct.begin\n';
+        cRet += `                ItemGeneratorPrototypeSID = BNPL_${faction}_${clas}_Secondary_ItemGenerator\n`;
+        cRet += '                Weight = 1';
+        cRet += '            struct.end\n';
+        cRet += '         struct.end\n';
+        cRet += '      struct.end\n';
 
     return cRet;
 };
@@ -355,9 +393,9 @@ const createPistolsItemGenerators = ()=>{
     let cPistolGenerators = '';
 
     for (let faction in oPrepared){
-        cPistolGenerators += `${faction}_WeaponPistol : struct.begin {bpatch}\n`;
-        cPistolGenerators += `   SID = ${faction}_WeaponPistol\n`;
-        cPistolGenerators += `   ItemGenerator : struct.begin {bpatch}\n`;
+        cPistolGenerators += `BNPL_${faction}_WeaponPistol : struct.begin {refurl=../ItemGeneratorPrototypes.cfg;refkey=[0]}\n`;
+        cPistolGenerators += `   SID = BNPL_${faction}_WeaponPistol\n`;
+        cPistolGenerators += `   ItemGenerator : struct.begin\n`;
         for (let rank in oPrepared[faction]){
             cPistolGenerators += `      [*] : struct.begin\n`;
             cPistolGenerators += `         Category = EItemGenerationCategory::WeaponSecondary\n`;
@@ -391,14 +429,14 @@ const createPistolsItemGenerators = ()=>{
 const createArmorAndPistol = (faction)=>{
     let cRet = '';
 
-    cRet += `      [*] : struct.begin\n`;
+    cRet += `      BNPL_ArmorAndPistol : struct.begin\n`;
     cRet += `         Category = EItemGenerationCategory::SubItemGenerator\n`;
     cRet += `         PossibleItems : struct.begin\n`;
-    cRet += `            [0] : struct.begin\n`;
-    cRet += `               ItemGeneratorPrototypeSID = ${faction}_Armor\n`;
+    cRet += `            Armor : struct.begin\n`;
+    cRet += `               ItemGeneratorPrototypeSID = BNPL_${faction}_Armor\n`;
     cRet += `               Chance = 1\n`;
     cRet += `            struct.end\n`;
-    cRet += `            [1] : struct.begin\n`;
+    cRet += `            Pistol : struct.begin\n`;
     cRet += `               ItemGeneratorPrototypeSID = ${faction}_WeaponPistol\n`;
     cRet += `               Chance = ${modifiedPistolSpawnChance/100}\n`;
     cRet += `            struct.end\n`;
@@ -414,7 +452,7 @@ const createConsumables = (faction, clas)=>{
 
     let cRet = '';
 
-    cRet += `      [*] : struct.begin\n`;
+    cRet += `      BNPL_Consumables_Wrapper : struct.begin\n`;
     cRet += `         Category = EItemGenerationCategory::SubItemGenerator\n`;
     cRet += `         PossibleItems : struct.begin\n`;
     cRet += `            [0] : struct.begin\n`;
@@ -432,7 +470,7 @@ const createDetector = (/*faction*/)=>{
 
     let cRet = '';
 
-    cRet += `      [*] : struct.begin\n`;
+    cRet += `      BNPL_Detector : struct.begin\n`;
     cRet += `         Category = EItemGenerationCategory::Detector\n`;
     cRet += `         PossibleItems : struct.begin\n`;
     cRet += `            [0] : struct.begin\n`;
@@ -491,8 +529,8 @@ const createGrenadesItemGenerators = ()=>{
     
 
     for (let clas in modifiedGrenadeSettings){
-            cGrenadeGenerators += `${clas}_Grenades : struct.begin {refurl=../ItemGeneratorPrototypes.cfg;refkey=[0]}\n`;
-            cGrenadeGenerators += `   SID = ${clas}_Grenades \n`;
+            cGrenadeGenerators += `BNPL_${clas}_Grenades : struct.begin {refurl=../ItemGeneratorPrototypes.cfg;refkey=[0]}\n`;
+            cGrenadeGenerators += `   SID = BNPL_${clas}_Grenades \n`;
             cGrenadeGenerators += `   ItemGenerator : struct.begin\n`;
         for (let rank =0; rank<4; rank++){
             cGrenadeGenerators += `      [*] : struct.begin\n`;
@@ -513,7 +551,7 @@ const createGrenades = (clas)=>{
     let cRet = '';
     let cItemGenerator = modifiedGrenadeSettings[clas]?`${clas}_Grenades`:'Default_Grenades';
 
-    cRet += `      [*] : struct.begin\n`;
+    cRet += `      BNPL_Grenades : struct.begin\n`;
     cRet += `         Category = EItemGenerationCategory::SubItemGenerator\n`;
     cRet += `         PossibleItems : struct.begin\n`;
     cRet += `            [0] : struct.begin\n`;
@@ -528,7 +566,7 @@ const createGrenades = (clas)=>{
 
 const createNVG = (faction)=>{
     let cRet = '';
-    cRet += '      [*] : struct.begin\n';
+    cRet += '      BNPL_NVG : struct.begin\n';
     cRet += `         Category = EItemGenerationCategory::SubItemGenerator\n`;
     cRet += `         PossibleItems : struct.begin\n`;
     cRet += `            [0] : struct.begin\n`;
@@ -550,6 +588,109 @@ const createNVG = (faction)=>{
 
     return cRet;
 };*/
+
+function createBlankOverride(factionClass){ //перетираємо оригінальні структури в тій же кількості, щоб bpatch не лишав старі структури
+    const factionClassStrucCount = {
+        GeneralNPC_Neutral_CloseCombat: 19,
+        GeneralNPC_Neutral_Recon: 18,
+        GeneralNPC_Neutral_Sniper: 19,
+        GeneralNPC_Neutral_Stormtrooper: 14,
+        GeneralNPC_Bandit_CloseCombat: 10,
+        GeneralNPC_Bandit_Recon: 13, 
+        GeneralNPC_Bandit_Stormtrooper: 11,
+        GeneralNPC_Bandit_Heavy: 11,
+        GeneralNPC_Mercenaries_CloseCombat: 11,
+        GeneralNPC_Mercenaries_Recon: 11,
+        GeneralNPC_Mercenaries_Stormtrooper: 8,
+        GeneralNPC_Mercenaries_Sniper: 10,
+        GeneralNPC_Scientists_Recon: 4,
+        GeneralNPC_Scientists_Stormtrooper: 5,
+        GeneralNPC_Militaries_CloseCombat: 8,
+        GeneralNPC_Militaries_Recon: 10,
+        GeneralNPC_Militaries_Stormtrooper: 11,
+        GeneralNPC_Militaries_Sniper: 9,
+        GeneralNPC_Militaries_Heavy: 12,
+        GeneralNPC_Monolith_CloseCombat: 10,
+        GeneralNPC_Monolith_Recon: 8,
+        GeneralNPC_Monolith_Stormtrooper: 8,
+        GeneralNPC_Monolith_Sniper: 10,
+        GeneralNPC_Duty_CloseCombat: 10,
+        GeneralNPC_Duty_Recon: 8, 
+        GeneralNPC_Duty_Stormtrooper: 10,
+        GeneralNPC_Duty_Sniper: 10,
+        GeneralNPC_Duty_Heavy: 10,
+        GeneralNPC_Freedom_CloseCombat: 10,
+        GeneralNPC_Freedom_Recon: 11,
+        GeneralNPC_Freedom_Stormtrooper: 10,
+        GeneralNPC_Freedom_Sniper: 10,
+        GeneralNPC_Varta_CloseCombat: 10,
+        GeneralNPC_Varta_Recon: 10,
+        GeneralNPC_Varta_Stormtrooper: 11,
+        GeneralNPC_Varta_Sniper: 9,
+        GeneralNPC_Varta_Heavy: 9,
+        GeneralNPC_Noon_CloseCombat: 6,
+        GeneralNPC_Noon_Recon: 6,
+        GeneralNPC_Noon_Stormtrooper: 6,
+        GeneralNPC_Noon_Sniper: 6,
+        GeneralNPC_Spark_CloseCombat: 8,
+        GeneralNPC_Spark_Recon: 7,
+        GeneralNPC_Spark_Stormtrooper: 8,
+        GeneralNPC_Spark_Sniper: 10,
+        GeneralNPC_Corpus_CloseCombat: 7,
+        GeneralNPC_Corpus_Recon: 7,
+        GeneralNPC_Corpus_Stormtrooper: 7,
+        GeneralNPC_Corpus_Sniper: 7,
+        GeneralNPC_Corpus_Heavy: 6,
+        GuardNPC_Neutral_CloseCombat: 11,
+        GuardNPC_Neutral_Recon: 13,
+        GuardNPC_Neutral_Sniper: 10, 
+        GuardNPC_Neutral_Stormtrooper: 12,
+        GuardNPC_Bandit_CloseCombat: 6,
+        GuardNPC_Bandit_Recon: 7,
+        GuardNPC_Bandit_Stormtrooper: 7,
+        GuardNPC_Bandit_Heavy: 5,
+        GuardNPC_Monolith_CloseCombat: 6,
+        GuardNPC_Monolith_Recon: 8,
+        GuardNPC_Monolith_Stormtrooper: 12,
+        GuardNPC_Monolith_Sniper: 7,
+        GuardNPC_Duty_CloseCombat: 6,
+        GuardNPC_Duty_Recon: 6,
+        GuardNPC_Duty_Stormtrooper: 9,
+        GuardNPC_Duty_Sniper: 8,
+        GuardNPC_Duty_Heavy: 5,
+        GuardNPC_Freedom_CloseCombat: 6,
+        GuardNPC_Freedom_Recon: 8,
+        GuardNPC_Freedom_Stormtrooper: 12,
+        GuardNPC_Freedom_Sniper: 10,
+        GuardNPC_Varta_CloseCombat: 6,
+        GuardNPC_Varta_Recon: 8,
+        GuardNPC_Varta_Stormtrooper: 11,
+        GuardNPC_Varta_Sniper: 9,
+        GuardNPC_Varta_Heavy: 5,
+        GuardNPC_Noon_CloseCombat: 5,
+        GuardNPC_Noon_Recon: 7,
+        GuardNPC_Noon_Stormtrooper: 8,
+        GuardNPC_Noon_Sniper: 6,
+        GuardNPC_Corpus_CloseCombat: 6,
+        GuardNPC_Corpus_Recon: 8,
+        GuardNPC_Corpus_Stormtrooper: 11,
+        GuardNPC_Corpus_Sniper: 8,
+        GuardNPC_Corpus_Heavy: 6,
+    }
+
+    if ( !factionClassStrucCount[factionClass]) {
+        console.warn(`No structure count found for faction class: ${factionClass}`);
+        return '';
+    }
+
+    let retVal = '';
+    for (let i=0; i<factionClassStrucCount[factionClass]; i++){
+        retVal += '      [*] : struct.begin\n';
+        retVal += '      struct.end\n';
+    }
+
+    return retVal;
+}
 
 export const createLoadout = async (appState)=>{
     if (!appState) {
@@ -582,10 +723,17 @@ export const createLoadout = async (appState)=>{
     let oPreparedSecondary = prepareWeaponStruct(oSecondaryLoadoutSettings); //Everything based on weapon loadout settings
 
     //creating modded structures
-    cRet += `//Armor itemgenerators to provide better helmet spawn and features like armor drop\n`;
+    cRet += `//Armor kits itemgenerators to provide better helmet spawn and features like armor drop\n`;
     for (let armor in modifiedArmorSpawnSettings){
         cRet += createArmorItemGenerator(armor);
     }
+
+    cRet += `//Primary weapons itemgenerators\n`;
+    cRet += createPrimaryGenerators(oPrepared);
+
+    
+    cRet += `//Secondary weapons itemgenerators\n`;
+    cRet += createSecondaryGenerators(oPreparedSecondary);
 
     cRet += `//Pistols itemgenerators\n`;
     cRet += createPistolsItemGenerators();
@@ -609,8 +757,9 @@ export const createLoadout = async (appState)=>{
         for (let clas in oPrepared[faction]){
             cRet += `${faction}_${clas}_ItemGenerator : struct.begin {bpatch}\n`;
             cRet += `   ItemGenerator : struct.begin {bpatch}\n`;
-            cRet +=        createPrimaryWeapons(oPrepared, faction, clas);
-            cRet +=        createSecondaryWeapons(oPreparedSecondary, faction, clas);
+            cRet +=        createBlankOverride(`${faction}_${clas}`); //nullifying vanilla game data to prevent dublicates
+            cRet +=        createPrimaryWeapons(faction, clas);
+            cRet +=        createSecondaryWeapons(faction, clas);
             cRet +=        createArmorAndPistol(faction); //may be splitted in future
             cRet +=        createConsumables(faction, clas); //TODO restructure to faction itemgenerators
             cRet +=        createDetector(faction); //is it works? 

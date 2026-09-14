@@ -3,9 +3,7 @@ import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
 import { downloadPackage } from './restCalls.js';
 
-const useRESTPacking = true;
-
-export const generateConfig = async (appState)=>{
+export const generateConfig = async (appState, useRESTPacking = true)=>{
     if (!appState) {
         console.error('AppState is required for generateConfig function');
         return;
@@ -24,7 +22,7 @@ export const generateConfig = async (appState)=>{
         zip.file("Stalker2/Content/GameLite/GameData/ItemGeneratorPrototypes/New_NPC_Loadouts.cfg", cArmorGenerators);
         zip.generateAsync({type:"blob"})
         .then(function(content) {
-            saveAs(content, `zzzz_${zipName}_P.zip`);
+            saveAs(content, `_${zipName}_1_P.zip`);
         });
     }else {
         let fileName = document.getElementById('config_name').value || 'Stalker2Loadout';
@@ -34,7 +32,7 @@ export const generateConfig = async (appState)=>{
             console.error(error);
             return;
         }
-        saveAs(blob, resultFileName || `zzzz_${fileName}_P.pak`);
+        saveAs(blob, resultFileName || `${fileName}.pak`);
     }
 }
 

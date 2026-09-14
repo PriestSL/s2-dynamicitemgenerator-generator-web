@@ -105,6 +105,19 @@ export class EventManager {
         } else {
             console.warn('Save button not found');
         }
+
+        const btnSaveZip = document.getElementById('btn_save_zip');
+        if (btnSaveZip) {
+            btnSaveZip.addEventListener('click', () => {
+                if (this.fileGenerator && this.appState) {
+                    this.fileGenerator.generateConfig(this.appState, false);
+                } else {
+                    console.error('Missing fileGenerator or appState');
+                }
+            });
+        } else {
+            console.warn('Save button not found');
+        }
         
         // Help button
         const btnHelp = document.getElementById('btn_help');
