@@ -271,13 +271,14 @@ const createSecondaryGenerators = (preparedData)=>{
     return cRet;
 };
 
-const createSecondaryWeapons = (faction, clas)=>{
+const createSecondaryWeapons = (oSecondary, faction, clas)=>{
+    if (!oSecondary || !oSecondary[faction] || !oSecondary[faction][clas] ) return '';
     let cRet =  '      BNPL_SecondaryWeapons : struct.begin\n';
         cRet += '         Category = EItemGenerationCategory::SubItemGenerator\n';
         cRet += '         PossibleItems : struct.begin\n';
         cRet += '            [0] : struct.begin\n';
         cRet += `                ItemGeneratorPrototypeSID = BNPL_${faction}_${clas}_Secondary_ItemGenerator\n`;
-        cRet += '                Weight = 1';
+        cRet += '                Weight = 1\n';
         cRet += '            struct.end\n';
         cRet += '         struct.end\n';
         cRet += '      struct.end\n';
@@ -427,17 +428,18 @@ const createPistolsItemGenerators = ()=>{
 };
 
 const createArmorAndPistol = (faction)=>{
+    let processedFaction = faction.substring(0, 8) == 'GuardNPC'?'GeneralNPC'+faction.substring(8):faction;
     let cRet = '';
 
     cRet += `      BNPL_ArmorAndPistol : struct.begin\n`;
     cRet += `         Category = EItemGenerationCategory::SubItemGenerator\n`;
     cRet += `         PossibleItems : struct.begin\n`;
     cRet += `            Armor : struct.begin\n`;
-    cRet += `               ItemGeneratorPrototypeSID = BNPL_${faction}_Armor\n`;
+    cRet += `               ItemGeneratorPrototypeSID = BNPL_${processedFaction}_Armor\n`;
     cRet += `               Chance = 1\n`;
     cRet += `            struct.end\n`;
     cRet += `            Pistol : struct.begin\n`;
-    cRet += `               ItemGeneratorPrototypeSID = ${faction}_WeaponPistol\n`;
+    cRet += `               ItemGeneratorPrototypeSID = BNPL_${processedFaction}_WeaponPistol\n`;
     cRet += `               Chance = ${modifiedPistolSpawnChance/100}\n`;
     cRet += `            struct.end\n`;
     cRet += `         struct.end \n`;          
@@ -475,7 +477,7 @@ const createDetector = (/*faction*/)=>{
     cRet += `         PossibleItems : struct.begin\n`;
     cRet += `            [0] : struct.begin\n`;
     cRet += `               ItemPrototypeSID = Echo\n`;
-    cRet += `               Chance = 0.3\n`;
+    cRet += `               Chance = 0.1\n`;
     cRet += `               MinCount = 1\n`;
     cRet += `               MaxCount = 1\n`;
     cRet += `            struct.end\n`;
@@ -549,7 +551,7 @@ const createGrenadesItemGenerators = ()=>{
 
 const createGrenades = (clas)=>{
     let cRet = '';
-    let cItemGenerator = modifiedGrenadeSettings[clas]?`${clas}_Grenades`:'Default_Grenades';
+    let cItemGenerator = modifiedGrenadeSettings[clas]?`${clas}_Grenades`:'BNPL_Default_Grenades';
 
     cRet += `      BNPL_Grenades : struct.begin\n`;
     cRet += `         Category = EItemGenerationCategory::SubItemGenerator\n`;
@@ -565,12 +567,13 @@ const createGrenades = (clas)=>{
 };
 
 const createNVG = (faction)=>{
+    let processedFaction = faction.substring(0, 8) == 'GuardNPC'?'GeneralNPC'+faction.substring(8):faction;
     let cRet = '';
     cRet += '      BNPL_NVG : struct.begin\n';
     cRet += `         Category = EItemGenerationCategory::SubItemGenerator\n`;
     cRet += `         PossibleItems : struct.begin\n`;
     cRet += `            [0] : struct.begin\n`;
-    cRet += `               ItemGeneratorPrototypeSID = ${faction}_NVG\n`;
+    cRet += `               ItemGeneratorPrototypeSID = ${processedFaction}_NVG\n`;
     cRet += `               Chance = 1\n`;
     cRet += `            struct.end\n`;
     cRet += `         struct.end\n`;
@@ -759,9 +762,9 @@ export const createLoadout = async (appState)=>{
             cRet += `   ItemGenerator : struct.begin {bpatch}\n`;
             cRet +=        createBlankOverride(`${faction}_${clas}`); //nullifying vanilla game data to prevent dublicates
             cRet +=        createPrimaryWeapons(faction, clas);
-            cRet +=        createSecondaryWeapons(faction, clas);
+            cRet +=        createSecondaryWeapons(oPreparedSecondary, faction, clas);
             cRet +=        createArmorAndPistol(faction); //may be splitted in future
-            cRet +=        createConsumables(faction, clas); //TODO restructure to faction itemgenerators
+            cRet +=        createConsumables(faction, clas);
             cRet +=        createDetector(faction); //is it works? 
             //cRet +=        createArtifact(faction); //Why grenade uses artifact category?
             cRet +=        createGrenades(clas);
