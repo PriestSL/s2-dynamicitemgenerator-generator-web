@@ -590,7 +590,7 @@ export class chancesController {
                 labelEl.className = 'form-label';
                 setTextContent(labelEl, attributeToTitle[thisAttr[0]] || thisAttr[0]);
                 
-                let attrElement = null;
+                let attrElement;
                 if (thisAttr[1] === 'select') {
                     attrElement = document.createElement('select');
                     attrElement.className = 'form-select form-select-sm';

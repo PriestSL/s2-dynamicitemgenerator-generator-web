@@ -129,8 +129,5 @@ dist
 .yarn/install-state.gz
 .pnp.*
 
-#generated files
-eslint.config.mjs
-
 #dev files
 app-original.js
