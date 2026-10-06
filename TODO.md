@@ -1,0 +1,9 @@
+- Refactor front
+- Add rank system
+- Refactor preset saving 
+    - Should be master preset
+    - When saving preset in json saves only changed structs
+    - On presets window add "Add new preset" button, when click - choose between "use current as product", "use current as master", "choose preset as master"
+- Add vanilla game preset
+- Add ability to compare preset (choose preset as "master"?)
+- Mark changed fields

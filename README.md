@@ -1,2 +1,38 @@
-Pure JS website to generating NPC Loadout mod to STALKER 2. That's all...
-Deployed: [https://s2-loadout-creator.cc/](https://dev.s2-loadout-creator.cc/)
+# S.T.A.L.K.E.R. 2 Loadout Creator
+
+Візуальний редактор loadouts NPC у S.T.A.L.K.E.R. 2. Дозволяє налаштувати предмети, які отримує НІП при спавні, замість ручного редагування довгого CFG-файлу.
+
+Користувач редагує списки предметів за категоріями для `Faction_Class` та їхні відносні ваги для чотирьох рангів гравця: Novice (у поточному коді — Newbie), Experienced, Veteran, Master. Можна обирати готові пресети та ділитися власними.
+
+Фронтенд генерує CFG і завантажує його в ZIP. Бекенд `s2-loadout-creator-rest` зберігає та завантажує пресети через REST API, а також пакує CFG у PAK.
+
+Сайт: [dev.s2-loadout-creator.cc](https://dev.s2-loadout-creator.cc/).
+
+## Документація
+
+- [PROJECT_CONTEXT.md](PROJECT_CONTEXT.md) — призначення, предметні правила, формати, межі системи та карта коду. Починати знайомство з нього.
+- [TODO_REFACTOR.md](TODO_REFACTOR.md) — план рефакторингу, критерії завершення та статус рев'ю кожного етапу.
+- [AGENTS.md](AGENTS.md) — правила роботи агента, комітів і зупинок для ручного рев'ю.
+- [FRONTEND_AUDIT.md](FRONTEND_AUDIT.md) — виявлені проблеми та докази.
+- [ARCHITECTURE_REVIEW.md](ARCHITECTURE_REVIEW.md) — оцінка архітектури, перехід на TypeScript і вибір UI.
+- [TODO.md](TODO.md) — продуктовий backlog поза обов'язковим обсягом поточного рефакторингу.
+
+## Локальна розробка
+
+Поточний стек: JavaScript, Vite, Bootstrap, JSZip і file-saver. TypeScript та порівняння з базовим пресетом описані в плані й ще не впроваджені.
+
+```sh
+npm install
+npm run dev
+```
+
+Команди з поточного `package.json`:
+
+| Команда | Призначення |
+| --- | --- |
+| `npm run dev` | Локальний сервер розробки |
+| `npm run build` | Збірка фронтенду |
+| `npm run preview` | Перегляд зібраного фронтенду |
+| `npm run lint` | ESLint |
+
+Команди `test` і `typecheck` поки відсутні. Відомі обмеження перевірок і запуску з чистого checkout зафіксовані в аудиті (F18); цей перелік команд не є підтвердженням успішного проходження перевірок.
