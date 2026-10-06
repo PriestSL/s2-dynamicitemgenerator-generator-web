@@ -3,24 +3,37 @@
  * Centralized application state management
  */
 
-import * as configs from './configs.js';
-import { deepCopy } from './utils.js';
+import { createEditorState } from '../model/config.ts';
+
+// Transitional JS facade: existing renderers, PresetsManager and the generator
+// still write these names. Each property forwards to the single working config.
+// Their writes/imports are NOT runtime-validated by the TypeScript model yet.
+const legacyFields = {
+    modifiedWeaponSettings: 'WeaponSettings',
+    modifiedArmorSettings: 'ArmorSettings',
+    modifiedArmorSpawnSettings: 'ArmorSpawnSettings',
+    modifiedHelmetSpawnSettings: 'HelmetsSettings',
+    modifiedGrenadeSettings: 'GrenadeSettings',
+    modifiedAmmoByWeaponClass: 'AmmoSettings',
+    modifiedWeaponList: 'WeaponList',
+    modifiedDropConfigs: 'DropConfigs',
+    modifiedPistolSettings: 'PistolSettings',
+    modifiedPistolSpawnChance: 'PistolSpawnChance',
+    modifiedMinWeaponDurability: 'MinWeaponDurability',
+    modifiedMaxWeaponDurability: 'MaxWeaponDurability',
+    modsCompatibility: 'Compatibility',
+};
 
 export class AppState {
     constructor() {
-        this.modifiedWeaponSettings = deepCopy(configs.oWeaponLoadoutSettings);
-        this.modifiedArmorSettings = deepCopy(configs.oArmorLoadoutSettings);
-        this.modifiedArmorSpawnSettings = deepCopy(configs.oArmorSpawnSettings);
-        this.modifiedHelmetSpawnSettings = deepCopy(configs.oHelmetsGlobalSpawnSettings);
-        this.modifiedGrenadeSettings = deepCopy(configs.oGrenadesSettings);
-        this.modifiedAmmoByWeaponClass = deepCopy(configs.oAmmoByWeaponClass);
-        this.modifiedWeaponList = deepCopy(configs.oWeaponList);
-        this.modifiedDropConfigs = deepCopy(configs.oDropConfigs);
-        this.modifiedPistolSettings = deepCopy(configs.oPistolLoadoutSettings);
-        this.modifiedPistolSpawnChance = configs.nPistolLootChance;
-        this.modifiedMinWeaponDurability = configs.nMinWeaponDurability;
-        this.modifiedMaxWeaponDurability = configs.nMaxWeaponDurability;
-        this.modsCompatibility = { SHA: false };
+        Object.assign(this, createEditorState());
+        for (const [legacyName, configName] of Object.entries(legacyFields)) {
+            Object.defineProperty(this, legacyName, {
+                enumerable: true,
+                get: () => this.config[configName],
+                set: value => { this.config[configName] = value; },
+            });
+        }
         
         // Create pistol type table
         this.typeToTable = {
