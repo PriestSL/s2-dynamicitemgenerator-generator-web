@@ -67,18 +67,6 @@ export function validatePin(raw) {
     return PIN_RX.test(String(raw).trim()) ? ok(String(raw).trim()) : fail('PIN must be 4-8 digits');
 }
 
-export function validateWeaponChances(raw) {
-    if (!Array.isArray(raw)) return fail('Chances must be array');
-    if (raw.length !== 4) return fail('Exactly 4 values required');
-    const sanitized = new Array(4);
-    for (let i = 0; i < 4; i++) {
-        const r = validatePercentage(raw[i]);
-        if (!r.isValid) return fail(`Index ${i + 1}: ${r.error}`);
-        sanitized[i] = r.sanitizedValue;
-    }
-    return ok(sanitized);
-}
-
 export function validateArmorDurability(raw) {
     if (!raw || typeof raw !== 'object') return fail('Object required');
     const minR = validateProbability(raw.min);
@@ -111,33 +99,6 @@ export function sanitizeHtml(html) {
         });
     });
     return temp.innerHTML;
-}
-
-/**
- * Validate a high‑level game config object.
- * Currently only weapon chances – extend as needed.
- */
-export function validateGameConfig(config) {
-    const errors = [];
-    if (!config || typeof config !== 'object') {
-        return { isValid: false, ok: false, errors: ['Config must be object'], sanitizedConfig: null };
-    }
-    // Shallow clone for sanitized output (extend later for deep sanitation)
-    const sanitizedConfig = { ...config };
-    if (config.WeaponSettings && typeof config.WeaponSettings === 'object') {
-        Object.entries(config.WeaponSettings).forEach(([name, w]) => {
-            if (w && Array.isArray(w.chances)) {
-                const r = validateWeaponChances(w.chances);
-                if (!r.isValid) errors.push(`Weapon ${name}: ${r.error}`);
-                else {
-                    // assign sanitized chances
-                    if (!sanitizedConfig.WeaponSettings) sanitizedConfig.WeaponSettings = {};
-                    sanitizedConfig.WeaponSettings[name] = { ...w, chances: r.sanitizedValue };
-                }
-            }
-        });
-    }
-    return { isValid: errors.length === 0, ok: errors.length === 0, errors, sanitizedConfig: errors.length === 0 ? sanitizedConfig : null };
 }
 
 /**

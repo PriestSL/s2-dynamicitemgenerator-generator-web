@@ -4,7 +4,7 @@
  */
 
 import { createElement, createCardHeader, createFormInput, createAlert } from '../utils/dom.js';
-import { addInputValidation, validateNumber, validatePercentage } from '../utils/validation.js';
+import { bindGlobal } from '../../ui/editing.ts';
 
 export class CategoryRenderers {
     constructor(appState, chancesController) {
@@ -83,9 +83,7 @@ export class CategoryRenderers {
             this.contentEl.appendChild(card);
             
             // Update labels after DOM is rendered
-            window.setTimeout(() => {
-                this.chancesCtrl.updateAllLabels(WeaponSettings[classification], classification);
-            }, 100);
+            this.chancesCtrl.updateAllLabels(WeaponSettings[classification], classification);
         }
     }
     
@@ -128,37 +126,11 @@ export class CategoryRenderers {
         settingsRow.appendChild(maxConditionCol);
         cardBody.appendChild(settingsRow);
         
-        // Add input validation
-        const minInput = minConditionCol.querySelector('input');
-        const maxInput = maxConditionCol.querySelector('input');
-        
-        if (minInput) {
-            addInputValidation(minInput, (value) => validateNumber(value, 0, 100));
-        }
-        
-        if (maxInput) {
-            addInputValidation(maxInput, (value) => validateNumber(value, 0, 100));
-        }
-        
         globalCard.appendChild(cardHeader);
         globalCard.appendChild(cardBody);
         this.contentEl.appendChild(globalCard);
-        
-        // Add event listeners
-        const minConditionInput = document.getElementById('minWeaponCondition');
-        const maxConditionInput = document.getElementById('maxWeaponCondition');
-        
-        if (minConditionInput) {
-            minConditionInput.addEventListener('change', (e) => {
-                this.state.updateWeaponDurability(e.target.value, this.state.modifiedMaxWeaponDurability);
-            });
-        }
-        
-        if (maxConditionInput) {
-            maxConditionInput.addEventListener('change', (e) => {
-                this.state.updateWeaponDurability(this.state.modifiedMinWeaponDurability, e.target.value);
-            });
-        }
+        bindGlobal(minConditionCol.querySelector('input'), this.state, 'MinWeaponDurability');
+        bindGlobal(maxConditionCol.querySelector('input'), this.state, 'MaxWeaponDurability');
 
         this.chancesCtrl.fillAttributesTable(this.state.modifiedWeaponList, this.contentEl, 'weapon');
     }
@@ -196,13 +168,7 @@ export class CategoryRenderers {
             pistolSpawnChanceInput.min = '0';
             pistolSpawnChanceInput.max = '100';
 
-            // Add validation with change handler for data updates
-            if (typeof addInputValidation === 'function' && typeof validatePercentage === 'function') {
-                addInputValidation(pistolSpawnChanceInput, validatePercentage, 
-                    (sanitizedValue) => {
-                        this.state.modifiedPistolSpawnChance = sanitizedValue;
-                    }, true);
-            }
+            bindGlobal(pistolSpawnChanceInput, this.state, 'PistolSpawnChance');
 
             pistolSpawnChance.appendChild(pistolSpawnChanceInput);
             this.contentEl.appendChild(pistolSpawnChance);
@@ -216,9 +182,7 @@ export class CategoryRenderers {
                 chances.addEventListener('change', this.chancesCtrl.onPistolChanceChange);
                 this.contentEl.appendChild(chances);
 
-                window.setTimeout(() => {
-                    this.chancesCtrl.updateAllLabels(PistolSettings);
-                }, 100);
+                this.chancesCtrl.updateAllLabels(PistolSettings);
             } else {
                 console.warn('No pistol settings found for:', GeneralSettings);
             }
@@ -253,9 +217,7 @@ export class CategoryRenderers {
 
         this.contentEl.appendChild(chances);
 
-        window.setTimeout(() => {
-            this.chancesCtrl.updateAllLabels(ArmorSettings);
-        }, 100);
+        this.chancesCtrl.updateAllLabels(ArmorSettings);
     }
     
     renderArtifacts() {

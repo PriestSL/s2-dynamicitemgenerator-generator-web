@@ -1,9 +1,9 @@
 import type { ValidationResult } from './types.ts';
 
 export type NumericUnit = 'weight' | 'percentage' | 'probability' | 'count';
+export const MAX_ITEM_WEIGHT = 10_000;
 
-// Scalar rules for the typed model. Parsing input strings and full JSON validation
-// belong to the next stage; no existing UI/REST handler is redirected here yet.
+// Shared limits for local editing and full JSON validation.
 export function validateValue(value: unknown, unit: NumericUnit, path = ''): ValidationResult<number> {
     if (typeof value !== 'number' || !Number.isFinite(value)) {
         return { ok: false, path, error: 'Expected a finite number' };
@@ -12,7 +12,7 @@ export function validateValue(value: unknown, unit: NumericUnit, path = ''): Val
     if (unit === 'count' && !Number.isInteger(value)) {
         return { ok: false, path, error: 'Expected an integer count' };
     }
-    const maximum = unit === 'percentage' ? 100 : unit === 'probability' ? 1 : Infinity;
+    const maximum = unit === 'weight' ? MAX_ITEM_WEIGHT : unit === 'percentage' ? 100 : unit === 'probability' ? 1 : Infinity;
     if (value > maximum) return { ok: false, path, error: `Maximum is ${maximum}` };
     return { ok: true, value };
 }

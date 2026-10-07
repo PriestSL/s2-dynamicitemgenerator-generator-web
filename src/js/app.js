@@ -3,7 +3,7 @@
  * Application initialization and coordination
  */
 
-import { AppState } from './state.js';
+import { AppState } from './state.ts';
 import { CategoryRenderers } from './renderers/categoryRenderers.js';
 import { ModalManager } from './ui/modalManager.js';
 import { PresetsManager } from './presets/presetsManager.js';
@@ -19,10 +19,8 @@ class Application {
         this.modalManager = new ModalManager();
         
         // Initialize chances controller with state
-        this.chancesCtrl = new chancesController();
+        this.chancesCtrl = new chancesController(this.state);
         this.presetsManager = new PresetsManager(this.state, this.chancesCtrl);
-        this.chancesCtrl.fillSettings(this.state.getChancesSettings());
-        this.chancesCtrl.typeToTable = this.state.typeToTable;
         this.chancesCtrl.currentFaction = 'Generic_settings'; // Set default faction
         
         this.categoryRenderers = new CategoryRenderers(this.state, this.chancesCtrl);

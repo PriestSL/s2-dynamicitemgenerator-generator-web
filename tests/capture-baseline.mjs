@@ -1,6 +1,6 @@
 // Explicit, review-only capture. Never called by npm test.
 import { mkdir, writeFile } from 'node:fs/promises';
-import { AppState } from '../src/js/state.js';
+import { AppState } from '../src/js/state.ts';
 import { createLoadout } from '../src/js/textGenerators.js';
 
 if (!process.argv.includes('--write')) {

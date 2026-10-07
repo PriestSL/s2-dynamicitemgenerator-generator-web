@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import JSZip from 'jszip';
-import { AppState } from '../src/js/state.js';
+import { AppState } from '../src/js/state.ts';
 import { createLoadout } from '../src/js/textGenerators.js';
 import { fixture, fixtureText, editor } from './helpers.mjs';
 
@@ -15,7 +15,7 @@ test('defaults JSON records the full current export contract', async () => {
 });
 
 for (const name of ['defaults', 'changed']) {
-    test(`${name}: direct AppState JSON round-trip preserves all fields`, async () => {
+    test(`${name}: historical generator fixture assignment preserves all fields`, async () => {
         const data = await fixture(name);
         const { state } = editor(data);
         assert.deepEqual(JSON.parse(JSON.stringify(state.exportState())), data);

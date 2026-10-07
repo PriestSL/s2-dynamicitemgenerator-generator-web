@@ -1,3 +1,4 @@
+import { bindDropSettings } from '../../ui/editing.ts';
 /**
  * Modal Manager Module
  * Handle all modal-related functionality
@@ -21,7 +22,7 @@ export class ModalManager {
 
         let content;
         if (typeof contentElement === 'string') {
-            content = UIHelpers.createElementFromHtml(`<p>${contentElement}</p>`);
+            content = createElement('p', { textContent: contentElement });
         } else {
             content = contentElement;
         }
@@ -336,17 +337,17 @@ export class ModalManager {
                                         <div class="row g-3">
                                             <div class="col-md-4">
                                                 <label for="armor_chance" class="form-label">Armor drop chance (0.1=10%)</label>
-                                                <input type="number" class="form-control" id="armor_chance" value="${appState.modifiedDropConfigs.nLootChance}" min="0" max="100">
-                                                <div class="form-text">Percentage chance that armor will drop</div>
+                                                <input type="number" class="form-control" id="armor_chance" value="${appState.modifiedDropConfigs.nLootChance}" min="0" max="1" step="any">
+                                                <div class="form-text">Probability from 0 to 1 (0.1 = 10%)</div>
                                             </div>
                                             <div class="col-md-4">
                                                 <label for="min_condition" class="form-label">Minimal condition (0.1=10%)</label>
-                                                <input type="number" class="form-control" id="min_condition" value="${appState.modifiedDropConfigs.nMinDurability}" min="0" max="100">
+                                                <input type="number" class="form-control" id="min_condition" value="${appState.modifiedDropConfigs.nMinDurability}" min="0" max="1" step="any">
                                                 <div class="form-text">Minimum durability of dropped armor</div>
                                             </div>
                                             <div class="col-md-4">
                                                 <label for="max_condition" class="form-label">Maximal condition (0.1=10%)</label>
-                                                <input type="number" class="form-control" id="max_condition" value="${appState.modifiedDropConfigs.nMaxDurability}" min="0" max="100">
+                                                <input type="number" class="form-control" id="max_condition" value="${appState.modifiedDropConfigs.nMaxDurability}" min="0" max="1" step="any">
                                                 <div class="form-text">Maximum durability of dropped armor</div>
                                             </div>
                                         </div>
@@ -401,63 +402,10 @@ export class ModalManager {
         });
     }
     
-    _subscribeFileSettingsEvents(appState, onSettingsChange) {
-        /*const SHAComp = document.getElementById('copm_SHA');
-        if (SHAComp) {
-            SHAComp.addEventListener('change', (e) => {
-                appState.modsCompatibility.SHA = e.target.checked;
-                if (onSettingsChange) onSettingsChange('compatibility', appState.modsCompatibility);
-            });
-        }*/
-
-        const dropArmor = document.getElementById('drop_armor');
-        if (dropArmor) {
-            dropArmor.addEventListener('change', (e) => {
-                appState.modifiedDropConfigs.createDroppableArmor = e.target.checked;
-                const settings = document.querySelector('.armor_drop_settings');
-                if (settings) {
-                    settings.style.display = e.target.checked ? 'block' : 'none';
-                }
-                if (onSettingsChange) onSettingsChange('dropConfigs', appState.modifiedDropConfigs);
-            });
-        }
-
-        // Add validation and change handlers for numeric inputs
-        const armorChance = document.getElementById('armor_chance');
-        const minCondition = document.getElementById('min_condition');
-        const maxCondition = document.getElementById('max_condition');
-        
-        if (armorChance) {
-            armorChance.addEventListener('change', (e) => {
-                const value = parseFloat(e.target.value);
-                if (!isNaN(value) && value >= 0 && value <= 100) {
-                    appState.modifiedDropConfigs.nLootChance = value;
-                    if (onSettingsChange) onSettingsChange('dropConfigs', appState.modifiedDropConfigs);
-                }
-            });
-        }
-        
-        if (minCondition) {
-            minCondition.addEventListener('change', (e) => {
-                const value = parseFloat(e.target.value);
-                if (!isNaN(value) && value >= 0 && value <= 100) {
-                    appState.modifiedDropConfigs.nMinDurability = value;
-                    if (onSettingsChange) onSettingsChange('dropConfigs', appState.modifiedDropConfigs);
-                }
-            });
-        }
-        
-        if (maxCondition) {
-            maxCondition.addEventListener('change', (e) => {
-                const value = parseFloat(e.target.value);
-                if (!isNaN(value) && value >= 0 && value <= 100) {
-                    appState.modifiedDropConfigs.nMaxDurability = value;
-                    if (onSettingsChange) onSettingsChange('dropConfigs', appState.modifiedDropConfigs);
-                }
-            });
-        }
+    _subscribeFileSettingsEvents(appState) {
+        bindDropSettings(appState);
     }
-    
+
     _createToDoContent() {
         const TODOList = [
             "NVG editing",

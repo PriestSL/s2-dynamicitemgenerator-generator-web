@@ -6,8 +6,8 @@ import tseslint from "typescript-eslint";
 /** @type {import('eslint').Linter.Config[]} */
 export default [
   {languageOptions: { globals: { ...globals.browser, process: 'readonly' }}},
-  {ignores: ['vite.config.js', 'dist/']},
+  {ignores: ['vite.config.js', 'dist/', '.npm-cache/']},
   pluginJs.configs.recommended,
-  ...tseslint.configs.recommended.map(config => ({ ...config, files: ['src/**/*.ts', 'tests/types/**/*.ts'] })),
-  {files: ['tests/**/*.mjs'], languageOptions: {globals: globals.node}},
+  ...tseslint.configs.recommended.map(config => ({ ...config, files: ['src/**/*.ts', 'tests/**/*.ts'] })),
+  {files: ['tests/**/*.mjs', 'tests/**/*.ts'], languageOptions: {globals: globals.node}},
 ];

@@ -3,6 +3,7 @@
  * Centralized event handling and binding
  */
 
+import { chooseJSON, downloadJSON } from '../../files/json.ts';
 import { UIHelpers } from '../ui/uiHelpers.js';
 import { addInputValidation, validateConfigName } from '../utils/validation.js';
 
@@ -34,63 +35,29 @@ export class EventManager {
         this.bindConfigNameValidation();
     }
     
+    renderCurrentView() {
+        UIHelpers.clearContent(document.getElementById('content'));
+        document.querySelectorAll('.category_item').forEach(item => item.classList.toggle('active', item.id === this.appState.view.category));
+        document.querySelectorAll('.faction_item').forEach(item => item.classList.toggle('active', item.id === this.appState.view.faction));
+        this.oCategoryToEvent[this.appState.view.category]();
+    }
     bindCategoryEvents() {
-        let elements = document.getElementsByClassName('category_item');
-        for (let i = 0; i < elements.length; i++) {
-            const element = elements[i];
-            element.addEventListener('click', (e) => {
-                // Clear content first
-                const contentEl = document.getElementById('content');
-                UIHelpers.clearContent(contentEl);
-                
-                // Get the category from the element's ID or title
-                const category = e.target.id || e.target.getAttribute('title') || e.target.textContent.trim();
-                this.categoryRenderers.chancesCtrl.currentCategory = category; // Update current category in chances controller
-                if (this.oCategoryToEvent[category]) {
-                    this.oCategoryToEvent[category]();
-                } else {
-                    console.warn('No handler found for category:', category);
-                }
-                
-                // Update active state
-                document.querySelectorAll('.category_item').forEach(item => {
-                    item.classList.remove('active');
-                });
-                e.target.classList.add('active');
+        for (const element of document.getElementsByClassName('category_item')) {
+            element.addEventListener('click', () => {
+                this.categoryRenderers.chancesCtrl.currentCategory = element.id;
+                this.renderCurrentView();
             });
         }
     }
-    
     bindFactionEvents() {
-        let elements = document.getElementsByClassName('faction_item');
-        for (let i = 0; i < elements.length; i++) {
-            const element = elements[i];
-            element.addEventListener('click', (e) => {
-                // Update the current faction in chances controller
-                const faction = e.target.id || e.target.getAttribute('data-faction') || e.target.textContent.trim();
-                this.categoryRenderers.chancesCtrl.currentFaction = faction;
-                // Clear content and re-render current category
-                const contentEl = document.getElementById('content');
-                UIHelpers.clearContent(contentEl);
-                
-                // Find active category and re-render it
-                const activeCategory = document.querySelector('.category_item.active');
-                if (activeCategory) {
-                    const category = activeCategory.id || activeCategory.getAttribute('title') || activeCategory.textContent.trim();
-                    if (this.oCategoryToEvent[category]) {
-                        this.oCategoryToEvent[category]();
-                    }
-                }
-                
-                // Update active state
-                document.querySelectorAll('.faction_item').forEach(item => {
-                    item.classList.remove('active');
-                });
-                e.target.classList.add('active');
+        for (const element of document.getElementsByClassName('faction_item')) {
+            element.addEventListener('click', () => {
+                this.categoryRenderers.chancesCtrl.currentFaction = element.id;
+                this.renderCurrentView();
             });
         }
     }
-    
+
     bindButtonEvents() {
         // Save/Generate button
         const btnSave = document.getElementById('btn_save');
@@ -213,69 +180,13 @@ export class EventManager {
     }
     
     exportToJSON() {
-        const data = this.appState.exportState();
-        
-        const configNameInput = document.getElementById('config_name');
-        const configName = (configNameInput ? configNameInput.value : '') || 'config';
-        
-        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = configName + '.json';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
+        try {
+            downloadJSON(this.appState, document.getElementById('config_name')?.value || 'config');
+        } catch (error) {
+            this.modalManager.createMessageBox('configExportError', error.message);
+        }
     }
-    
     importFromJSON() {
-        const input = document.createElement('input');
-        input.type = 'file';
-        input.accept = '.json';
-        input.onchange = (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
-            
-            const reader = new FileReader();
-            reader.onload = (event) => {
-                try {
-                    const data = JSON.parse(event.target.result);
-                    
-                    // Handle old helmet version if needed
-                    if (data.HelmetsSettings && !data.HelmetsSettings.Generic_settings) {
-                        data.HelmetsSettings = this._adoptOldHelmetVersion(data.HelmetsSettings);
-                    }
-                    
-                    this.appState.importState(data);
-                    
-                    // Refresh the current view
-                    const activeCategory = document.querySelector('.category_item.active');
-                    if (activeCategory) {
-                        const category = activeCategory.getAttribute('data-category') || activeCategory.textContent.trim();
-                        if (this.oCategoryToEvent[category]) {
-                            const contentEl = document.getElementById('content');
-                            UIHelpers.clearContent(contentEl);
-                            this.oCategoryToEvent[category]();
-                        }
-                    }
-                    
-                    this.modalManager.createMessageBox('configImportSuccess', 'Configuration imported successfully!');
-                } catch (error) {
-                    console.error('Error importing configuration:', error);
-                    this.modalManager.createMessageBox('configImportError', 'Error importing configuration. Please check the file format.');
-                }
-            };
-            reader.readAsText(file);
-        };
-        input.click();
-    }
-    
-    _adoptOldHelmetVersion(oldVersion) {
-        // Handle conversion from old helmet format to new format
-        // This is a placeholder - implement based on your specific needs
-        return {
-            Generic_settings: oldVersion
-        };
+        chooseJSON(this.appState, () => this.renderCurrentView(), (id, message) => this.modalManager.createMessageBox(id, message));
     }
 }

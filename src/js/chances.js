@@ -1,25 +1,11 @@
 import { showFreezeDiv, hideFreezeDiv } from './utils.js';
 import { createElement, setTextContent, createButton } from './utils/dom.js';
-import { validateNumber, addInputValidation } from './utils/validation.js';
+import { editEvent, configureRankInput } from '../ui/editing.ts';
+import { relativePercent, itemWeights, factionScope, categoryId } from '../model/editing.ts';
 
 export class chancesController {
-    constructor() {
-        this.currentFaction = "Neutral";
-        this.currentCategory = "Primary";
-        this.settings = {
-            weapon: {},
-            armor: {},
-            pistol: {},
-            grenade: {},
-            helmet: {},
-            ammo: {}
-        };
-        this.lists = {
-            weapon: {},
-            armor: {},
-            helmet: {}
-        }
-        this.typeToTable = {};
+    constructor(state) {
+        this.state = state;
 
         this.onWeaponChanceChange = this.onWeaponChanceChange.bind(this);
         this.onGrenadeChanceChange = this.onGrenadeChanceChange.bind(this);
@@ -30,20 +16,17 @@ export class chancesController {
         this.onAttributeChange = this.onAttributeChange.bind(this);
     }
 
-    fillSettings (settings) {
-        this.settings = {
-            weapon: settings.weapon,
-            armor: settings.armor,
-            pistol: settings.pistol,
-            grenade: settings.grenade,
-            helmet: settings.helmet,
-            ammo: settings.ammo
-        }
-        this.lists = {
-            weapon: settings.weaponList,
-            armor: settings.armorList,
-            helmet: settings.helmet
-        };
+    get currentFaction() { return this.state.view.faction; }
+    set currentFaction(value) { this.state.view.faction = factionScope(value); }
+    get currentCategory() { return this.state.view.category; }
+    set currentCategory(value) { this.state.view.category = categoryId(value); }
+    get typeToTable() { return this.state.typeToTable; }
+    // PresetsManager still calls this after legacy assignments. No rebinding is needed.
+    fillSettings() {}
+
+    changeList(list, classification, item, operation) {
+        this.state.edit({ kind: 'list', list, faction: this.currentFaction, role: classification, item, operation });
+        return itemWeights(this.state.config, list, this.currentFaction, classification);
     }
 
     createChances (item, summary, chances, classification = '', attr = 'chances') {
@@ -69,11 +52,8 @@ export class chancesController {
                     chanceElement.dataset.item = item;
                     chanceElement.dataset.attr = attr;
                     chanceElement.dataset.level = i;
-                    chanceElement.min = '0';
-                    chanceElement.max = '1000'; // Allow high values for spawn chances
+                    configureRankInput(chanceElement, this.currentCategory, attr);
 
-                // Add validation using helper function
-                addInputValidation(chanceElement, (value) => validateNumber(value, 0, 1000), null, true);
 
                 resultElement.appendChild(chanceElement);
 
@@ -127,11 +107,8 @@ export class chancesController {
                     input.dataset.type = this.currentCategory;
                     input.dataset.item = item;
                     input.dataset.level = index;
-                    input.min = '0';
-                    input.max = '1000';
+                    configureRankInput(input, this.currentCategory, input.dataset.attr);
 
-                    // Add validation using helper function
-                    addInputValidation(input, (value) => validateNumber(value, 0, 1000), null, true);
                     
                     let label = document.createElement('small');
                     label.className = 'text-muted me-1 chance_persent';
@@ -145,7 +122,7 @@ export class chancesController {
             });
             
             // Add delete button if needed
-            if ((this.currentCategory === 'Primary' || this.currentCategory === 'Armor') && this.currentFaction !== 'Generic_settings' && item !== '') {
+            if ((this.currentCategory === 'Primary' || this.currentCategory === 'Armor' || this.currentCategory === 'Pistols') && this.currentFaction !== 'Generic_settings' && item !== '') {
                 let actionsCell = document.createElement('td');
                 actionsCell.className = 'text-center';
                 
@@ -156,14 +133,9 @@ export class chancesController {
                 });
                 
                 deleteButton.addEventListener('click', () => {
-                    let GeneralSettings = 'GeneralNPC_'+this.currentFaction;
-                    if (this.currentCategory === 'Primary') {
-                        delete this.settings.weapon[GeneralSettings][classification][item];
-                        this.updateAllLabels(this.settings.weapon[GeneralSettings][classification], classification);
-                    } else if (this.currentCategory === 'Armor') {
-                        delete this.settings.armor[GeneralSettings][item];
-                        this.updateAllLabels(this.settings.armor[GeneralSettings]);
-                    }
+                    const list = this.currentCategory === 'Primary' ? 'weapon' : this.currentCategory === 'Armor' ? 'armor' : 'pistol';
+                    const items = this.changeList(list, classification, item, 'remove');
+                    this.updateAllLabels(items, classification);
                     row.remove();
                 });
                 
@@ -176,42 +148,16 @@ export class chancesController {
             return row;
     }
 
-    addWeaponToClass (parentEl, classification, weapon) {
-        let GeneralSettings = 'GeneralNPC_'+this.currentFaction;
-        let WeaponSettings = this.settings.weapon[GeneralSettings];
-        if (WeaponSettings[classification][weapon]) return;
-
-        let eChances = this.addRow(parentEl, weapon, classification, [0, 0, 0, 0]);
-        eChances.addEventListener('change', this.onWeaponChanceChange);
-
-        WeaponSettings[classification][weapon] = [0, 0, 0, 0];
-
-        this.updateAllLabels(WeaponSettings[classification], classification);
+    addItem(parentEl, list, classification, item) {
+        const current = itemWeights(this.state.config, list, this.currentFaction, classification);
+        if (Object.hasOwn(current, item)) return;
+        const items = this.changeList(list, classification, item, 'add');
+        this.addRow(parentEl, item, classification, [0, 0, 0, 0]);
+        this.updateAllLabels(items, classification);
     }
-
-    addArmor (parentEl, armor) {
-        let GeneralSettings = 'GeneralNPC_'+this.currentFaction;
-        let ArmorSettings = this.settings.armor[GeneralSettings];
-        if (ArmorSettings[armor]) return;
-
-        let eChances = this.addRow(parentEl, armor, '', [0, 0, 0, 0]);
-        eChances.addEventListener('change', this.onArmorChanceChange);
-
-        ArmorSettings[armor] = [0, 0, 0, 0];
-        this.updateAllLabels(ArmorSettings);
-    }
-
-    addPistol (parentEl, item) {
-        let GeneralSettings = 'GeneralNPC_'+this.currentFaction;
-        let PistolSettings = this.settings.pistol[GeneralSettings];
-        if (PistolSettings[item]) return;
-
-        let eChances = this.addRow(parentEl, item, '', [0, 0, 0, 0]);
-        eChances.addEventListener('change', this.onPistolChanceChange);
-
-        PistolSettings[item] = [0, 0, 0, 0];
-        this.updateAllLabels(PistolSettings);
-    }
+    addWeaponToClass(parentEl, classification, item) { this.addItem(parentEl, 'weapon', classification, item); }
+    addArmor(parentEl, item) { this.addItem(parentEl, 'armor', '', item); }
+    addPistol(parentEl, item) { this.addItem(parentEl, 'pistol', '', item); }
 
     showAddSelection (target, type, classification) {
         showFreezeDiv();
@@ -272,80 +218,28 @@ export class chancesController {
         return div;
     }
 
-    updateLabels (oSettings, level, classification = '') {
-        let total = 0;
-        for (let item in oSettings) {
-            total += +oSettings[item][level];
-        }
-
-        for (let item in oSettings) {
-            let label = document.getElementById(classification + '-' + item + '-' + 'chances' + '-' + level + '_label');
-            setTextContent(label, '~'+(oSettings[item][level]/total*100).toFixed(2)+'%');
-        }
-
-    }
-
-    updateAllLabels (oSettings, classification = '') {
-        for (let level = 0; level < 4; level++) {
-            this.updateLabels(oSettings, level, classification);
+    updateLabels(settings, level, classification = '') {
+        for (const item in settings) {
+            const label = document.getElementById(classification + '-' + item + '-chances-' + level + '_label');
+            setTextContent(label, '~' + relativePercent(settings, item, Number(level)).toFixed(2) + '%');
         }
     }
-
-    onWeaponChanceChange(e) {
-        //TODO rewrite to use typeToTable
-        let dataset = e.target.dataset;
-        let value = e.target.value;
-        let GeneralSettings = 'GeneralNPC_'+dataset.faction;
-        let WeaponSettings = this.settings.weapon[GeneralSettings];
-        WeaponSettings[dataset.classification][dataset.item][dataset.level] = value;
-
-        this.updateLabels(WeaponSettings[dataset.classification], dataset.level, dataset.classification);
+    updateAllLabels(settings, classification = '') {
+        for (let level = 0; level < 4; level++) this.updateLabels(settings, level, classification);
     }
-
-    onGrenadeChanceChange (e) {
-        let dataset = e.target.dataset;
-        let value = e.target.value;
-        this.settings.grenade.Default[dataset.item][dataset.attr][dataset.level] = value;
+    changeWeight(event, list) {
+        if (editEvent(this.state, event, list)) {
+            const d = event.target.dataset;
+            this.updateLabels(itemWeights(this.state.config, list, d.faction, d.classification), d.level, d.classification);
+        }
     }
-
-    onArmorChanceChange(e) {
-        let dataset = e.target.dataset;
-        let value = e.target.value;
-        let GeneralSettings = 'GeneralNPC_'+dataset.faction;
-        let ArmorSettings = this.settings.armor[GeneralSettings];
-        ArmorSettings[dataset.item][dataset.level] = value;
-
-        this.updateLabels(ArmorSettings, dataset.level);
-    }
-
-    onPistolChanceChange(e) {
-        let dataset = e.target.dataset;
-        let value = e.target.value;
-        let GeneralSettings = 'GeneralNPC_'+dataset.faction;
-        let PistolSettings = this.settings.pistol[GeneralSettings];
-        PistolSettings[dataset.item][dataset.level] = value;
-
-        this.updateLabels(PistolSettings, dataset.level);
-    }
-
-    onHelmetChanceChange(e) {
-        let dataset = e.target.dataset;
-        let value = e.target.value;
-        this.settings.helmet[dataset.item][dataset.level] = value;
-    }
-
-    onAmmoChanceChange(e){
-        let dataset = e.target.dataset;
-        let value = e.target.value;
-        let AmmoSettings = this.settings.ammo[dataset.item];
-        AmmoSettings[dataset.level] = value;
-    }
-
-    onAttributeChange(e) {
-        let dataset = e.target.dataset;
-        let value = e.target.value;
-        this.typeToTable[dataset.type][dataset.item][dataset.attr] = value;
-    }
+    onWeaponChanceChange(event) { this.changeWeight(event, 'weapon'); }
+    onArmorChanceChange(event) { this.changeWeight(event, 'armor'); }
+    onPistolChanceChange(event) { this.changeWeight(event, 'pistol'); }
+    onGrenadeChanceChange(event) { editEvent(this.state, event, 'grenade'); }
+    onHelmetChanceChange(event) { editEvent(this.state, event, 'helmet'); }
+    onAmmoChanceChange(event) { editEvent(this.state, event, 'ammo'); }
+    onAttributeChange(event) { editEvent(this.state, event, 'attribute'); }
 
     //TODO rewrite to use typeToTable
     fillChancesTable (oSettings, newRowReplace, tableType, classification = '') {
@@ -377,7 +271,7 @@ export class chancesController {
         });
         
         // Add actions header if needed
-        if ((this.currentCategory === 'Primary' || this.currentCategory === 'Armor') && this.currentFaction !== 'Generic_settings') {
+        if ((this.currentCategory === 'Primary' || this.currentCategory === 'Armor' || this.currentCategory === 'Pistols') && this.currentFaction !== 'Generic_settings') {
             let actionsHeader = document.createElement('th');
             actionsHeader.textContent = 'Actions';
             actionsHeader.className = 'text-center';
@@ -408,7 +302,7 @@ export class chancesController {
             // Check if it's an object with attributes or array of chances
             if (typeof oSettings[item] === 'object' && !Array.isArray(oSettings[item])) {
                 let colCount = levelHeaders.length + 1;
-                if ((this.currentCategory === 'Primary' || this.currentCategory === 'Armor') && this.currentFaction !== 'Generic_settings') {
+                if ((this.currentCategory === 'Primary' || this.currentCategory === 'Armor' || this.currentCategory === 'Pistols') && this.currentFaction !== 'Generic_settings') {
                     colCount += 1;
                 }
                 itemCell.colSpan = colCount;
@@ -440,11 +334,8 @@ export class chancesController {
                         input.dataset.item = item;
                         input.dataset.attr = attr;
                         input.dataset.level = index;
-                        input.min = '0';
-                        input.max = '1000';
+                        configureRankInput(input, this.currentCategory, input.dataset.attr);
 
-                        // Add validation using helper function
-                        addInputValidation(input, (value) => validateNumber(value, 0, 1000), null, true);
                         
                         let label = document.createElement('small');
                         label.className = 'text-muted me-1 chance_persent';
@@ -482,11 +373,8 @@ export class chancesController {
                         input.dataset.type = this.currentCategory;
                         input.dataset.item = item;
                         input.dataset.level = index;
-                        input.min = '0';
-                        input.max = '1000';
+                        configureRankInput(input, this.currentCategory, input.dataset.attr);
 
-                        // Add validation using helper function
-                        addInputValidation(input, (value) => validateNumber(value, 0, 1000), null, true);
                         
                         let label = document.createElement('small');
                         label.className = 'text-muted me-1 chance_persent';
@@ -500,7 +388,7 @@ export class chancesController {
                 });
                 
                 // Add delete button if needed
-                if ((this.currentCategory === 'Primary' || this.currentCategory === 'Armor') && this.currentFaction !== 'Generic_settings' && item !== '') {
+                if ((this.currentCategory === 'Primary' || this.currentCategory === 'Armor' || this.currentCategory === 'Pistols') && this.currentFaction !== 'Generic_settings' && item !== '') {
                     let actionsCell = document.createElement('td');
                     actionsCell.className = 'text-center';
                     
@@ -511,14 +399,9 @@ export class chancesController {
                     });
                     
                     deleteButton.addEventListener('click', () => {
-                        let GeneralSettings = 'GeneralNPC_'+this.currentFaction;
-                        if (this.currentCategory === 'Primary') {
-                            delete this.settings.weapon[GeneralSettings][classification][item];
-                            this.updateAllLabels(this.settings.weapon[GeneralSettings][classification], classification);
-                        } else if (this.currentCategory === 'Armor') {
-                            delete this.settings.armor[GeneralSettings][item];
-                            this.updateAllLabels(this.settings.armor[GeneralSettings]);
-                        }
+                        const list = this.currentCategory === 'Primary' ? 'weapon' : this.currentCategory === 'Armor' ? 'armor' : 'pistol';
+                        const items = this.changeList(list, classification, item, 'remove');
+                        this.updateAllLabels(items, classification);
                         row.remove();
                     });
                     
@@ -570,7 +453,6 @@ export class chancesController {
             helmetSpawn: 'Helmet Drop Chance (%) (seems not working, spawn in helmet settings)'
         }; //TODO add tooltips on hover
 
-
         let attributesTable = document.createElement('div');
 
         attributesTable.classList.add('attributes_table');
@@ -595,9 +477,9 @@ export class chancesController {
                     attrElement = document.createElement('select');
                     attrElement.className = 'form-select form-select-sm';
                     attrElement.dataset.type = type;
-                    attrElement.dataset.to_item = item;
-                    attrElement.dataset.to_attr = thisAttr[0];
-                    let itemList = type==='armor'?thisAttr[0]=='helmet'?this.lists.helmet:this.lists.armor:this.lists.weapon; //bruh
+                    attrElement.dataset.item = item;
+                    attrElement.dataset.attr = thisAttr[0];
+                    let itemList = type==='armor'?thisAttr[0]=='helmet'?this.state.config.HelmetsSettings:this.state.config.ArmorSpawnSettings:this.state.config.WeaponList; //bruh
                     {
                         let option = document.createElement('option');
                         option.value = '';
@@ -610,7 +492,7 @@ export class chancesController {
                         option.text = item;
                         attrElement.appendChild(option);
                     }
-                    attrElement.value = oAttr[thisAttr[0]];
+                    attrElement.value = oAttr[thisAttr[0]] ?? '';
                 } else if (thisAttr[1] === 'checkbox') {
                     // Special handling for checkbox
                     let checkDiv = document.createElement('div');
@@ -621,8 +503,8 @@ export class chancesController {
                     attrElement.type = 'checkbox';
                     attrElement.checked = oAttr[thisAttr[0]];
                     attrElement.dataset.type = type;
-                    attrElement.dataset.to_item = item;
-                    attrElement.dataset.to_attr = thisAttr[0];
+                    attrElement.dataset.item = item;
+                    attrElement.dataset.attr = thisAttr[0];
                     
                     labelEl.className = 'form-check-label';
                     
@@ -635,26 +517,25 @@ export class chancesController {
                     attrElement = document.createElement('input');
                     attrElement.className = 'form-control form-control-sm';
                     attrElement.type = thisAttr[1];
-                    attrElement.value = oAttr[thisAttr[0]];
+                    attrElement.value = typeof oAttr[thisAttr[0]] === 'boolean' ? Number(oAttr[thisAttr[0]]) : oAttr[thisAttr[0]] ?? '';
                     attrElement.dataset.type = type;
-                    attrElement.dataset.to_item = item;
-                    attrElement.dataset.to_attr = thisAttr[0];
+                    attrElement.dataset.item = item;
+                    attrElement.dataset.attr = thisAttr[0];
 
                     // Add validation for number inputs
                     if (thisAttr[1] === 'number') {
                         // Set appropriate min/max based on attribute type
                         let min = 0;
-                        let max = 1000;
+                        let max = Infinity;
                         
-                        if (thisAttr[0].includes('Condition')) {
+                        if (thisAttr[0].includes('Condition') || thisAttr[0] === 'helmetSpawn') {
                             max = 100; // Condition is percentage
                         }
                         
                         attrElement.min = min;
-                        attrElement.max = max;
+                        if (Number.isFinite(max)) attrElement.max = max;
+                        attrElement.step = thisAttr[0].includes('Ammo') ? '1' : 'any';
 
-                        // Add validation using helper function
-                        addInputValidation(attrElement, (value) => validateNumber(value, min, max), null, true);
                     }
                 }
 
