@@ -26,7 +26,7 @@ export function validateRange(min: unknown, max: unknown, unit: NumericUnit, pat
     return { ok: true, value: [lower.value, upper.value] };
 }
 
-// This is the model rule; legacy CFG fallback is intentionally left for stage 3.
+// Missing inherits; explicit zero is a value in both editing and CFG generation.
 export function resolveOverride(override: number | undefined, inherited: number): number {
     return override ?? inherited;
 }

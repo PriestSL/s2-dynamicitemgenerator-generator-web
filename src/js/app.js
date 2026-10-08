@@ -1,3 +1,5 @@
+import { setPackageTransport } from '../files/packageTransport.ts';
+import { downloadPackage } from './restCalls.js';
 /**
  * Main Application Controller (Refactored)
  * Application initialization and coordination
@@ -10,8 +12,10 @@ import { PresetsManager } from './presets/presetsManager.js';
 import { EventManager } from './events/eventManager.js';
 import { UIHelpers } from './ui/uiHelpers.js';
 import { chancesController } from './chances.js';
-import { generateConfig } from './fileStreamGenerator.js';
+import { generateConfig } from './fileStreamGenerator.ts';
 import '../css/custom.scss';
+
+setPackageTransport(downloadPackage);
 
 class Application {
     constructor() {

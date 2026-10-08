@@ -1,3 +1,4 @@
+import { bindDownloads } from '../../ui/downloads.ts';
 /**
  * Event Manager Module
  * Centralized event handling and binding
@@ -59,33 +60,8 @@ export class EventManager {
     }
 
     bindButtonEvents() {
-        // Save/Generate button
-        const btnSave = document.getElementById('btn_save');
-        if (btnSave) {
-            btnSave.addEventListener('click', () => {
-                if (this.fileGenerator && this.appState) {
-                    this.fileGenerator.generateConfig(this.appState);
-                } else {
-                    console.error('Missing fileGenerator or appState');
-                }
-            });
-        } else {
-            console.warn('Save button not found');
-        }
+        bindDownloads(this.appState, this.fileGenerator.generateConfig);
 
-        const btnSaveZip = document.getElementById('btn_save_zip');
-        if (btnSaveZip) {
-            btnSaveZip.addEventListener('click', () => {
-                if (this.fileGenerator && this.appState) {
-                    this.fileGenerator.generateConfig(this.appState, false);
-                } else {
-                    console.error('Missing fileGenerator or appState');
-                }
-            });
-        } else {
-            console.warn('Save button not found');
-        }
-        
         // Help button
         const btnHelp = document.getElementById('btn_help');
         if (btnHelp) {

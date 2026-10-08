@@ -1,5 +1,35 @@
 # Перевірки рефакторингу
 
+## Етап 3 — 8 жовтня 2026
+
+Етап 2 позначено схваленим за явною вказівкою власника. Генератор, ZIP, файлові операції та сумісні точки входу перенесено на TS. `npm run typecheck`, `npm run lint`, `npm test` (**49/49**) та `npm run build` пройшли. Build і dev-сервер потребували дозволу поза sandbox: у sandbox були EPERM realpath PNG, хибна помилка пошуку Sass та недоступний браузеру socket. Відомі попередження Node/Vite module mode і 318 повторних Sass/Bootstrap deprecations залишаються.
+
+Автоматичні перевірки:
+
+- `generator.test.ts`: defaults JSON/CFG та сумісний `createLoadout(AppState)`; позитивні/відсутні/нульові ammo й condition для primary, Guard і pistols; A → B → A, паралельні async-входи, незмінність config/base й заморожений input; відмова для невалідних діапазонів/NaN, порожнього набору NPC та відсутніх kit/Secondary-посилань.
+- Історичні fixtures не перезаписувалися. `changed.json` лишається невалідним доказом F07. Тест додає йому лише minAmmo=0, після чого перевіряє весь CFG проти історичного тексту з явною заміною тільки GunObrez/GuardGunObrez minCondition та ammo-полів. Два KNOWN-тести замінено позитивними регресіями.
+- `downloads.test.ts`: реальний `generateConfig` → `packZip` → зворотне читання JSZip; один CFG за потрібним шляхом, точна рівність чистому генератору, ім'я й fallback; завершення Promise після save; помилки пакування/валідації без save; pending, придушення дубля та retry.
+- Незмінений `restCalls.js` у тесті виконується з тестовим origin і підміною `fetch`. Перевірено POST `/pack`, headers, `{fileName, structure}`, вкладений шлях і CFG, успіх, HTTP 500, відмову мережі та malformed-відповіді адаптера. JS-модуль не оголошується typechecked: його відповідь на TS-межі — `unknown`. F15 fallback `<name>.pak` збережено явно, попри реальний серверний `fileName`.
+- Спільне браузерне збереження Blob покривається `json-download.test.ts`; JSON-операції залишаються відокремленими від ZIP. File input під час вибору приєднується до DOM і видаляється після вибору/скасування/помилки запуску.
+
+У браузері на локальному dev-сервері пройдено: defaults → Generic Primary → GunObrez maxCondition=90, minCondition=67, ammo=0/0 → ZIP. Завантажено `_Stage3Verified_1_P.zip`; зворотне читання саме браузерного файлу підтвердило один CFG у правильному каталозі та всі 9 primary/Guard-блоків із MinDurability=0.67, MaxDurability=0.9, AmmoMinCount=0, AmmoMaxCount=0. Ввід підтверджувався клавіатурою/Tab, оскільки програмний fill сам по собі не викликав change. Після імпорту структурно допустимого JSON без Neutral pistol kit показано помилку генерації, обидві кнопки доступні; після імпорту defaults повтор успішно завантажив `_Stage3Retry_1_P.zip`. Console errors у фінальному сценарії немає. Тимчасовий JSON для браузерного тесту прибрано.
+
+Сумісні входи та залишкові межі:
+
+| Код / споживачі | Поточний контракт / завершення |
+| --- | --- |
+| `textGenerators.ts` → `generator/loadout.ts` | `await createLoadout(state)` читає актуальний config; чистий `generateLoadout(config)` не використовує DOM/REST |
+| `app.js` / `EventManager` → `ui/downloads.ts` → `fileStreamGenerator.ts` | Об'єкт `{ generateConfig }` збережений; boolean другого аргументу та default PAK збережені; третій аргумент — ім'я з UI |
+| `app.js` → `setPackageTransport(downloadPackage)` | Підключає фактичний JS REST до TS-адаптера; endpoints/payload/PIN/CRUD не змінено; REST/PresetsManager — етап 7 |
+| Локальний app/chances/renderers/events/modal/helpers та `controller-contract.test.mjs` | Етап 5; нова логіка завантаження вже TS |
+| `configs.js`, Vite/ESLint-конфігурації та решта tooling | Етап 7; `capture-baseline.ts` уже перенесено разом із генератором |
+
+`node tests/capture-baseline.ts --write` створює кандидати у `tests/fixtures/candidates/`, не перезаписує історичні докази. Без `--write` відмовляється писати. Старі `baseline.test.mjs`, `known-defects.test.mjs` і `helpers.mjs` прибрано після перенесення потрібних перевірок; модельний helper — `fixtures.ts`.
+
+Ручне рев'ю: у Generic Primary для GunObrez спочатку задати maxCondition=90, потім minCondition=67, minAmmo=0 та maxAmmo=0; завантажити ZIP із власним ім'ям і перевірити відповідні CFG-поля 0.67/0.9/0/0. Аналогічно задати індивідуальні ammo пістолету. Перевірити імпорт/повторне завантаження; під час пакування кнопки блокуються, після успіху/помилки доступні знову.
+
+Реальний REST/PAK, серверні CRUD та гра не перевірялися; серверних записів не було. Bootstrap, UI-layout і мережевий workflow загалом не рефакторилися. Етап 3 очікує рев'ю; етап 4 не розпочато. Нижче — історичні звіти попередніх станів коду.
+
 ## Етап 2 — 7 жовтня 2026
 
 Локальне редагування, runtime-валідація, файловий JSON та AppState перенесені на TS. `npm run typecheck` перевіряє всі `src/**/*.ts` і `tests/**/*.ts` двома strict-конфігураціями; `build` виконує ту саму повну команду перед Vite. `npm test` запускає `.mjs` та `.ts` через Node 26. Для типізації Node-тестів додано `@types/node`.

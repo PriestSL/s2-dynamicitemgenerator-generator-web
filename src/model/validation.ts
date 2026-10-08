@@ -1,4 +1,6 @@
-import { FACTIONS, NPC_CLASSES, WEAPON_CLASSES } from './types.ts';
+import { FACTIONS, NPC_CLASSES } from './types.ts';
+import { effectiveWeapon, weaponClass } from './effective.ts';
+export { weaponClass } from './effective.ts';
 import type { LoadoutConfig, RankValues, WeaponOverrides, ArmorSpawnSettings, AmmoRange, AmmoSettings } from './types.ts';
 import { validateRange, validateValue } from './values.ts';
 import type { NumericUnit } from './values.ts';
@@ -79,10 +81,6 @@ function range(min: number, max: number, unit: NumericUnit, path: string): void 
 function reference(item: string, catalog: object, path: string): void {
     if (item !== '' && !Object.hasOwn(catalog, item)) invalid(path, `Unknown item ${item}`);
 }
-export function weaponClass(item: string): typeof WEAPON_CLASSES[number] {
-    const found = WEAPON_CLASSES.find(key => item.endsWith(`_${key}`));
-    return found ?? invalid(`WeaponList.${item}`, 'Unknown weapon class suffix');
-}
 
 /** Full current wire format only. No guessed migrations or coercion of JSON strings. */
 export function validateConfig(value: unknown): LoadoutConfig {
@@ -90,10 +88,10 @@ export function validateConfig(value: unknown): LoadoutConfig {
     range(config.MinWeaponDurability, config.MaxWeaponDurability, 'percentage', 'Min/MaxWeaponDurability');
     range(config.DropConfigs.nMinDurability, config.DropConfigs.nMaxDurability, 'probability', 'DropConfigs');
     for (const [key, [min, max]] of Object.entries(config.AmmoSettings)) range(min, max, 'count', `AmmoSettings.${key}`);
-    for (const [item, overrides] of Object.entries(config.WeaponList)) {
-        const ammo = config.AmmoSettings[weaponClass(item)];
-        range(overrides.minAmmo ?? ammo[0], overrides.maxAmmo ?? ammo[1], 'count', `WeaponList.${item}.ammo`);
-        range(overrides.minCondition ?? config.MinWeaponDurability, overrides.maxCondition ?? config.MaxWeaponDurability, 'percentage', `WeaponList.${item}.condition`);
+    for (const item of Object.keys(config.WeaponList)) {
+        const effective = effectiveWeapon(config, item);
+        range(effective.minAmmo, effective.maxAmmo, 'count', `WeaponList.${item}.ammo`);
+        range(effective.minCondition, effective.maxCondition, 'percentage', `WeaponList.${item}.condition`);
     }
     for (const [faction, roles] of Object.entries(config.WeaponSettings)) {
         for (const [role, items] of Object.entries(roles)) {
