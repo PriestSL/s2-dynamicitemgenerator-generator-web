@@ -1,16 +1,21 @@
 import { createEditorState } from '../model/config.ts';
-import type { LoadoutConfig } from '../model/types.ts';
+import type { DocumentMetadata, LoadoutConfig } from '../model/types.ts';
+import { normalizeImport, serverConfig } from '../model/importing.ts';
+import { compareConfig, resetConfig } from '../model/comparison.ts';
+import type { ConfigPath } from '../model/comparison.ts';
 import { editConfig } from '../model/editing.ts';
 import type { EditCommand } from '../model/editing.ts';
 import { validateConfig } from '../model/validation.ts';
 
-// Legacy setters intentionally preserve the existing PresetsManager assignment
-// contract. Local UI uses edit(); external DTO validation belongs to stage 7.
+// Legacy setters preserve existing integration contracts until their migration.
+// UI uses edit(); JSON and preset loading share the validated import boundary.
 export class AppState {
     private editor = createEditorState();
     get config() { return this.editor.config; }
     get baseConfig() { return this.editor.baseConfig; }
     get view() { return this.editor.view; }
+    get document() { return this.editor.document; }
+    get changes() { return compareConfig(this.baseConfig, this.config); }
     get modifiedWeaponSettings() { return this.config.WeaponSettings; }
     set modifiedWeaponSettings(value: LoadoutConfig['WeaponSettings']) { this.config.WeaponSettings = value; }
     get modifiedArmorSettings() { return this.config.ArmorSettings; }
@@ -49,7 +54,17 @@ export class AppState {
             helmetList: this.config.HelmetsSettings };
     }
     edit(command: EditCommand): void { this.editor.config = editConfig(this.config, command); }
-    importState(data: unknown): void { this.editor.config = validateConfig(data); }
+    importState(data: unknown, metadata: DocumentMetadata = { name: 'Imported JSON', source: 'json' }) {
+        const result = normalizeImport(data);
+        const next = createEditorState(result.config, metadata);
+        next.view = { ...this.view };
+        this.editor = next;
+        return result.notices;
+    }
+    importPreset(response: unknown, metadata: Omit<DocumentMetadata, 'source'>) {
+        return this.importState(serverConfig(response), { ...metadata, source: 'server' });
+    }
+    reset(paths?: readonly ConfigPath[]): void { this.editor.config = resetConfig(this.config, this.baseConfig, paths); }
     exportState(): LoadoutConfig { return structuredClone(this.config); }
     resetState(): void { this.editor = createEditorState(); }
     updateWeaponSettings(value: LoadoutConfig['WeaponSettings']): void {

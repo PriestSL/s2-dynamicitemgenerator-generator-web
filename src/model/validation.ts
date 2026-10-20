@@ -58,7 +58,7 @@ const ammoRange: Parser<AmmoRange> = (value, path) => {
     if (!Array.isArray(value) || value.length !== 2) invalid(path, 'Expected [min, max]');
     return [count(value[0], `${path}[0]`), count(value[1], `${path}[1]`)];
 };
-const schema = shape<LoadoutConfig>({
+export const validateConfigShape = shape<LoadoutConfig>({
     WeaponSettings: record(record(weights, NPC_CLASSES), factions),
     ArmorSettings: record(weights, factions),
     PistolSettings: record(weights, factions),
@@ -84,7 +84,7 @@ function reference(item: string, catalog: object, path: string): void {
 
 /** Full current wire format only. No guessed migrations or coercion of JSON strings. */
 export function validateConfig(value: unknown): LoadoutConfig {
-    const config = schema(value, 'config');
+    const config = validateConfigShape(value, 'config');
     range(config.MinWeaponDurability, config.MaxWeaponDurability, 'percentage', 'Min/MaxWeaponDurability');
     range(config.DropConfigs.nMinDurability, config.DropConfigs.nMaxDurability, 'probability', 'DropConfigs');
     for (const [key, [min, max]] of Object.entries(config.AmmoSettings)) range(min, max, 'count', `AmmoSettings.${key}`);

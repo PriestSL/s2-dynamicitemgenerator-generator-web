@@ -86,29 +86,7 @@ class Application {
     }
     
     setupPresetEventListener() {
-        // Listen for preset loaded events from PresetsManager
-        window.addEventListener('presetLoaded', () => {
-            // Clear current content
-            const contentEl = document.getElementById('content');
-            if (contentEl) {
-                contentEl.innerHTML = '';
-            }
-            
-            // Re-render current category to show updated data
-            const currentCategory = this.chancesCtrl.currentCategory;
-            
-            // Call the appropriate renderer based on current category
-            if (this.categoryRenderers && currentCategory) {
-                const renderMethodName = `render${currentCategory}`;
-                if (typeof this.categoryRenderers[renderMethodName] === 'function') {
-                    setTimeout(() => {
-                        this.categoryRenderers[renderMethodName]();
-                    }, 100);
-                } else {
-                    console.warn('No renderer found for category:', currentCategory);
-                }
-            }
-        });
+        window.addEventListener('presetLoaded', () => this.eventManager.renderCurrentView());
     }
     
     setInitialUIState() {
@@ -125,7 +103,7 @@ class Application {
             // Trigger initial render
             setTimeout(() => {
                 if (this.categoryRenderers && this.categoryRenderers.renderPrimary) {
-                    this.categoryRenderers.renderPrimary();
+                    this.eventManager.renderCurrentView();
                 }
             }, 200);
         }

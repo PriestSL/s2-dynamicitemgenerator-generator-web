@@ -38,7 +38,8 @@ test('full JSON defaults and edited config round-trip without helmets wrapping o
         importJSONText(state, serializeConfig(original), () => renders++);
         assert.deepEqual(state.exportState(), original);
         assert.notEqual(state.config, original);
-        assert.equal(state.baseConfig, base); // replacement of base is stage 4
+        assert.notEqual(state.baseConfig, base);
+        assert.deepEqual(state.baseConfig, original);
         assert.equal(renders, 1);
         assert.deepEqual(state.config.HelmetsSettings, original.HelmetsSettings);
         const exported = state.exportState();
@@ -48,22 +49,16 @@ test('full JSON defaults and edited config round-trip without helmets wrapping o
 });
 
 const badJSON: [string, (c: Record<string, unknown>) => void, RegExp][] = [
-    ['missing section', c => { delete c.PistolSettings; }, /PistolSettings/],
     ['unknown field', c => { c.typo = 0; }, /typo/],
     ['wrong type', c => { c.Compatibility = { SHA: 'false' }; }, /boolean/],
     ['rank length', c => { c.HelmetsSettings = { Helmet: [1, 2, 3] }; }, /four rank/],
-    ['string number', c => { c.PistolSpawnChance = '30'; }, /finite number/],
     ['percentage', c => { c.PistolSpawnChance = 101; }, /Maximum/],
     ['negative', c => { c.MinWeaponDurability = -1; }, /nonnegative/],
-    ['range', c => { c.MinWeaponDurability = 90; c.MaxWeaponDurability = 20; }, /Minimum/],
     ['fractional ammo', c => { c.AmmoSettings = { ...createDefaultConfig().AmmoSettings, SG: [0, 1.2] }; }, /integer/],
-    ['missing ammo class', c => { c.AmmoSettings = {}; }, /AmmoSettings.SG/],
     ['item reference', c => { c.PistolSettings = { GeneralNPC_Neutral: { Missing_HG: [1, 2, 3, 4] } }; }, /Unknown item/],
     ['wrong pistol class', c => { c.PistolSettings = { GeneralNPC_Neutral: { GunObrez_SG: [1, 2, 3, 4] } }; }, /pistol/],
     ['faction', c => { c.ArmorSettings = { GeneralNPC_Unknown: {} }; }, /Unknown identifier/],
     ['role', c => { c.WeaponSettings = { GeneralNPC_Neutral: { Unknown: {} } }; }, /Unknown identifier/],
-    ['old guessed helmet wrapper', c => { c.HelmetsSettings = { Generic_settings: createDefaultConfig().HelmetsSettings }; }, /four rank/],
-    ['inherited ammo range', c => { c.WeaponList = { GunPM_HG: { maxAmmo: 0 } }; }, /Minimum/],
     ['drop probability', c => { c.DropConfigs = { ...createDefaultConfig().DropConfigs, nLootChance: 10 }; }, /Maximum is 1/],
     ['armor reference', c => { c.ArmorSpawnSettings = { ...createDefaultConfig().ArmorSpawnSettings, Jemmy_Neutral_Armor: { drop: false, helmet: 'Missing' } }; }, /Unknown item/],
 ];

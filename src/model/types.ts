@@ -94,6 +94,14 @@ export interface EditorState {
     readonly baseConfig: DeepReadonly<LoadoutConfig>;
     config: LoadoutConfig;
     view: ViewState;
+    readonly document: Readonly<DocumentMetadata>;
+}
+
+export interface DocumentMetadata {
+    name: string;
+    source: 'defaults' | 'json' | 'server';
+    serverId?: string;
+    version?: string;
 }
 
 export type ValidationResult<T> =

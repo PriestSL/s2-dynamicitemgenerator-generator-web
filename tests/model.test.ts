@@ -65,7 +65,8 @@ test('AppState facade forwards legacy writes, replacements and export to one con
     assert.deepEqual(state.exportState(), imported);
     assert.equal(state.typeToTable.weapon, state.config.WeaponList);
     assert.equal(state.typeToTable.armor, state.config.ArmorSpawnSettings);
-    assert.deepEqual(state.baseConfig, base);
+    assert.notDeepEqual(state.baseConfig, base);
+    assert.deepEqual(state.baseConfig, imported);
     state.resetState();
     assert.deepEqual(state.exportState(), await fixture('defaults'));
     state.modifiedPistolSpawnChance = 17;

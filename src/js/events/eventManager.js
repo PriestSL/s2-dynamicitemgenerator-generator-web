@@ -1,4 +1,6 @@
 import { bindDownloads } from '../../ui/downloads.ts';
+import { ComparisonUI } from '../../ui/comparison.ts';
+import '../../css/comparison.css';
 /**
  * Event Manager Module
  * Centralized event handling and binding
@@ -30,6 +32,10 @@ export class EventManager {
     }
     
     initializeEventListeners() {
+        this.comparison = new ComparisonUI(this.appState, () => this.renderCurrentView());
+        this.categoryRenderers.chancesCtrl.refreshComparison = () => this.comparison.refresh();
+        document.addEventListener('change', () => this.comparison.refresh());
+        document.addEventListener('shown.bs.modal', () => this.comparison.refresh());
         this.bindCategoryEvents();
         this.bindFactionEvents(); 
         this.bindButtonEvents();
@@ -41,6 +47,7 @@ export class EventManager {
         document.querySelectorAll('.category_item').forEach(item => item.classList.toggle('active', item.id === this.appState.view.category));
         document.querySelectorAll('.faction_item').forEach(item => item.classList.toggle('active', item.id === this.appState.view.faction));
         this.oCategoryToEvent[this.appState.view.category]();
+        this.comparison?.refresh();
     }
     bindCategoryEvents() {
         for (const element of document.getElementsByClassName('category_item')) {

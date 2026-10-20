@@ -48,6 +48,7 @@ export function editEvent(state: AppState, event: Event, kind: ListKind | 'helme
     return applyField(input, () => state.edit(command));
 }
 export function bindGlobal(input: HTMLInputElement, state: AppState, field: 'MinWeaponDurability' | 'MaxWeaponDurability' | 'PistolSpawnChance'): void {
+    input.dataset.compareField = field;
     input.addEventListener('change', () => applyField(input, () => state.edit({ kind: 'global', field, value: input.value })));
 }
 export function bindDropSettings(state: AppState): void {

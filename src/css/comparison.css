@@ -1,0 +1,11 @@
+.comparison-banner { background: var(--bs-tertiary-bg, #f1f3f5); }
+.comparison-banner button { margin: .35rem .5rem 0 0; }
+.comparison-base { color: var(--bs-secondary-color, #555); font-size: .75rem; }
+input.comparison-modified, select.comparison-modified { outline: 2px solid #b47700; outline-offset: 1px; }
+tr.comparison-modified > td:first-child, .card.comparison-modified > .card-header { border-left: 3px solid #b47700; }
+tr.comparison-added > td:first-child { border-left: 3px solid #157347; }
+.comparison-category-changed { outline: 2px solid #b47700; outline-offset: -2px; }
+.comparison-removed > td { color: #62666b; background: #e9ecef !important; }
+.comparison-removed > td:not(:last-child) { opacity: .65; }
+.comparison-removed button { opacity: 1; background: white; color: #343a40; }
+.comparison-decoration button { font-size: .72rem; padding: .1rem .25rem; }

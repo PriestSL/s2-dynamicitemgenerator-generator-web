@@ -1,5 +1,5 @@
 import * as defaults from './defaults.ts';
-import type { EditorState, LoadoutConfig } from './types.ts';
+import type { DocumentMetadata, EditorState, LoadoutConfig } from './types.ts';
 
 export function createDefaultConfig(): LoadoutConfig {
     return structuredClone({
@@ -27,12 +27,13 @@ function freezeDeep(value: unknown): void {
 }
 
 // Trusted typed input only. Unknown JSON must be validated before calling this API.
-export function createEditorState(initial: LoadoutConfig = createDefaultConfig()): EditorState {
+export function createEditorState(initial: LoadoutConfig = createDefaultConfig(), metadata: DocumentMetadata = { name: 'Defaults', source: 'defaults' }): EditorState {
     const baseConfig = structuredClone(initial);
     freezeDeep(baseConfig);
     return {
         baseConfig,
         config: structuredClone(initial),
         view: { faction: 'Generic_settings', category: 'Primary' },
+        document: Object.freeze({ ...metadata }),
     };
 }

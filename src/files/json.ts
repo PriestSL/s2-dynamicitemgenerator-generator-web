@@ -1,11 +1,13 @@
 import type { AppState } from '../js/state.ts';
-import { parseConfig, serializeConfig } from '../model/validation.ts';
+import { serializeConfig } from '../model/validation.ts';
+import { importSummary } from '../model/importing.ts';
 import { saveBlob } from './browser.ts';
 
-export function importJSONText(state: AppState, text: string, render: () => void): void {
-    const config = parseConfig(text);
-    state.importState(config);
+export function importJSONText(state: AppState, text: string, render: () => void, name = 'Imported JSON'): string {
+    const config: unknown = JSON.parse(text);
+    const notices = state.importState(config, { name, source: 'json' });
     render();
+    return importSummary(notices);
 }
 export function chooseJSON(state: AppState, render: () => void, message: (id: string, text: string) => void): void {
     const input = document.createElement('input');
@@ -22,8 +24,8 @@ export function chooseJSON(state: AppState, render: () => void, message: (id: st
         reader.onload = () => {
             try {
                 if (typeof reader.result !== 'string') throw new Error('Expected a text file');
-                importJSONText(state, reader.result, render);
-                message('configImportSuccess', 'Configuration imported successfully!');
+                const summary = importJSONText(state, reader.result, render, file.name);
+                message('configImportSuccess', summary);
             } catch (error) {
                 message('configImportError', error instanceof Error ? error.message : String(error));
             }

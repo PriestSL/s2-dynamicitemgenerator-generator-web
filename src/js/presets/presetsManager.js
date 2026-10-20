@@ -6,6 +6,7 @@
 import { createElement, escapeHtml } from '../utils/dom.js';
 import { fetchHeaders, getPreset, deletePreset, createPreset, updatePreset } from '../restCalls.js';
 import { ModalManager } from '../ui/modalManager.js';
+import { importSummary } from '../../model/importing.ts';
 
 export class PresetsManager {
     constructor(appState, chancesCtrl) {
@@ -386,13 +387,13 @@ export class PresetsManager {
 
         this.modalManager.createConfirmationBox('loadPreset', `Load preset "${presetName}"? This will replace your current settings.`, {
             onConfirm: () => {
-                this._loadPreset(presetId, presetType, presetName);
+                this._loadPreset(presetId, presetType, presetName, card.dataset.version);
             }
         });
 
     }
     
-    async _loadPreset(presetId, type, presetName) {
+    async _loadPreset(presetId, type, presetName, version) {
         try {
             const data = await getPreset(presetId, type);
             if (!data) { 
@@ -400,22 +401,11 @@ export class PresetsManager {
                 return;
             }
             
-            let preset = data.data;
-            
-            // Update the state with the preset data (matching original app.js structure)
-            this.state.modifiedWeaponSettings = preset.WeaponSettings;
-            this.state.modifiedArmorSettings = preset.ArmorSettings;
-            this.state.modifiedGrenadeSettings = preset.GrenadeSettings;
-            this.state.modifiedAmmoByWeaponClass = preset.AmmoSettings;
-            this.state.modifiedWeaponList = preset.WeaponList;
-            this.state.modifiedDropConfigs = preset.DropConfigs;
-            this.state.modsCompatibility = preset.Compatibility;
-            this.state.modifiedArmorSpawnSettings = preset.ArmorSpawnSettings;
-            this.state.modifiedHelmetSpawnSettings = preset.HelmetsSettings;
+            const notices = this.state.importPreset(data, { name: presetName, serverId: presetId, ...(version ? { version } : {}) });
+            const preset = this.state.exportState();
             
             // Update config name if element exists
             const configNameEl = document.getElementById('config_name');
-            console.log(preset);
             if (configNameEl) {
                 configNameEl.value = presetName;
             }
@@ -435,10 +425,11 @@ export class PresetsManager {
             window.dispatchEvent(new CustomEvent('presetLoaded', { 
                 detail: { presetId, type, preset } 
             }));
+            if (notices.length) this.modalManager.createMessageBox('presetImportSummary', importSummary(notices));
             
         } catch (error) {
             console.error('Error loading preset:', error);
-            this.modalManager.createMessageBox('presetLoadError', 'Error loading preset. Please try again.');
+            this.modalManager.createMessageBox('presetLoadError', `Error loading preset: ${error instanceof Error ? error.message : String(error)}`);
         }
     }
     

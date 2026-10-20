@@ -137,6 +137,7 @@ export class chancesController {
                     const items = this.changeList(list, classification, item, 'remove');
                     this.updateAllLabels(items, classification);
                     row.remove();
+                    this.refreshComparison?.();
                 });
                 
                 actionsCell.appendChild(deleteButton);
@@ -154,6 +155,7 @@ export class chancesController {
         const items = this.changeList(list, classification, item, 'add');
         this.addRow(parentEl, item, classification, [0, 0, 0, 0]);
         this.updateAllLabels(items, classification);
+        this.refreshComparison?.();
     }
     addWeaponToClass(parentEl, classification, item) { this.addItem(parentEl, 'weapon', classification, item); }
     addArmor(parentEl, item) { this.addItem(parentEl, 'armor', '', item); }
@@ -246,6 +248,11 @@ export class chancesController {
         // Create Bootstrap table structure
         let tableContainer = document.createElement('div');
         tableContainer.className = 'table-responsive';
+        if (tableType) {
+            tableContainer.dataset.comparisonList = tableType === 'weapon' ? 'WeaponSettings' : tableType === 'armor' ? 'ArmorSettings' : 'PistolSettings';
+            tableContainer.dataset.comparisonFaction = `GeneralNPC_${this.currentFaction}`;
+            tableContainer.dataset.comparisonRole = classification;
+        }
         
         let table = document.createElement('table');
         table.className = 'table table-striped table-hover table-sm';
@@ -403,6 +410,7 @@ export class chancesController {
                         const items = this.changeList(list, classification, item, 'remove');
                         this.updateAllLabels(items, classification);
                         row.remove();
+                        this.refreshComparison?.();
                     });
                     
                     actionsCell.appendChild(deleteButton);
