@@ -3,9 +3,10 @@
  * Handle all preset-related functionality
  */
 
-import { createElement, escapeHtml } from '../utils/dom.js';
+import { createElement, escapeHtml } from '../utils/dom.ts';
 import { fetchHeaders, getPreset, deletePreset, createPreset, updatePreset } from '../restCalls.js';
-import { ModalManager } from '../ui/modalManager.js';
+import { ModalManager } from '../ui/modalManager.ts';
+import { legacyPresetForm } from '../../compatibility/presetForm.ts';
 import { importSummary } from '../../model/importing.ts';
 
 export class PresetsManager {
@@ -462,7 +463,7 @@ export class PresetsManager {
                 </div>
             </form>
         `;
-        this.modalManager.createConfirmationBox('editPreset', modal, {
+        this.modalManager.createConfirmationBox('editPreset', legacyPresetForm(modal), {
             onConfirm: () => this.handleEditPresetSubmit(presetId),
             confirmValidation: () => {
                 const presetName = document.getElementById('presetName').value.trim();
@@ -544,7 +545,7 @@ export class PresetsManager {
             </form>
             `;
 
-            this.modalManager.createConfirmationBox('savePreset', modal, {
+            this.modalManager.createConfirmationBox('savePreset', legacyPresetForm(modal), {
                 onConfirm: () => this.handleSavePresetSubmit(),
                 confirmValidation: () => {
                     const presetName = document.getElementById('presetName').value.trim();

@@ -85,9 +85,9 @@
 
 | Аспект | Зараз | Напрямок розвитку |
 | --- | --- | --- |
-| Стек | TypeScript у моделі, редагуванні, AppState, генераторі, JSON/ZIP, браузерному збереженні та обробнику завантаження; решта UI й REST/PresetsManager ще JS; Vite, Bootstrap, JSZip | Поетапна повна TS-міграція всього власного програмного коду фронтенд-проєкту |
-| Дані редактора | AppState володіє config; локальні зміни проходять validate → normalize → commit. Контролер читає актуальні секції; навігація керується view | Завершення міграції UI та інтеграцій |
-| Порівняння з базою | Незмінний baseConfig із defaults, JSON або серверного пресета; метадані, обчислений diff, локальні reset та відновлення видалених предметів | Спільні UI-компоненти порівняння й редагування |
+| Стек | TypeScript у моделі, AppState, генераторі, JSON/ZIP та всьому локальному UI; внутрішній UI PresetsManager і REST ще JS; Vite, локальний Bootstrap, JSZip | Завершити TS-міграцію інтеграцій і tooling |
+| Дані редактора | AppState володіє config; локальні зміни проходять validate → normalize → commit. ControllerAdapter читає актуальні секції; навігація керується view | Завершення міграції інтеграцій |
+| Порівняння з базою | Незмінний baseConfig із defaults, JSON або серверного пресета; спільні поля/рядки показують базу, diff, validation, reset і відновлення видалених предметів | Узгодження теми, адаптивності та доступності |
 | Серверний пресет | Повне представлення конфігурації | У майбутньому — зміни відносно master-версії пресету; формат ще не визначений |
 | Збереження між сесіями | Ручні файли та серверні пресети | localStorage/автозбереження не є погодженою вимогою |
 
@@ -110,7 +110,9 @@
 
 `generateLoadout(config)` синхронно повертає CFG без DOM/REST і без запису у вхідні дані. Перед генерацією перевіряється повна конфігурація; порожній набір NPC loadouts, відсутні потрібні armor/pistol-комплекти, невідомі предмети стандартної Secondary та непідтримана структура bpatch спричиняють помилку замість некоректного файлу. Secondary лишається з наявних defaults, Guard — із наявним правилом спільних GeneralNPC armor/pistol-комплектів; це не нові можливості редагування.
 
-`generateConfig(state, useRESTPacking = true, name)` зберігає сумісний вибір ZIP/PAK. Ім'я надходить від UI, а CFG один для обох способів. ZIP очікується до завершення; UI показує стан/помилку, блокує повторний запуск і дозволяє повтор після невдачі. `app.js` підключає незмінений `restCalls.js` через типізований транспорт із перевіркою unknown-відповіді. Відомий F15 щодо імені PAK збережено явно: реальний `fileName` перевіряється, але завантаження використовує попереднє fallback-ім'я `<name>.pak`; виправлення серверного workflow відкладене.
+`generateConfig(state, useRESTPacking = true, name)` зберігає сумісний вибір ZIP/PAK. Ім'я надходить від UI, а CFG один для обох способів. ZIP очікується до завершення; Bootstrap toast показує стан/помилку, повторний запуск блокується до завершення й дозволений після невдачі. Повідомлення про початок завантаження не підтверджує збереження на диск. `app.ts` підключає незмінений `restCalls.js` через типізований транспорт із перевіркою unknown-відповіді. Відомий F15 щодо імені PAK збережено явно: реальний `fileName` перевіряється, але завантаження використовує попереднє fallback-ім'я `<name>.pak`; виправлення серверного workflow відкладене.
+
+Локальний UI складається через `Application.renderCurrentView` та один реєстр категорій. Поля й таблиці читають актуальний AppState; введення оновлює підписи й помилки без перебудови всього каталогу. Початкові, додані та відновлені рядки використовують той самий компонент. Локальні діалоги мають спільний Bootstrap lifecycle та повернення фокуса. CSS/JS Bootstrap беруться з одного npm-пакета; глобальний `window.bootstrap` збережено для PresetsManager. Внутрішні HTML-форми PresetsManager тимчасово проходять окремий legacy-адаптер; він не є універсальним sanitizer і не закриває F19.
 
 ## Орієнтири в поточному коді
 
@@ -121,17 +123,21 @@
 | [types.ts](src/model/types.ts) | Контракти LoadoutConfig/ViewState, каталоги ідентифікаторів, ранги та кортежі |
 | [defaults.ts](src/model/defaults.ts) | Початкові дані з перевіркою TypeScript; значення збережені |
 | [config.ts](src/model/config.ts), [values.ts](src/model/values.ts) | Незалежні baseConfig/config, початковий view та числові правила моделі |
-| [configs.js](src/js/configs.js) | Сумісний реекспорт defaults для наявних JS-імпортів |
+| [configs.ts](src/js/configs.ts) | Сумісний типізований реекспорт defaults |
 | [state.ts](src/js/state.ts) | Типізований AppState, актуальні config/view, атомарний імпорт та сумісні точки входу інтеграцій |
 | [editing.ts](src/model/editing.ts), [validation.ts](src/model/validation.ts) | Предметні команди без DOM, нормалізація полів та повна runtime-перевірка конфігурації |
 | [importing.ts](src/model/importing.ts) | Спільна нормалізація JSON/серверного data, legacy/defaults, виправлення діапазонів та повідомлення імпорту |
 | [comparison.ts](src/model/comparison.ts) | Структурне порівняння, області reset і атомарне повернення до бази без DOM |
-| [comparison.ts](src/ui/comparison.ts), [comparison.css](src/css/comparison.css) | Базові значення, позначки змін, reset/Restore і приглушені видалені рядки поверх legacy-renderer-ів |
-| [editing.ts](src/ui/editing.ts) | DOM-адаптер полів, checked/value, межі ваг/відсотків та показ помилки без запису в config |
+| [comparison.ts](src/ui/comparison.ts), [editor.ts](src/ui/editor.ts) | Метадані бази, лічильники, reset scope та оновлення змонтованих компонентів без власної копії config |
+| [fields.ts](src/ui/fields.ts), [editing.ts](src/ui/editing.ts) | Спільні типізовані поля, checked/value, base/modified, валідація, чернетка вводу й парний reset |
+| [chanceTable.ts](src/ui/chanceTable.ts), [attributeFields.ts](src/ui/attributeFields.ts), [dropSettings.ts](src/ui/dropSettings.ts) | Спільні рядки/таблиці, Add/Delete/Restore, властивості предметів та Armor Drop |
 | [json.ts](src/files/json.ts), [browser.ts](src/files/browser.ts) | Локальний вибір/читання JSON, атомарний імпорт і валідований експорт; окреме браузерне збереження Blob |
-| [app.js](src/js/app.js) | Ініціалізація й зв'язування компонентів |
-| [chances.js](src/js/chances.js), [categoryRenderers.js](src/js/renderers/categoryRenderers.js) | Legacy-таблиці й відображення категорій; редагування делеговане TS-модулям |
-| [eventManager.js](src/js/events/eventManager.js) | Навігація через view, події інтерфейсу та виклик TS-модуля JSON |
+| [app.ts](src/app.ts), [application.ts](src/ui/application.ts), [bootstrap.ts](src/ui/bootstrap.ts) | Ініціалізація, навігація, toolbar, єдиний renderCurrentView та локальний Bootstrap |
+| [categories.ts](src/ui/categories.ts) | Явний реєстр усіх категорій; відображення через спільні компоненти |
+| [controller.ts](src/compatibility/controller.ts), [integrations.ts](src/compatibility/integrations.ts) | Сумісний live-контракт контролера та перевірені unknown-входи відкладених JS-модулів |
+| [dialogs.ts](src/ui/dialogs.ts), [modalManager.ts](src/js/ui/modalManager.ts), [notifications.ts](src/ui/notifications.ts) | Локальні діалоги, сумісні назви методів PresetsManager і toast-стан операцій |
+| [dom.ts](src/ui/dom.ts), [dom.ts](src/js/utils/dom.ts), [presetForm.ts](src/compatibility/presetForm.ts) | DOM-компоненти, мінімальні legacy helpers і окрема межа HTML-форм PresetsManager |
+| [editor.css](src/css/editor.css), [comparison.css](src/css/comparison.css), [custom.scss](src/css/custom.scss) | Компонентні стилі, diff/error та єдиний Bootstrap SCSS-імпорт |
 | [loadout.ts](src/generator/loadout.ts), [effective.ts](src/model/effective.ts) | Чистий генератор CFG та спільні правила effective weapon settings/одиниць |
 | [textGenerators.ts](src/js/textGenerators.ts) | Сумісний async-вхід createLoadout(AppState), який делегує генерацію актуального config |
 | [fileStreamGenerator.ts](src/js/fileStreamGenerator.ts), [zip.ts](src/files/zip.ts) | Сумісний generateConfig, очікування ZIP або PAK, окреме локальне пакування CFG |

@@ -9,18 +9,20 @@ export function importJSONText(state: AppState, text: string, render: () => void
     render();
     return importSummary(notices);
 }
-export function chooseJSON(state: AppState, render: () => void, message: (id: string, text: string) => void): void {
+export function chooseJSON(state: AppState, render: () => void, message: (id: string, text: string) => void, activity: (pending: boolean) => void = () => {}): void {
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = '.json,application/json';
     input.hidden = true;
-    input.oncancel = () => input.remove();
+    activity(true);
+    input.oncancel = () => { input.remove(); activity(false); };
     input.onchange = () => {
         const file = input.files?.[0];
         input.remove();
-        if (!file) return;
+        if (!file) { activity(false); return; }
         const reader = new FileReader();
-        reader.onerror = () => message('configImportError', 'Unable to read the file.');
+        reader.onerror = () => { activity(false); message('configImportError', 'Unable to read the file.'); };
+        reader.onabort = () => activity(false);
         reader.onload = () => {
             try {
                 if (typeof reader.result !== 'string') throw new Error('Expected a text file');
@@ -28,15 +30,23 @@ export function chooseJSON(state: AppState, render: () => void, message: (id: st
                 message('configImportSuccess', summary);
             } catch (error) {
                 message('configImportError', error instanceof Error ? error.message : String(error));
+            } finally {
+                activity(false);
             }
         };
-        reader.readAsText(file);
+        try {
+            reader.readAsText(file);
+        } catch (error) {
+            activity(false);
+            message('configImportError', error instanceof Error ? error.message : String(error));
+        }
     };
     document.body.appendChild(input);
     try {
         input.click();
     } catch (error) {
         input.remove();
+        activity(false);
         message('configImportError', error instanceof Error ? error.message : String(error));
     }
 }

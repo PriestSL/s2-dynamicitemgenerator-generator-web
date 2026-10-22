@@ -1,21 +1,20 @@
-// The controller/renderer implementation remains JS until stage 5.
-// This local contract covers its existing consumers without calling REST.
+// The TS compatibility adapter reads current state without duplicated bindings.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { AppState } from '../src/js/state.ts';
-import { chancesController } from '../src/js/chances.js';
+import { ControllerAdapter } from '../src/compatibility/controller.ts';
 import { createDefaultConfig } from '../src/model/config.ts';
 import * as defaults from '../src/model/defaults.ts';
-import * as compatibilityDefaults from '../src/js/configs.js';
+import * as compatibilityDefaults from '../src/js/configs.ts';
 
 test('legacy defaults re-export remains identical for generator consumers', () => {
     assert.deepEqual(Object.keys(compatibilityDefaults), Object.keys(defaults));
-    for (const key of Object.keys(defaults)) assert.equal(compatibilityDefaults[key], defaults[key]);
+    for (const key of Object.keys(defaults) as (keyof typeof defaults)[]) assert.equal(compatibilityDefaults[key], defaults[key]);
 });
 
 test('controller uses current state after import, reset and PresetsManager legacy assignments', () => {
     const state = new AppState();
-    const controller = new chancesController(state);
+    const controller = new ControllerAdapter(state);
     controller.currentFaction = 'Neutral';
     controller.currentCategory = 'Pistols';
     assert.deepEqual(state.view, { faction: 'Neutral', category: 'Pistols' });
@@ -29,7 +28,7 @@ test('controller uses current state after import, reset and PresetsManager legac
     controller.fillSettings(state.getChancesSettings());
     assert.ok(Object.hasOwn(controller.typeToTable.pistol, 'Custom_HG'));
     controller.changeList('pistol', '', 'Custom_HG', 'add');
-    assert.deepEqual(state.exportState().PistolSettings.GeneralNPC_Neutral.Custom_HG, [0, 0, 0, 0]);
+    assert.deepEqual(state.exportState().PistolSettings.GeneralNPC_Neutral?.Custom_HG, [0, 0, 0, 0]);
     assert.equal('settings' in controller, false);
     assert.equal('lists' in controller, false);
     state.resetState();

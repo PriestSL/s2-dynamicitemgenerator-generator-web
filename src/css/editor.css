@@ -1,0 +1,21 @@
+/* Component layout for the stage-5 representative table; global theme is stage 6. */
+.editor-workspace { min-width: 0; }
+#factions_bar { flex-shrink: 0; }
+.editor-rank-table { min-width: 820px; table-layout: fixed; }
+.editor-rank-table th:first-child { width: 24%; }
+.editor-rank-table th:last-child { width: 110px; }
+.editor-rank-table td { vertical-align: top; overflow-wrap: anywhere; padding: .65rem .5rem; }
+.editor-field { display: flex; flex-direction: column; align-items: stretch; gap: .2rem; min-width: 0; }
+.editor-field .form-control { width: 100%; min-width: 0; }
+.editor-field .form-check-input { align-self: flex-start; }
+.editor-field .form-label { margin-bottom: .2rem; }
+.editor-reset { font-size: .72rem; padding: 0; text-align: left; align-self: flex-start; }
+.editor-field-error:empty { display: none; }
+.editor-percent { display: block; font-size: .75rem; color: var(--bs-secondary-color); margin-top: .25rem; }
+.editor-row-actions .btn { display: block; margin-bottom: .35rem; }
+.editor-table-scroll { max-width: 100%; margin-top: .5rem; }
+.editor-weight-list { min-width: 0; }
+.editor-card > .card-body { min-width: 0; }
+.editor-item-choices { max-height: 60vh; overflow-y: auto; }
+.editor-notifications { z-index: 1100; max-width: 100vw; }
+.armor_drop_settings[hidden] { display: none; }

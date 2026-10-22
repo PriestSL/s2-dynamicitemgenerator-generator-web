@@ -1,5 +1,51 @@
 # Перевірки рефакторингу
 
+## Етап 5 — 22 жовтня 2026
+
+Увесь локальний UI перенесений на TypeScript: `src/app.ts`, `ui/application.ts`, єдиний реєстр категорій, спільні поля/рядки/таблиці, властивості предметів, drop settings, діалоги й toast. Старі chancesController, EventManager, categoryRenderers та дубльовані helpers видалені. Початковий render, Add Item і Restore використовують один конструктор рядка; зміна поля не перебудовує каталог. Фокус і незавершене введення в інших полях зберігаються.
+
+`npm test` — **68/68**, `npm run lint`, `npm run typecheck` (також входить до `npm run build`) та production build — успішні на Node 26.10.0. Інвентаризація `tsc --listFilesOnly -p tsconfig.tests.json` підтвердила охоплення всіх **53 TS-файлів** у src/tests. У src залишилися лише два JS-модулі: `restCalls.js` та `presets/presetsManager.js`; Vite/ESLint-конфігурації теж залишаються JS/MJS до етапу 7. Перевірки не послаблювалися.
+
+Автоматичні перевірки:
+
+- 12 нових тестів `ui.test.ts` використовують jsdom і справжній Bootstrap: збереження вузлів/фокуса/чернетки, перерахунок часток, відхилення невалідного вводу, локальний reset, delete → re-add → reset, Restore, видалення нового предмета reset-ом, усі категорії й різні одиниці значень.
+- Перевірено absent/zero override, checkbox/select, парні діапазони та один ранг гранати; два одночасно змонтовані набори drop settings синхронізуються через актуальний AppState.
+- Escape/Close, show/hide/dispose, повернення фокуса, відсутність залишкового backdrop/modal-open, вкладений діалог, async failure/retry та блокування повторного підтвердження. Окремо — анімований legacy-модальний PresetsManager і відсутність його повторного відкриття після presetLoaded.
+- Toast pending/error/success, блокування дубльованого download, повтор після помилки, повідомлення «Download started» без обіцянки збереження на диск; скасування JSON picker звільняє кнопку й тимчасовий input.
+- `controller-contract.test.ts` і тест Application перевіряють live getChancesSettings/typeToTable, fillSettings, view-навігацію, import/reset, legacy assignments і presetLoaded. Попередні модельні, legacy JSON, генераторні, ZIP та mocked REST-контракти залишилися зеленими.
+
+Актуальна межа сумісності після видалення контролера:
+
+| Споживач | Збережений контракт |
+| --- | --- |
+| PresetsManager | `new PresetsManager(state, controller)`; ControllerAdapter читає актуальний AppState, `fillSettings` не створює копій або bindings; currentFaction/currentCategory змінюють view |
+| Завантаження пресета | `state.importState(data, metadata)` → `fillSettings(state.getChancesSettings())` → window `presetLoaded`; Application викликає єдиний renderCurrentView |
+| Форми PresetsManager | Сумісні createMessageBox/createConfirmationBox/removeMessageBox; дві старі HTML-форми передають Node через `compatibility/presetForm.ts`. Звичайні повідомлення використовують textContent |
+| Bootstrap | CSS і JS з локального npm-пакета; `window.bootstrap` збережено для відкладеного PresetsManager |
+| REST/PAK | Модулі імпортуються як unknown із перевіркою потрібних експортів; endpoints, payload, PIN, CRUD та F15 fallback не змінені |
+
+`legacyPresetForm` зберігає попередню фільтрацію лише на явній межі двох старих форм: це не повноцінний sanitizer, не виправлення F19 і не нова гарантія безпеки серверного HTML. `staticMarkup` використовується для власних статичних довідкових шаблонів. Внутрішня реалізація PresetsManager буде перенесена разом з інтеграцією на етапі 7. Неоголошені external JS не замасковані типізованими stubs чи `any`.
+
+Браузерні перевірки 20–22 жовтня, dev `127.0.0.1:4175` та фінальний production preview `127.0.0.1:4176`:
+
+1. Neutral → Primary → CloseCombat: вага 90 → 1200 дає Base 90, Modified, Share 99.17%; reset повертає базу. Delete показує приглушений рядок, повторний Add Item того самого SID залишає один активний рядок; Reset item повертає базові ваги. Ці структурні сценарії також покриті автоматично.
+2. Імпорт defaults.json через справжній файловий picker встановив базу JSON. Після зміни GunObrez_SG/Newbie на 1200 браузер завантажив JSON із 13 полями й ZIP. Розпакований CFG має **621668 символів**, є єдиним файлом за шляхом `Stalker2/Content/GameLite/GameData/ItemGeneratorPrototypes/New_NPC_Loadouts.cfg` і точно дорівнює `generateLoadout` із завантаженого JSON.
+3. File Settings → Escape: 0 modal, 0 backdrop, modal-open відсутній, фокус повернувся на btn_file_settings.
+4. Production: від'ємна вага -5 отримала aria-invalid, config залишився без diff; reset прибрав невалідну чернетку. Pistols/GunPM_HG 100 → 200 зберігся після Primary → Pistols; reset повернув 100.
+5. На 1440×900 повна таблиця містить чотири ранги, окремі поля/base/reset/частки та дії. На 390×844 ширина сторінки — 390 px, таблиця 820 px у локальному scroll-контейнері 264 px із overflow:auto. Підписи не накладаються на поле. Повна адаптація toolbar/навігації, тема, пошук Add Item, 768 px/200% zoom/повний keyboard audit належать етапу 6.
+6. У фінальному production preview console errors/warnings не зафіксовано. У старій dev-вкладці після паузи були помилки з'єднання HMR WebSocket; локальні імпорт/редагування/завантаження працювали. Sandbox preview був недоступний браузеру; повторний запуск поза sandbox відкрив фінальну збірку.
+
+Відомі попередження: Node MODULE_TYPELESS_PACKAGE_JSON, Vite native-config/ESM і Sass/Bootstrap deprecations (311 повторних). Read-only npm audit під час встановлення тестових залежностей повідомив 6 high для вже наявних lock-версій: @parcel/watcher 2.5.1, brace-expansion 5.0.9, braces 3.0.3, micromatch 4.0.8, picomatch 2.3.1, source-map-js 1.2.1. Порівняння з HEAD підтвердило, що ці версії не додані й не змінені етапом 5; автоматичний audit fix не запускався.
+
+Рішення для огляду: Bootstrap залишається основою; остаточне схвалення оформлення очікує користувача. Етапи 6–7 не розпочаті. Живий REST, серверний CRUD/PIN, PAK і гра не перевірялись; тестові серверні записи не створювались. Вихідні `json_examples` збережені й не включаються до коміту.
+
+Ручне рев'ю:
+
+1. Відкрити локальний preview, Neutral → Primary → CloseCombat. Змінити вагу, перевірити base/частку/помилку, Reset, Delete → Restore та Delete → Add Item → Reset item.
+2. Змінити пістолет, перейти в іншу категорію й назад; перевірити збереження. У Generic перевірити парний reset міцності й Armor Drop; відкрити File Settings та закрити Escape.
+3. Import JSON → edit → Export JSON → Download ZIP: перевірити toast і відсутність зайвих діалогів. Некоректний JSON не має замінювати робочий документ.
+4. Оцінити повну таблицю та локальну прокрутку на вузькому екрані; зафіксувати рішення про продовження оформлення на Bootstrap.
+
 ## Етап 4 — 14 жовтня 2026
 
 Реалізовані порівняння з вибраною базою, метадані документа, локальні reset і спільний імпорт JSON/серверного `data`. **56/56 тестів**, `npm run lint`, strict `npm run typecheck` (також у складі `npm run build`) і production build пройшли на наявному Node 26.10.0 / npm 11.19.1. Нових залежностей немає. Build і preview виконувалися з дозволом поза sandbox через раніше підтверджені обмеження читання PNG/доступу браузера до socket. Відомі попередження Node/Vite module mode та Sass/Bootstrap залишаються.

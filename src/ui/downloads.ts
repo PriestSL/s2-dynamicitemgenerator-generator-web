@@ -1,5 +1,6 @@
 import type { AppState } from '../js/state.ts';
 import type { generateConfig } from '../js/fileStreamGenerator.ts';
+import type { Notifications } from './notifications.ts';
 
 export interface DownloadStatus { pending: boolean; message: string; error: boolean }
 
@@ -23,23 +24,16 @@ export function createDownloadAction(
     };
 }
 
-export function bindDownloads(state: AppState, generate: typeof generateConfig): void {
+export function bindDownloads(state: AppState, generate: typeof generateConfig, notifications: Notifications): void {
     const zip = document.getElementById('btn_save_zip');
     const pak = document.getElementById('btn_save');
     const name = document.getElementById('config_name');
     if (!(zip instanceof HTMLButtonElement) || !(pak instanceof HTMLButtonElement) || !(name instanceof HTMLInputElement)) return;
-    const status = document.createElement('div');
-    status.id = 'download_status';
-    status.className = 'small px-3';
-    status.setAttribute('role', 'status');
-    status.setAttribute('aria-live', 'polite');
-    document.getElementById('toolbar')?.parentElement?.after(status);
     const run = createDownloadAction((useREST, fileName) => generate(state, useREST, fileName), value => {
         zip.disabled = pak.disabled = value.pending;
         zip.setAttribute('aria-busy', String(value.pending));
         pak.setAttribute('aria-busy', String(value.pending));
-        status.textContent = value.message;
-        status.classList.toggle('text-danger', value.error);
+        notifications.show('download', value.message, value.error ? 'error' : value.pending ? 'pending' : 'success');
     });
     zip.addEventListener('click', () => { void run(false, name.value); });
     pak.addEventListener('click', () => { void run(true, name.value); });

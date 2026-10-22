@@ -11,7 +11,6 @@ import { validateConfig } from '../src/model/validation.ts';
 import { generateLoadout } from '../src/generator/loadout.ts';
 import { CFG_PATH, packZip } from '../src/files/zip.ts';
 import { importJSONText } from '../src/files/json.ts';
-import { controlPath } from '../src/ui/comparison.ts';
 
 for (const [name, numericCount, repairs] of [['BNPL_Rei_2_0.json', 1232, 2], ['My new loadout.json', 950, 0], ['Vonamorio_BNPL.json', 1211, 0]] as const) {
     test(`legacy ${name}: real import, unchanged source, independent base, JSON and CFG/ZIP round-trip`, async () => {
@@ -227,10 +226,7 @@ test('reset validation is atomic when inherited values outside its scope conflic
     assert.throws(() => state.reset([['WeaponList', '__proto__', 'maxAmmo']]), /Reserved|Invalid/);
 });
 
-test('UI field mapping and category scopes use local lists, paired controls and global properties explicitly', () => {
-    assert.deepEqual(controlPath({ id: '', dataset: { type: 'Primary', faction: 'Neutral', classification: 'Recon', item: 'GunViper_PP', level: '2' } }), ['WeaponSettings', 'GeneralNPC_Neutral', 'Recon', 'GunViper_PP', '2']);
-    assert.deepEqual(controlPath({ id: '', dataset: { type: 'Grenades', item: 'GrenadeF1', attr: 'minAmmo', level: '1' } }), ['GrenadeSettings', 'Default', 'GrenadeF1', 'minAmmo', '1']);
-    assert.deepEqual(controlPath({ id: 'min_condition', dataset: {} }), ['DropConfigs', 'nMinDurability']);
+test('reset and category scopes use local lists, paired controls and global properties explicitly', () => {
     assert.deepEqual(resetPaths(['AmmoSettings', 'SG', '0']), [['AmmoSettings', 'SG']]);
     assert.deepEqual(viewPaths({ faction: 'Bandit', category: 'Primary' }), [['WeaponSettings', 'GeneralNPC_Bandit']]);
     assert.deepEqual(viewPaths({ faction: 'Generic_settings', category: 'Pistols' }), [['PistolSpawnChance']]);
