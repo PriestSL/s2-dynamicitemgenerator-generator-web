@@ -3,9 +3,7 @@ import { installBootstrap } from './ui/bootstrap.ts';
 import { Application } from './ui/application.ts';
 import { legacyPresets, legacyPackageTransport } from './compatibility/integrations.ts';
 import { setPackageTransport } from './files/packageTransport.ts';
-import './css/custom.scss';
-import './css/comparison.css';
-import './css/editor.css';
+import './css/theme.scss';
 
 // Vite imports these deferred JS modules as unknown; the boundary checks exports.
 const deferred = import.meta.glob<unknown>(['./js/presets/presetsManager.js', './js/restCalls.js'], { eager: true });

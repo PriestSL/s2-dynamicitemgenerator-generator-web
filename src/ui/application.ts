@@ -10,6 +10,7 @@ import { EditorUI } from './editor.ts';
 import { Notifications } from './notifications.ts';
 import { bindDownloads } from './downloads.ts';
 import { bindConfigName } from './configName.ts';
+import { bindDisclosure, editorIcon } from './dom.ts';
 
 /** Composition, navigation and toolbar. Field handlers belong to their components. */
 export class Application {
@@ -27,12 +28,34 @@ export class Application {
         this.content = content;
     }
     initialize(): void {
+        for (const placeholder of document.querySelectorAll<HTMLElement>('[data-editor-icon]')) {
+            placeholder.replaceWith(editorIcon(placeholder.dataset.editorIcon ?? 'help'));
+        }
+        for (const menu of document.querySelectorAll<HTMLDetailsElement>('.editor-help-menu')) {
+            bindDisclosure(menu);
+            menu.addEventListener('click', event => {
+                if (event.target instanceof Element && event.target.closest('.editor-menu-panel button, .editor-menu-panel a')) menu.open = false;
+            });
+        }
         this.content.before(comparisonBanner(this.editor, () => this.renderCurrentView()));
         for (const node of document.querySelectorAll<HTMLElement>('.category_item, .faction_item')) {
+            node.setAttribute('aria-label', node.title || node.id);
+            if (['Secondary', 'Artifacts', 'Consumables'].includes(node.id)) node.title = `${node.id} · Not implemented`;
             node.addEventListener('click', () => {
                 if (node.classList.contains('category_item')) this.chancesCtrl.currentCategory = node.id;
                 else this.chancesCtrl.currentFaction = node.id;
                 this.renderCurrentView();
+            });
+        }
+        for (const bar of document.querySelectorAll<HTMLElement>('#categories_bar, #factions_bar')) {
+            bar.addEventListener('keydown', event => {
+                const nodes = [...bar.querySelectorAll<HTMLElement>('button')];
+                const index = nodes.indexOf(document.activeElement as HTMLElement);
+                if (index < 0) return;
+                const next = event.key === 'Home' ? 0 : event.key === 'End' ? nodes.length - 1
+                    : ['ArrowRight', 'ArrowDown'].includes(event.key) ? (index + 1) % nodes.length
+                    : ['ArrowLeft', 'ArrowUp'].includes(event.key) ? (index - 1 + nodes.length) % nodes.length : undefined;
+                if (next !== undefined) { event.preventDefault(); nodes[next]?.focus(); }
             });
         }
         window.addEventListener('presetLoaded', () => this.renderCurrentView());
@@ -42,8 +65,11 @@ export class Application {
     }
     renderCurrentView(): void {
         this.content.replaceChildren(sectionReset(this.editor), categories[this.state.view.category](this.editor));
-        for (const node of document.querySelectorAll('.category_item')) node.classList.toggle('active', node.id === this.state.view.category);
-        for (const node of document.querySelectorAll('.faction_item')) node.classList.toggle('active', node.id === this.state.view.faction);
+        for (const node of document.querySelectorAll('.category_item, .faction_item')) {
+            const selected = node.id === this.state.view.category || node.id === this.state.view.faction;
+            node.classList.toggle('active', selected);
+            node.setAttribute('aria-pressed', String(selected));
+        }
         this.editor.refresh();
     }
     private bindToolbar(): void {
@@ -52,9 +78,13 @@ export class Application {
         if (!(name instanceof HTMLInputElement)) throw new Error('Config name input is missing');
         bindConfigName(name);
         const bind = (id: string, run: () => void) => document.getElementById(id)?.addEventListener('click', run);
-        bind('btn_help', () => this.modalManager.showHelpModal());
-        bind('btn_info', () => this.modalManager.showInfoModal());
-        bind('btn_todo', () => this.modalManager.showToDoModal());
+        const help = (run: () => void) => {
+            document.querySelector<HTMLElement>('.editor-help-menu > summary')?.focus();
+            run();
+        };
+        bind('btn_help', () => help(() => this.modalManager.showHelpModal()));
+        bind('btn_info', () => help(() => this.modalManager.showInfoModal()));
+        bind('btn_todo', () => help(() => this.modalManager.showToDoModal()));
         bind('btn_file_settings', () => this.modalManager.showFileSettingsModal(this.state, this.editor));
         bind('btn_presets', () => {
             void this.presetsManager.openPresetsWindow().catch(error => this.notifications.show('presets', error instanceof Error ? error.message : String(error), 'error'));

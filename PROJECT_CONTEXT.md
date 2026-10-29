@@ -137,7 +137,7 @@
 | [controller.ts](src/compatibility/controller.ts), [integrations.ts](src/compatibility/integrations.ts) | Сумісний live-контракт контролера та перевірені unknown-входи відкладених JS-модулів |
 | [dialogs.ts](src/ui/dialogs.ts), [modalManager.ts](src/js/ui/modalManager.ts), [notifications.ts](src/ui/notifications.ts) | Локальні діалоги, сумісні назви методів PresetsManager і toast-стан операцій |
 | [dom.ts](src/ui/dom.ts), [dom.ts](src/js/utils/dom.ts), [presetForm.ts](src/compatibility/presetForm.ts) | DOM-компоненти, мінімальні legacy helpers і окрема межа HTML-форм PresetsManager |
-| [editor.css](src/css/editor.css), [comparison.css](src/css/comparison.css), [custom.scss](src/css/custom.scss) | Компонентні стилі, diff/error та єдиний Bootstrap SCSS-імпорт |
+| [theme.scss](src/css/theme.scss), [editor.css](src/css/editor.css), [presets.css](src/css/presets.css) | Єдина точка входу теми: Bootstrap, потім стилі пресетів і редактора; diff/error/focus, адаптивна навігація |
 | [loadout.ts](src/generator/loadout.ts), [effective.ts](src/model/effective.ts) | Чистий генератор CFG та спільні правила effective weapon settings/одиниць |
 | [textGenerators.ts](src/js/textGenerators.ts) | Сумісний async-вхід createLoadout(AppState), який делегує генерацію актуального config |
 | [fileStreamGenerator.ts](src/js/fileStreamGenerator.ts), [zip.ts](src/files/zip.ts) | Сумісний generateConfig, очікування ZIP або PAK, окреме локальне пакування CFG |

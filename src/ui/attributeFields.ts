@@ -1,5 +1,6 @@
 import type { EditorUI } from './editor.ts';
-import { button, card, element } from './dom.ts';
+import { card, element } from './dom.ts';
+import { resetButton } from './chanceTable.ts';
 import { field } from './fields.ts';
 import { isChanged } from '../model/comparison.ts';
 import type { ConfigPath } from '../model/comparison.ts';
@@ -25,10 +26,9 @@ export function attributeFields(ui: EditorUI, list: 'weapon' | 'armor'): HTMLEle
             fields.append(col);
         }
         const path: ConfigPath = [section, item];
-        const reset = button('Reset item', () => ui.reset([path]));
-        const note = element('small', '', 'ms-2');
-        const footer = element('div', '', 'mt-2');
-        footer.append(reset, note);
+        const reset = resetButton(ui, 'Reset item', [path]);
+        const footer = element('div', '', 'editor-list-actions');
+        footer.append(reset);
         fields.append(footer);
         const group = card(item, fields);
         group.dataset.item = item;
@@ -36,7 +36,6 @@ export function attributeFields(ui: EditorUI, list: 'weapon' | 'armor'): HTMLEle
             const modified = isChanged(ui.state.baseConfig, ui.state.config, [path]);
             group.classList.toggle('comparison-modified', modified);
             reset.disabled = !modified;
-            note.textContent = modified ? 'Modified' : '';
         });
         root.append(group);
     }

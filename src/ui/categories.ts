@@ -17,8 +17,7 @@ function globalFields(ui: EditorUI, fields: readonly ('MinWeaponDurability' | 'M
     }
     return root;
 }
-function notice(text: string): HTMLElement { return element('p', text, 'alert alert-info'); }
-const globalNotice = () => notice('These settings apply to all factions.');
+function notice(text: string): HTMLElement { return element('p', text, 'editor-empty-state'); }
 
 /** One explicit registry for every category. No renderer/controller dispatch duplication. */
 export const categories: Record<CategoryId, (ui: EditorUI) => HTMLElement> = {
@@ -49,7 +48,7 @@ export const categories: Record<CategoryId, (ui: EditorUI) => HTMLElement> = {
     },
     Helmets(ui) {
         const root = element('div');
-        root.append(globalNotice(), rankTable(ui, () => Object.keys(ui.state.config.HelmetsSettings).map(item => ({
+        root.append(rankTable(ui, () => Object.keys(ui.state.config.HelmetsSettings).map(item => ({
             label: item, path: ['HelmetsSettings', item], max: 100,
             command: (value, index) => ({ kind: 'rank', section: 'helmet', item, index, value }),
         }))));
@@ -59,7 +58,7 @@ export const categories: Record<CategoryId, (ui: EditorUI) => HTMLElement> = {
     Consumables: () => notice('Not implemented: editing consumable loot settings.'),
     Ammo(ui) {
         const root = element('div');
-        root.append(globalNotice(), rankTable(ui, () => Object.keys(ui.state.config.AmmoSettings).map(item => ({
+        root.append(rankTable(ui, () => Object.keys(ui.state.config.AmmoSettings).map(item => ({
             label: item, path: ['AmmoSettings', item], step: '1',
             command: (value, index) => ({ kind: 'rank', section: 'ammo', item, index, value }),
         })), ['Minimum ammo', 'Maximum ammo']));
@@ -67,7 +66,6 @@ export const categories: Record<CategoryId, (ui: EditorUI) => HTMLElement> = {
     },
     Grenades(ui) {
         const root = element('div');
-        root.append(globalNotice());
         for (const item of Object.keys(ui.state.config.GrenadeSettings.Default)) {
             root.append(card(item, rankTable(ui, () => (['chances', 'minAmmo', 'maxAmmo'] as const).map(attribute => ({
                 label: `${item} · ${attribute}`, path: ['GrenadeSettings', 'Default', item, attribute],

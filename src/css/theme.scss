@@ -1,0 +1,9 @@
+$primary: #596b43;
+$warning: #a78136;
+$body-color: #252b28;
+$border-color: #d9ded7;
+$border-radius: .375rem;
+// Single local style entry: Bootstrap first, then scoped application components.
+@import "bootstrap/scss/bootstrap";
+@import "./presets";
+@import "./editor";

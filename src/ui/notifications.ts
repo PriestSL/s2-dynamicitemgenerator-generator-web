@@ -10,6 +10,8 @@ export class Notifications {
     constructor() {
         this.region = element('div', '', 'toast-container position-fixed bottom-0 end-0 p-3 editor-notifications');
         this.region.setAttribute('aria-label', 'Operation notifications');
+        this.region.setAttribute('aria-live', 'polite');
+        this.region.setAttribute('aria-relevant', 'additions text');
         document.body.append(this.region);
     }
     show(id: string, message: string, kind: NoticeKind): void {
@@ -22,9 +24,11 @@ export class Notifications {
         const text = element('div', message, 'toast-body');
         const toast = new (bootstrapUI().Toast)(node, { autohide: kind === 'success', delay: 6000, animation: false });
         const remove = () => {
+            const restoreFocus = node.contains(document.activeElement);
             toast.dispose();
             node.remove();
             if (this.notices.get(id) === remove) this.notices.delete(id);
+            if (restoreFocus) document.getElementById('content')?.focus();
         };
         const close = button('', () => toast.hide(), 'btn-close me-2 mt-2 flex-shrink-0');
         close.setAttribute('aria-label', 'Close notification');

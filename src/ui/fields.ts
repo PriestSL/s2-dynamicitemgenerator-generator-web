@@ -1,9 +1,9 @@
 import { isChanged, resetTargets, sameValue, valueAt } from '../model/comparison.ts';
 import type { ConfigPath } from '../model/comparison.ts';
 import type { EditCommand } from '../model/editing.ts';
-import { weaponClass } from '../model/effective.ts';
+import { effectiveWeapon, weaponClass } from '../model/effective.ts';
 import { applyField } from './editing.ts';
-import { button, element, uniqueId } from './dom.ts';
+import { iconButton, element, uniqueId } from './dom.ts';
 import type { EditorUI } from './editor.ts';
 
 export interface FieldOptions {
@@ -40,6 +40,7 @@ export function field(ui: EditorUI, options: FieldOptions): HTMLElement {
     label.htmlFor = id;
     const control = options.kind === 'select' ? element('select', '', 'form-select form-select-sm') : element('input', '', 'form-control form-control-sm');
     control.id = id;
+    control.setAttribute('autocomplete', 'off');
     control.dataset.path = JSON.stringify(path);
     if (control instanceof HTMLSelectElement) {
         for (const value of ['', ...options.options ?? []]) {
@@ -65,8 +66,15 @@ export function field(ui: EditorUI, options: FieldOptions): HTMLElement {
     const resetPaths = resetTargets(ui.state.baseConfig, path);
     const paired = resetPaths.length > 1 || path[0] === 'AmmoSettings';
     const removes = !paired && (resetPaths[0]?.length ?? path.length) < path.length;
-    const reset = button(removes ? 'Reset (remove)' : paired ? 'Reset pair' : 'Reset', () => ui.reset(resetPaths), 'btn btn-sm btn-link editor-reset');
+    const reset = iconButton(removes ? 'Reset (remove)' : paired ? 'Reset pair' : 'Reset', () => {
+        const container = root.closest('.editor-weight-list');
+        ui.reset(resetPaths);
+        if (control.isConnected) control.focus();
+        else container?.querySelector<HTMLElement>('input, button:not([hidden])')?.focus();
+    });
+    reset.classList.add('editor-reset');
     reset.setAttribute('aria-label', `${reset.textContent}: ${options.label}`);
+    reset.title = `${reset.textContent}: ${options.label}`;
     let lastCommitted = valueAt(ui.state.config, path);
     let draft = false;
     const writeValue = () => {
@@ -98,8 +106,16 @@ export function field(ui: EditorUI, options: FieldOptions): HTMLElement {
         lastCommitted = current;
         const modified = !sameValue(valueAt(ui.state.baseConfig, path), current);
         control.classList.toggle('comparison-modified', modified);
-        note.textContent = `Base: ${baseText(ui, path)}${modified ? ' · Modified' : ''}`;
+        const attr = path[2];
+        const inherited = path[0] === 'WeaponList' && current === undefined && path[1]
+            && (attr === 'minAmmo' || attr === 'maxAmmo' || attr === 'minCondition' || attr === 'maxCondition')
+            ? effectiveWeapon(ui.state.config, path[1])[attr] : undefined;
+        note.textContent = `${modified ? `Base: ${baseText(ui, path)}${options.hideLabel ? '' : ' · Modified'}` : ''}${inherited !== undefined ? `${modified ? ' · ' : ''}Inherited: ${inherited}` : ''}`;
+        note.hidden = !note.textContent;
+        if (!control.hasAttribute('aria-invalid')) control.title = `Base: ${baseText(ui, path)}`;
+        if (control instanceof HTMLInputElement) control.placeholder = inherited === undefined ? '' : String(inherited);
         reset.disabled = !isChanged(ui.state.baseConfig, ui.state.config, resetPaths) && !control.hasAttribute('aria-invalid');
+        reset.hidden = reset.disabled;
     });
     return root;
 }

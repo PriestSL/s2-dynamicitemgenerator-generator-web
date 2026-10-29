@@ -1,5 +1,6 @@
 import test, { beforeEach, after } from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import { setupDOM } from './dom.ts';
 import { AppState } from '../src/js/state.ts';
 import { EditorUI } from '../src/ui/editor.ts';
@@ -64,8 +65,9 @@ test('shared primary row keeps node/focus/draft and updates shares, validation a
     assert.equal(input(path), control);
     assert.equal(document.activeElement, control);
     assert.equal(state.config.WeaponSettings.GeneralNPC_Neutral?.CloseCombat?.GunObrez_SG?.[0], 1000);
-    assert.match(control.parentElement?.textContent ?? '', /Modified/);
-    assert.match(control.closest('td')?.querySelector('.editor-percent')?.textContent ?? '', /Share:/);
+    assert.match(control.closest('tr')?.textContent ?? '', /Modified/);
+    assert.match(control.parentElement?.querySelector('.comparison-base')?.textContent ?? '', /^Base: 90$/);
+    assert.equal(control.closest('td')?.querySelector('.editor-percent')?.textContent, '99.01%');
     control.value = '';
     control.dispatchEvent(new Event('input', { bubbles: true }));
     ui.refresh();
@@ -84,7 +86,7 @@ test('shared primary row keeps node/focus/draft and updates shares, validation a
 
 test('delete, Add Item, Restore and reset of a new item share one row and preserve unrelated drafts', () => {
     const { state, root } = mount('Primary', 'Neutral');
-    const list = root.querySelector<HTMLElement>('[data-comparison-role="CloseCombat"]');
+    const list = root.querySelector<HTMLElement>('[data-comparison-role="CloseCombat"]')?.closest('.editor-card');
     assert.ok(list);
     const path: ConfigPath = ['WeaponSettings', 'GeneralNPC_Neutral', 'CloseCombat', 'GunObrez_SG', '0'];
     const other = input(['WeaponSettings', 'GeneralNPC_Neutral', 'Recon', 'GunViper_PP', '0']);
@@ -164,6 +166,12 @@ test('global and attribute controls preserve absent versus zero, checkbox/select
     drop.dispatchEvent(new Event('change'));
     assert.equal(armor.state.config.DropConfigs.createDroppableArmor, true);
     assert.equal(armor.root.querySelector<HTMLElement>('.armor_drop_settings')?.hidden, false);
+    const lootChance = input(['DropConfigs', 'nLootChance']);
+    change(lootChance, '0.25');
+    assert.equal(armor.state.config.DropConfigs.nLootChance, 0.25);
+    assert.equal(lootChance.parentElement?.querySelector('.editor-field-equivalent')?.textContent, 'Current: 25%');
+    click('Reset', lootChance.parentElement!);
+    assert.equal(lootChance.parentElement?.querySelector('.editor-field-equivalent')?.textContent, 'Current: 10%');
     const select = armor.root.querySelector<HTMLSelectElement>('select');
     assert.ok(select);
     change(select, '');
@@ -358,4 +366,104 @@ test('cancelled JSON picker releases pending and its temporary input', () => {
     assert.deepEqual(activity, [true, false]);
     assert.equal(picker.isConnected, false);
     assert.ok(bootstrapUI().Modal);
+});
+
+test('compact fields show reset only for changes or invalid drafts and retain focus after reset', () => {
+    const { state } = mount('Primary', 'Neutral');
+    const path: ConfigPath = ['WeaponSettings', 'GeneralNPC_Neutral', 'CloseCombat', 'GunObrez_SG', '0'];
+    const control = input(path);
+    const reset = control.parentElement?.querySelector<HTMLButtonElement>('.editor-reset');
+    const base = control.parentElement?.querySelector<HTMLElement>('.comparison-base');
+    assert.ok(reset && base);
+    assert.equal(reset.hidden, true);
+    assert.equal(base.hidden, true);
+    assert.match(control.title, /Base: 90/);
+    change(control, '1200');
+    assert.equal(reset.hidden, false);
+    assert.equal(base.hidden, false);
+    reset.focus();
+    reset.click();
+    assert.equal(document.activeElement, control);
+    assert.equal(reset.hidden, true);
+    change(control, '-1');
+    assert.equal(control.getAttribute('aria-invalid'), 'true');
+    assert.equal(reset.hidden, false);
+    const error = control.parentElement?.querySelector('.editor-field-error');
+    assert.ok(error?.id && control.getAttribute('aria-describedby')?.includes(error.id));
+    reset.click();
+    assert.equal(control.hasAttribute('aria-invalid'), false);
+    assert.equal(state.changes.length, 0);
+});
+
+test('item search filters safely, reports no matches, and Escape restores the invoking button', () => {
+    const { root } = mount('Primary', 'Neutral');
+    const list = root.querySelector('[data-comparison-role="CloseCombat"]')?.closest('.editor-card');
+    assert.ok(list);
+    const trigger = click('Add Item', list);
+    // The real browser focuses a clicked button; jsdom does not.
+    click('Close', document.querySelector('.modal')!);
+    trigger.focus();
+    trigger.click();
+    const search = document.querySelector<HTMLInputElement>('.modal input[type="search"]');
+    assert.ok(search);
+    assert.equal(document.activeElement, search);
+    search.value = 'gunpm';
+    search.dispatchEvent(new Event('input'));
+    const visible = [...document.querySelectorAll<HTMLButtonElement>('.editor-item-choices button')].filter(b => !b.hidden);
+    assert.deepEqual(visible.map(b => b.textContent), ['GunPM_HG']);
+    search.value = '<img src=x onerror=alert(1)>';
+    search.dispatchEvent(new Event('input'));
+    assert.equal(document.querySelector('.modal img'), null);
+    assert.equal(document.querySelector<HTMLElement>('.modal [role="status"]')?.hidden, false);
+    search.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    modalClean();
+    assert.equal(document.activeElement, trigger);
+});
+
+test('native navigation supports arrows and preserves category scope, menu Escape and safe document names', () => {
+    const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
+    document.body.innerHTML = html.slice(html.indexOf('<body>') + 6, html.indexOf('</body>'));
+    const app = new Application(() => ({ async openPresetsWindow() {} }));
+    app.initialize();
+    app.modalManager.removeMessageBox('dev-warning');
+    const global = document.getElementById('Generic_settings');
+    const neutral = document.getElementById('Neutral');
+    assert.ok(global instanceof HTMLButtonElement && neutral instanceof HTMLButtonElement);
+    global.focus();
+    global.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
+    assert.equal(document.activeElement, neutral);
+    neutral.click();
+    assert.equal(neutral.getAttribute('aria-pressed'), 'true');
+    assert.match(document.querySelector('.editor-scope')?.textContent ?? '', /Neutral/);
+    document.getElementById('Helmets')?.click();
+    assert.match(document.querySelector('.editor-scope')?.textContent ?? '', /All factions/);
+    assert.match(document.getElementById('Secondary')?.getAttribute('aria-label') ?? '', /Not implemented/);
+    const menu = document.querySelector<HTMLDetailsElement>('.editor-document-menu');
+    assert.ok(menu);
+    menu.open = true;
+    menu.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    assert.equal(menu.open, false);
+    assert.equal(document.activeElement, menu.querySelector('summary'));
+    const help = document.querySelector<HTMLDetailsElement>('.editor-help-menu');
+    assert.ok(help);
+    help.open = true;
+    document.getElementById('btn_info')?.click();
+    assert.equal(help.open, false);
+    document.querySelector('.modal')?.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    modalClean();
+    assert.equal(document.activeElement, help.querySelector('summary'));
+    help.open = true;
+    help.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    assert.equal(help.open, false);
+    assert.equal(document.activeElement, help.querySelector('summary'));
+    document.getElementById('Armor')?.click();
+    const weight = document.querySelector<HTMLInputElement>('.editor-weight-field input');
+    assert.ok(weight);
+    change(weight, '16');
+    assert.equal(document.querySelector('.editor-section-heading button'), null);
+    assert.equal(document.querySelector<HTMLButtonElement>('.editor-list-actions .editor-reset-scope')?.hidden, false);
+    app.state.importState(app.state.exportState(), { name: '<img src=x onerror=alert(1)>', source: 'json' });
+    app.editor.refresh();
+    assert.equal(document.querySelector('.comparison-banner img'), null);
+    assert.match(document.querySelector('.editor-document-summary')?.textContent ?? '', /<img/);
 });

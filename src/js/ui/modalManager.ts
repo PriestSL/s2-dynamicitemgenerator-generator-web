@@ -44,7 +44,7 @@ export class ModalManager {
     showDeveloperWarning(): void { this.createMessageBox('dev-warning', this._createDeveloperWarningContent(), { title: 'Development version', closeText: 'I Understand' }); }
     showFileSettingsModal(state: AppState, editor: EditorUI): Modal {
         if (editor.state !== state) throw new Error('File settings must use the active editor');
-        return this.createMessageBox('settings', dropSettings(editor), { title: 'Armor drop settings' });
+        return this.createMessageBox('settings', dropSettings(editor), { title: 'Armor drop settings', closeText: 'Done' });
     }
     _createHelpContent() {
         const presetsIconUrl = new URL('../../img/list.png', import.meta.url).href;

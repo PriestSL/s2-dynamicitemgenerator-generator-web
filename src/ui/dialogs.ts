@@ -11,6 +11,7 @@ export interface DialogOptions {
     validate?: () => boolean;
     confirm?: () => void | boolean | Promise<void | boolean>;
     onClosed?: () => void;
+    initialFocus?: HTMLElement;
 }
 interface Entry {
     node: HTMLElement;
@@ -57,6 +58,7 @@ export function showDialog(options: DialogOptions): Modal {
     node.append(dialog);
     document.body.append(node);
     const modal = new Modal(node, { backdrop: true, keyboard: true, focus: true });
+    node.addEventListener('shown.bs.modal', () => options.initialFocus?.focus());
     const entry: Entry = { node, modal, previous, external, focus, suspended: false, closed: false, pending: false };
     active = entry;
     const loaded = () => { entry.external = undefined; };
