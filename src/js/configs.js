@@ -21,6 +21,7 @@ export const oWeaponList = {
     GunBucket_PP: {},
     GunIntegral_PP: {},
     GunZubr_PP: {},
+    GunFora230_PP: {},
     GunAK74_ST: {},
     GunM16_ST: {},
     GunFora_ST: {},
@@ -30,15 +31,18 @@ export const oWeaponList = {
     GunLavina_ST: {},
     GunDnipro_ST: {},
     GunKharod_ST: {},
+    GunArev_ST: {},
     GunThreeLine_SP: {},
     GunSVDM_SP: {},
     GunSVU_SP: {},
     GunMark_SP: {},
     GunM701_SP: {},
     GunGauss_SP: {},
-    GunKora_HG: {},
+    GunSKP_DMR: {},
+    GunGP3A_DMR: {},
     GunM10_HG: {},
     GunPM_HG: {},
+    GunKora_HG: {},
     GunUDP_HG: {},
     GunAPB_HG: {},
     GunRhino_HG: {},
@@ -86,6 +90,7 @@ export let oArmorSpawnSettings = {
     Jemmy_Neutral_Armor: {
         drop: true,
         helmet: 'Light_Neutral_Helmet',
+        helmetSpawn: true
     },
     Newbee_Neutral_Armor:{
         drop: true,
@@ -94,7 +99,6 @@ export let oArmorSpawnSettings = {
     NPC_Sel_Neutral_Armor:{
         drop: false,
         helmet: 'Light_Neutral_Helmet',
-        dropItem: 'Newbee_Neutral_Armor'
     },
     Nasos_Neutral_Armor:{
         drop: true,
@@ -106,19 +110,15 @@ export let oArmorSpawnSettings = {
     },
     SEVA_Neutral_Armor:{
         drop: true,
-        helmet: 'Light_Neutral_Helmet',
-        helmetless: true
+        helmet: 'Light_Neutral_Helmet'
     },
     NPC_Cloak_Heavy_Neutral_Armor:{
         drop: false,
-        helmet: 'Light_Neutral_Helmet',
-        dropItem: 'Zorya_Neutral_Armor',
-        helmetless: true
+        helmet: 'Light_Neutral_Helmet'
     },
     Exoskeleton_Neutral_Armor:{
         drop: true,
-        helmet: 'Light_Neutral_Helmet',
-        helmetless: true
+        helmet: 'Light_Neutral_Helmet'
     },
     SkinJacket_Bandit_Armor:{
         drop: true,
@@ -127,7 +127,6 @@ export let oArmorSpawnSettings = {
     NPC_SkinCloak_Bandit_Armor:{
         drop: false,
         helmet: 'Light_Bandit_Helmet',
-        dropItem: 'SkinJacket_Bandit_Armor',
     },
     Jacket_Bandit_Armor:{
         drop: true,
@@ -144,32 +143,26 @@ export let oArmorSpawnSettings = {
     Heavy_Mercenaries_Armor:{
         drop: true,
         helmet: 'Light_Mercenaries_Helmet',
-        helmetless: true
     },
     Exoskeleton_Mercenaries_Armor:{
         drop: true,
-        helmet: 'Light_Mercenaries_Helmet',
-        helmetless: true
+        helmet: 'Light_Mercenaries_Helmet'
     },
     NPC_HeavyExoskeleton_Mercenaries_Armor:{
         drop: true,
         dropItem: 'Exoskeleton_Mercenaries_Armor',
-        helmet: 'Light_Mercenaries_Helmet',
-        helmetless: true
+        helmet: 'Light_Mercenaries_Helmet'
     },
     Anomaly_Scientific_Armor: {
         drop: true,
-        helmet: 'Light_Mercenaries_Helmet',
-        helmetless: true
+        helmet: 'Light_Mercenaries_Helmet'
     },
     NPC_Sci_Armor:{
-        drop: false,
-        helmetless: true
+        drop: false
     },
     HeavyAnomaly_Scientific_Armor:{
         drop: true,
-        helmet: 'Light_Mercenaries_Helmet',
-        helmetless: true
+        helmet: 'Light_Mercenaries_Helmet'
     },
     Default_Military_Armor:{
         drop: true,
@@ -178,19 +171,16 @@ export let oArmorSpawnSettings = {
     NPC_Cloak_Heavy_Military_Armor:{
         drop: true,
         dropItem: 'Heavy2_Military_Armor',
-        helmet: 'Battle_Military_Helmet',
-        helmetless: true
+        helmet: 'Battle_Military_Helmet'
     },
     NPC_Heavy_Military_Armor:{
         drop: true,
         dropItem: 'Heavy2_Military_Armor',
-        helmet: 'Battle_Military_Helmet',
-        helmetless: true
+        helmet: 'Battle_Military_Helmet'
     },
     Heavy2_Military_Armor:{
         drop: true,
-        helmet: 'Battle_Military_Helmet',
-        helmetless: true
+        helmet: 'Battle_Military_Helmet'
     },
     Battle_Monolith_Armor:{
         drop: true,
@@ -198,18 +188,15 @@ export let oArmorSpawnSettings = {
     },
     HeavyAnomaly_Monolith_Armor:{
         drop: true,
-        helmet: 'Battle_Military_Helmet',
-        helmetless: true
+        helmet: 'Battle_Military_Helmet'
     },
     HeavyExoskeleton_Monolith_Armor:{
         drop: true,
-        helmet: 'Battle_Military_Helmet',
-        helmetless: true
+        helmet: 'Battle_Military_Helmet'
     },
     Exoskeleton_Monolith_Armor:{
         drop: true,
-        helmet: 'Battle_Military_Helmet',
-        helmetless: true
+        helmet: 'Battle_Military_Helmet'
     },
     Rook_Dolg_Armor:{
         drop: true,
@@ -225,18 +212,15 @@ export let oArmorSpawnSettings = {
     },
     Heavy_Dolg_Armor:{
         drop: true,
-        helmet: 'Heavy_Duty_Helmet',
-        helmetless: true
+        helmet: 'Heavy_Duty_Helmet'
     },
     Exoskeleton_Dolg_Armor:{
         drop: true,
-        helmet: 'Heavy_Duty_Helmet',
-        helmetless: true
+        helmet: 'Heavy_Duty_Helmet'
     },
     HeavyExoskeleton_Dolg_Armor:{
         drop: true,
-        helmet: 'Heavy_Duty_Helmet',
-        helmetless: true
+        helmet: 'Heavy_Duty_Helmet'
     },
     Rook_Svoboda_Armor:{
         drop: true,
@@ -248,23 +232,19 @@ export let oArmorSpawnSettings = {
     },
     SEVA_Svoboda_Armor:{
         drop: true,
-        helmet: 'Heavy_Svoboda_Helmet',
-        helmetless: true
+        helmet: 'Heavy_Svoboda_Helmet'
     },
     Heavy_Svoboda_Armor:{
         drop: true,
-        helmet: 'Heavy_Svoboda_Helmet',
-        helmetless: true
+        helmet: 'Heavy_Svoboda_Helmet'
     },
     Exoskeleton_Svoboda_Armor:{
         drop: true,
-        helmet: 'Heavy_Svoboda_Helmet',
-        helmetless: true
+        helmet: 'Heavy_Svoboda_Helmet'
     },
     HeavyExoskeleton_Svoboda_Armor:{
         drop: true,
-        helmet: 'Heavy_Svoboda_Helmet',
-        helmetless: true
+        helmet: 'Heavy_Svoboda_Helmet'
     },
     Battle_Varta_Armor:{
         drop: true,
@@ -272,8 +252,7 @@ export let oArmorSpawnSettings = {
     },
     BattleExoskeleton_Varta_Armor:{
         drop: true,
-        helmet: 'Heavy_Varta_Helmet',
-        helmetless: true
+        helmet: 'Heavy_Varta_Helmet'
     },
     NPC_Battle_Noon_Armor:{
         drop: true,
@@ -288,14 +267,12 @@ export let oArmorSpawnSettings = {
     NPC_Exoskeleton_Noon_Armor:{
         drop: true,
         dropItem: 'Exoskeleton_Monolith_Armor',
-        helmet: 'Battle_Military_Helmet',
-        helmetless: true
+        helmet: 'Battle_Military_Helmet'
     },
     NPC_HeavyExoskeleton_Noon_Armor:{
         drop: true,
         dropItem: 'HeavyExoskeleton_Monolith_Armor',
-        helmet: 'Battle_Military_Helmet',
-        helmetless: true
+        helmet: 'Battle_Military_Helmet'
     },
     Battle_Spark_Armor:{
         drop: true,
@@ -308,58 +285,48 @@ export let oArmorSpawnSettings = {
     },
     HeavyAnomaly_Spark_Armor:{
         drop: true,
-        helmet: 'Battle_Military_Helmet',
-        helmetless: true
+        helmet: 'Battle_Military_Helmet'
     },
     SEVA_Spark_Armor:{
         drop: true,
-        helmet: 'Battle_Military_Helmet',
-        helmetless: true
+        helmet: 'Battle_Military_Helmet'
     },
     HeavyBattle_Spark_Armor:{
         drop: true,
-        helmet: 'Battle_Military_Helmet',
-        helmetless: true
+        helmet: 'Battle_Military_Helmet'
     },
     NPC_HeavyExoskeleton_Spark_Armor:{
         drop: true,
         dropItem: 'Exoskeleton_Neutral_Armor',
-        helmet: 'Battle_Military_Helmet',
-        helmetless: true
+        helmet: 'Battle_Military_Helmet'
     },
     NPC_Heavy_Corps_Armor:{
         drop: true,
         dropItem: 'Heavy2_Military_Armor',
-        helmet: 'Battle_Military_Helmet',
-        helmetless: true
+        helmet: 'Battle_Military_Helmet'
     },
     NPC_Heavy2_Coprs_Armor:{
         drop: true,
         dropItem: 'Heavy2_Military_Armor',
-        helmet: 'Battle_Military_Helmet',
-        helmetless: true
+        helmet: 'Battle_Military_Helmet'
     },
     NPC_Heavy3_Corps_Armor:{
         drop: true,
         dropItem: 'Heavy2_Military_Armor',
-        helmet: 'Battle_Military_Helmet',
-        helmetless: true
+        helmet: 'Battle_Military_Helmet'
     },
     NPC_Heavy3Exoskeleton_Coprs_Armor:{
         drop: true,
         dropItem: 'Exoskeleton_Neutral_Armor',
-        helmet: 'Battle_Military_Helmet',
-        helmetless: true
+        helmet: 'Battle_Military_Helmet'
     },
     NPC_Exoskeleton_Coprs_Armor:{
         drop: true,
         dropItem: 'Exoskeleton_Neutral_Armor',
-        helmet: 'Battle_Military_Helmet',
-        helmetless: true
+        helmet: 'Battle_Military_Helmet'
     },
     SEVA_Monolith_Armor:{ //preorder item, but monolith seva bois wear it
-        drop: false,
-        helmetless: true
+        drop: false
     }
 };
 
@@ -448,16 +415,16 @@ export let oArmorLoadoutSettings = {
 };
 
 export let oHelmetsGlobalSpawnSettings = {
-    Light_Neutral_Helmet: [30, 50, 60, 70],
-    Light_Bandit_Helmet: [0, 50, 60, 70],
-    Light_Mercenaries_Helmet: [30, 50, 60, 70],
-    Light_Military_Helmet: [30, 0, 0, 0],
-    Battle_Military_Helmet: [0, 50, 60, 70],
-    Light_Duty_Helmet: [30, 0, 0, 0],
-    Heavy_Duty_Helmet: [0, 50, 60, 70],
-    Heavy_Svoboda_Helmet: [20, 50, 60, 70],
-    Heavy_Varta_Helmet: [30, 50, 60, 70],
-    Heavy_Military_Helmet: [0, 0, 60, 70]
+    Light_Neutral_Helmet: [50, 70, 70, 70],
+    Light_Bandit_Helmet: [0, 50, 70, 70],
+    Light_Mercenaries_Helmet: [70, 70, 70, 70],
+    Light_Military_Helmet: [70, 70, 70, 70],
+    Battle_Military_Helmet: [70, 70, 70, 70],
+    Light_Duty_Helmet: [70, 70, 70, 70],
+    Heavy_Duty_Helmet: [70, 70, 70, 70],
+    Heavy_Svoboda_Helmet: [70, 70, 70, 70],
+    Heavy_Varta_Helmet: [70, 70, 70, 70],
+    Heavy_Military_Helmet: [70, 70, 70, 70]
 }
 
 export let oWeaponLoadoutSettings = {
@@ -472,15 +439,18 @@ export let oWeaponLoadoutSettings = {
             GunViper_PP: [90, 42, 20, 0],
             GunAKU_PP: [10, 52.5, 25, 20],
             GunBucket_PP: [0, 5.5, 50, 40],
-            GunIntegral_PP: [0, 0, 5, 40]
+            GunIntegral_PP: [0, 0, 5, 40],
+            GunFora230_PP: [0, 40, 25, 30]
         },
         Sniper:{
-            GunThreeLine_SP: [70, 75, 20, 10],
             GunAK74_ST: [20, 5, 0, 0],
             GunM16_ST: [10, 5, 0, 0],
             GunFora_ST: [0, 5, 20, 10],
             GunGvintar_ST: [0, 5, 20, 20],
-            GunSVDM_SP: [0, 5, 40, 60]
+            GunSVDM_SP: [0, 5, 40, 60],
+            GunThreeLine_SP: [70, 75, 20, 10],
+            GunSKP_DMR: [0, 75, 40, 60],
+            GunGP3A_DMR: [0, 0, 0, 5]
         },
         Stormtrooper:{
             GunAK74_ST: [50, 29.4, 0, 0],
@@ -489,7 +459,8 @@ export let oWeaponLoadoutSettings = {
             GunGvintar_ST: [0, 5.9, 45.5, 19.2],
             GunG37_ST: [0, 0, 4.6, 19.2],
             GunGrim_ST: [0, 0, 4.6, 38.5],
-            GunLavina_ST: [0, 0, 0, 3.9]
+            GunLavina_ST: [0, 0, 0, 3.9],
+            GunArev_ST: [0, 0, 4.6, 38.5]
         }
     },
     GeneralNPC_Bandit:{
@@ -505,7 +476,8 @@ export let oWeaponLoadoutSettings = {
             GunViper_PP: [83.3, 33.33, 20, 5],
             GunAKU_PP: [16.6, 47.7, 45, 55],
             GunBucket_PP: [0, 4.8, 15, 29],
-            GunIntegral_PP: [0, 0, 1, 5]
+            GunIntegral_PP: [0, 0, 1, 5],
+            GunFora230_PP: [0, 40, 25, 30]
         },
         Stormtrooper:{
             GunViper_PP: [90, 0, 0, 0],
@@ -515,7 +487,8 @@ export let oWeaponLoadoutSettings = {
             GunFora_ST: [0, 10, 10, 7],
             GunGvintar_ST: [0, 0, 6, 6],
             GunG37_ST: [0, 10, 32, 35],
-            GunGrim_ST: [0, 0, 0, 10]
+            GunGrim_ST: [0, 0, 0, 10],
+            GunArev_ST: [0, 0, 2, 10]
         },
         Heavy:{
             GunThreeLine_SP: [45, 20, 10, 5],
@@ -538,14 +511,16 @@ export let oWeaponLoadoutSettings = {
             GunRam2_SG: [0, 0, 0, 10],
         },
         Recon:{
-            GunViper_PP: [100, 100, 71.4, 28.6],
-            GunIntegral_PP: [0, 0, 28.6, 71.4]
+            GunViper_PP: [100, 50, 50, 28.6],
+            GunIntegral_PP: [0, 0, 30, 71.4],
+            GunFora230_PP: [0, 50, 30, 30]
         },
         Stormtrooper:{
             GunM16_ST: [90.9, 70, 30, 16.7],
             GunFora_ST: [0, 5, 10, 16.7],
             GunG37_ST: [9.1, 25, 60, 33.3],
-            GunKharod_ST: [0, 0, 0, 33.3]
+            GunKharod_ST: [0, 0, 0, 33.3],
+            GunArev_ST: [0, 0, 30, 33.3]
         },
         Sniper:{
             GunSVDM_SP: [90.9, 70, 28.6, 0],
@@ -575,9 +550,10 @@ export let oWeaponLoadoutSettings = {
             GunSPSA_SG: [0, 0, 10, 21]
         },
         Recon:{
-            GunAKU_PP: [100, 83.3, 42.1, 20],
+            GunAKU_PP: [100, 63, 42.1, 20],
             GunBucket_PP: [0, 16.7, 52.6, 30],
-            GunZubr_PP: [0, 0, 5.3, 50]
+            GunZubr_PP: [0, 0, 5.3, 50],
+            GunFora230_PP: [0, 20, 25, 30]
         },
         Stormtrooper:{
             GunAK74_ST: [80, 73, 15, 7],
@@ -615,7 +591,8 @@ export let oWeaponLoadoutSettings = {
             GunBucket_PP: [4.8, 16, 42, 25],
             GunIntegral_PP: [0, 0, 8, 30],
             GunZubr_PP: [0, 0, 0, 25],
-            GunGauss_SP: [0, 0, 0, 5]
+            GunGauss_SP: [0, 0, 0, 5],
+            GunFora230_PP: [0, 40, 25, 30]
 
         },
         Stormtrooper:{
@@ -630,9 +607,11 @@ export let oWeaponLoadoutSettings = {
         Sniper:{
             GunSVDM_SP: [90.9, 70, 33, 20],
             GunMark_SP: [9.1, 30, 33, 40],
-            GunM701_SP: [0, 0, 33, 17],
+            GunM701_SP: [0, 0, 33, 9],
             GunSVU_SP: [0, 0, 0, 17],
-            GunGauss_SP: [0, 0, 0, 6]
+            GunGauss_SP: [0, 0, 0, 6],
+            GunSKP_DMR: [0, 0, 33, 40],
+            GunGP3A_DMR: [0, 0, 0, 9]
         }
     },
     GeneralNPC_Duty:{
@@ -655,14 +634,17 @@ export let oWeaponLoadoutSettings = {
             GunLavina_ST: [0, 0, 6, 25]
         },
         Sniper:{
-            GunAK74_ST: [83.3, 40, 0, 0],
+            GunThreeLine_SP: [50, 20, 10, 5],
+            GunAK74_ST: [50, 20, 0, 0],
             GunGvintar_ST: [8.3, 30, 30, 20],
-            GunSVDM_SP: [8.3, 30, 70, 50],
-            GunSVU_SP: [0, 0, 0, 30]
+            GunSVDM_SP: [8.3, 30, 60, 45],
+            GunSVU_SP: [0, 0, 0, 30],
+            GunSKP_DMR: [0, 0, 30, 60]
         },
         Heavy:{
-            GunAK74_ST: [90.9, 85, 20, 10],
-            GunGvintar_ST: [9.1, 15, 56, 20],
+            GunThreeLine_SP: [21, 0, 0, 0],
+            GunAK74_ST: [70, 85, 20, 10],
+            GunGvintar_ST: [9, 15, 56, 20],
             GunGrim_ST: [0, 0, 10, 15],
             GunLavina_ST: [0, 0, 10, 15],
             GunPKP_MG: [0, 0, 4, 40]
@@ -675,18 +657,21 @@ export let oWeaponLoadoutSettings = {
             GunRam2_SG: [0, 0, 0, 27.8]
         },
         Recon:{
-            GunViper_PP: [100, 100, 83.3, 62.5],
-            GunIntegral_PP: [0, 0, 16.7, 37.5]
+            GunViper_PP: [100, 60, 50, 32.5],
+            GunIntegral_PP: [0, 0, 16.7, 37.5],
+            GunFora230_PP: [0, 40, 40, 30]
         },
         Stormtrooper:{
             GunM16_ST: [90.9, 70, 40, 20],
             GunFora_ST: [0, 10, 20, 20],
             GunG37_ST: [9.1, 20, 40, 40],
-            GunKharod_ST: [0, 0, 0, 20]
+            GunKharod_ST: [0, 0, 0, 20],
+            GunArev_ST: [0, 0, 20, 20]
         },
         Sniper:{
-            GunMark_SP: [100, 100, 62.5, 62.5],
-            GunM701_SP: [0, 0, 37.5, 37.5],
+            GunMark_SP: [100, 100, 62.5, 37.5],
+            GunM701_SP: [0, 0, 37.5, 62.5],
+            GunGP3A_DMR: [0, 0, 0, 37.5]
         }
     },
     GeneralNPC_Varta:{
@@ -703,7 +688,8 @@ export let oWeaponLoadoutSettings = {
             GunAKU_PP: [50, 52.6, 27, 8],
             GunBucket_PP: [0, 5.3, 52, 12],
             GunIntegral_PP: [0, 0, 6, 50],
-            GunZubr_PP: [0, 0, 0, 25]
+            GunZubr_PP: [0, 0, 0, 25],
+            GunFora230_PP: [0, 40, 25, 20]
         },
         Stormtrooper:{
             GunAK74_ST: [90.9, 30, 10, 5],
@@ -711,18 +697,21 @@ export let oWeaponLoadoutSettings = {
             GunFora_ST: [0, 10, 60, 40],
             GunG37_ST: [0, 0, 10, 20],
             GunKharod_ST: [0, 0, 0, 15],
-            GunDnipro_ST: [0, 0, 0, 15]
+            GunDnipro_ST: [0, 0, 0, 15],
+            GunArev_ST: [0, 0, 20, 40]
         },
         Sniper:{
-            GunAK74_ST: [90.9, 0, 0, 0],
-            GunM16_ST: [9.1, 70, 0, 0],
+            GunThreeLine_SP: [50, 50, 10, 5],
+            GunAK74_ST: [50, 0, 0, 0],
+            GunM16_ST: [9, 20, 0, 0],
             GunFora_ST: [0, 20, 0, 0],
             GunMark_SP: [0, 10, 66.7, 60],
             GunM701_SP: [0, 0, 33.3, 40]
         },
         Heavy:{
-            GunAK74_ST: [90.9, 30, 15, 5],
-            GunM16_ST: [9.1, 60, 20, 15],
+            GunThreeLine_SP: [21, 0, 0, 0],
+            GunAK74_ST: [70, 30, 15, 5],
+            GunM16_ST: [9, 60, 20, 15],
             GunFora_ST: [0, 10, 43, 20],
             GunG37_ST: [0, 0, 16, 20],
             GunPKP_MG: [0, 0, 6, 40]
@@ -737,18 +726,20 @@ export let oWeaponLoadoutSettings = {
         Recon:{
             GunViper_PP: [50, 42.1, 42.1, 42.1],
             GunAKU_PP: [50, 52.6, 52.6, 52.6],
-            GunBucket_PP: [0, 5.3, 5.3, 5.3]
+            GunBucket_PP: [0, 5.3, 5.3, 5.3],
+            GunFora230_PP: [0, 40, 40, 30]
         },
         Stormtrooper:{
             GunAK74_ST: [100, 76.9, 76.9, 76.9],
             GunM16_ST: [0, 23.1, 23.1, 23.1]
         },
         Sniper:{
-            GunThreeLine_SP: [50, 75, 20, 10],
-            GunAK74_ST: [50, 62.5, 62.5, 62.5],
+            GunThreeLine_SP: [50, 50, 10, 5],
+            GunAK74_ST: [50,30, 62.5, 62.5],
             GunM16_ST: [0, 18.8, 18.8, 18.8],
             GunSVDM_SP: [0, 12.5, 12.5, 12.5],
-            GunMark_SP: [0, 6.2, 6.2, 6.2]
+            GunMark_SP: [0, 6.2, 6.2, 6.2],
+            GunSKP_DMR: [0, 50, 50, 50]
         }
     },
     GeneralNPC_Spark:{
@@ -776,13 +767,14 @@ export let oWeaponLoadoutSettings = {
             GunDnipro_ST: [0, 0, 0, 20]
         },
         Sniper:{
-            GunThreeLine_SP: [43.5, 43.5, 20, 10],
-            GunAK74_ST: [43.5, 43.5, 0, 0],
-            GunM16_ST: [43.5, 43.5, 0, 0],
+            GunThreeLine_SP: [50, 50, 0, 0],
+            GunAK74_ST: [20, 20, 0, 0],
+            GunM16_ST: [20, 20, 0, 0],
             GunFora_ST: [4.4, 4.4, 0, 0],
             GunGvintar_ST: [4.4, 4.4, 5, 0],
-            GunSVDM_SP: [4.4, 4.4, 95, 90.9],
-            GunSVU_SP: [0, 0, 0, 9.1]
+            GunSVDM_SP: [4.4, 4.4, 95, 60],
+            GunSVU_SP: [0, 0, 0, 9.1],
+            GunSKP_DMR: [0, 0, 40, 60]
         }
     },
     GeneralNPC_Corpus:{
@@ -792,8 +784,9 @@ export let oWeaponLoadoutSettings = {
             GunRam2_SG: [0, 0, 0, 6.7]
         },
         Recon:{
-            GunBucket_PP: [90.9, 90.9, 90.9, 33.3],
-            GunZubr_PP: [9.1, 9.1, 9.1, 66.7]
+            GunBucket_PP: [90.9, 50.9, 50.9, 33.3],
+            GunZubr_PP: [9.1, 9.1, 9.1, 66.7],
+            GunFora230_PP: [0, 40, 40, 30]
         },
         Stormtrooper:{
             GunGvintar_ST: [90.9, 90.9, 90.9, 0],
@@ -802,7 +795,8 @@ export let oWeaponLoadoutSettings = {
             GunDnipro_ST: [0, 0, 0, 33.3]
         },
         Sniper:{
-            GunM701_SP: [100, 100, 100, 30],
+            GunThreeLine_SP: [50, 30, 10, 5],
+            GunM701_SP: [50, 70, 90, 25],
             GunSVU_SP: [0, 0, 0, 70]
         },
         Heavy:{
@@ -871,7 +865,9 @@ export let oWeaponLoadoutSettings = {
         },
         Sniper:{
             GunSVDM_SP: [76.9, 76.9, 76.9, 76.9],
-            GunMark_SP: [23.1, 23.1, 23.1, 23.1]
+            GunMark_SP: [23.1, 23.1, 23.1, 23.1],
+            GunSKP_DMR: [10, 10, 10, 50],
+            GunGP3A_DMR: [0, 0, 0, 50]
         }
     },
     GuardNPC_Duty:{
@@ -889,7 +885,8 @@ export let oWeaponLoadoutSettings = {
             GunLavina_ST: [0, 0, 0, 50]
         },
         Sniper:{
-            GunSVDM_SP: [100, 100, 100, 100]
+            GunSVDM_SP: [100, 100, 70, 70],
+            GunSKP_DMR: [0, 0, 30, 30]
         },
         Heavy:{
             GunPKP_MG: [100, 100, 100, 100]
@@ -910,7 +907,8 @@ export let oWeaponLoadoutSettings = {
         },
         Sniper:{
             GunSVDM_SP: [100, 100, 0, 0],
-            GunM701_SP: [0, 0, 100, 100]
+            GunM701_SP: [0, 0, 100, 100],
+            GunGP3A_DMR: [0, 0, 0, 100]
         }
     },
     GuardNPC_Varta:{
@@ -951,7 +949,8 @@ export let oWeaponLoadoutSettings = {
         },
         Sniper:{
             GunSVDM_SP: [50, 50, 50, 50],
-            GunMark_SP: [50, 50, 50, 50]
+            GunMark_SP: [50, 50, 50, 50],
+            GunSKP_DMR: [10, 10, 10, 10]
         }
     },
     GuardNPC_Corpus:{
@@ -971,7 +970,8 @@ export let oWeaponLoadoutSettings = {
             GunDnipro_ST: [0, 0, 0, 100]
         },
         Sniper:{
-            GunSVU_SP: [100, 100, 100, 100]
+            GunSVU_SP: [100, 100, 100, 100],
+            GunGP3A_DMR: [0, 0, 0, 100]
         },
         Heavy:{
             GunPKP_MG: [100, 100, 100, 100]
@@ -1043,7 +1043,7 @@ export const oPistolLoadoutSettings = {
     GeneralNPC_Freedom: {
         GunUDP_HG: [100, 100, 90.9, 50],
         GunM10_HG: [0, 0, 9.1, 50],
-        GunKora_HG: [0, 47.5, 20, 10],
+        GunKora_HG: [0, 47.5, 20, 10]
     },
     GeneralNPC_Varta: {
         GunPM_HG: [90.9, 50, 0, 0],
@@ -1069,12 +1069,12 @@ export const oPistolLoadoutSettings = {
 export const oGrenadesSettings = {
     Default: {
         GrenadeF1: {
-            chances: [0, 20, 50, 70],
+            chances: [0, 15, 35, 40],
             minAmmo: [0, 0, 0, 0],
             maxAmmo: [1, 1, 1, 2]
         },
         GrenadeRGD5: {
-            chances: [100, 80, 50, 30],
+            chances: [60, 45, 25, 20],
             minAmmo: [0, 0, 0, 0],
             maxAmmo: [1, 1, 2, 2]
         }
@@ -1093,7 +1093,8 @@ export const oAmmoByWeaponClass = {
     SP: [0, 10],
     HG: [5, 10],
     MG: [10, 50],
-    GL: [0, 2]
+    GL: [0, 2],
+    DMR: [0, 10]
 };
 
 

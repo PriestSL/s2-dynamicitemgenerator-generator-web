@@ -1,0 +1,45 @@
+#categories_bar{
+    display: flex;
+    flex-direction: row;
+    background-color: #AE9672;
+
+    padding: 0;
+    width: auto;
+}
+
+#factions_bar{
+    display: flex;
+    flex-direction: column;
+    background-color: black;
+    width: 45px;
+}
+
+#toolbar{
+    display: flex;
+    background-color: #AE9672;
+}
+
+#categories_bar .category_item {
+  width: 45px;
+  height: 45px;
+  cursor: pointer;
+  display: block;
+  padding: 2px;
+}
+
+#categories_bar .category_item.active {
+  background-color: rgb(255, 255, 255);
+}
+
+
+
+#factions_bar .faction_item {
+  width: 45px;
+  height: 45px;
+  cursor: pointer;
+  display: block;
+}
+
+#factions_bar .faction_item.active {
+  background-color: #6b4d21;
+}

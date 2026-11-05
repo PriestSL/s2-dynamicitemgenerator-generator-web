@@ -1,0 +1,126 @@
+.messageBox{
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: white;
+    border: 1px solid black;
+    border-radius: 5px;
+    padding: 10px;
+    z-index: 100;
+    display: block;
+}
+
+.armor_drop_settings{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+}
+
+.armor_drop_settings label{
+    font-size: 16px;
+    font-weight: normal;
+}
+
+.attention{
+    font-weight: bold;
+}
+
+.attributes_grid>select{
+    width: 200px;
+}
+
+.addDiv>button{
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background-color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+}
+
+.freezeDiv{
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 99;
+}
+
+.loading-animation{
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 50px;
+    height: 50px;
+    border: 5px solid rgba(174, 150, 114, 0.3);
+    border-top: 5px solid #AE9672;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    z-index: 999;
+}
+
+@keyframes spin {
+    0% { transform: translate(-50%, -50%) rotate(0deg); }
+    100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+.fullscreen_select{
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90%;
+    height: 90%;
+    background-color: white;
+    border: 1px solid black;
+    border-radius: 5px;
+    z-index: 100;
+}
+
+.fullscreen_select_content{
+    display: grid;
+    height: 100%;
+    width: 100%;
+    overflow: scroll;
+}
+
+.fullscreen_select_item{    
+    display: block;
+    cursor: pointer;
+    background-color: #D9D7D4;
+    border-radius: 5px;
+    width: 100%;
+    height: 30px;
+    line-height: 30px;
+    font-weight: bold;
+    align-self: center;
+    padding-top: 5px;
+}
+
+.fullscreen_select_item:hover{
+    background-color: lightgray;
+}
+
+.fullscreen_select_close{
+    width: 100%;
+}
+
+/* Fix for loading animation and backdrop */
+.loading-animation {
+  z-index: 2000;
+}
+
+/* Loading spinner */
+#loadingSpinner {
+  z-index: 9999;
+}
+
+.loading-spinner {
+  width: 3rem;
+  height: 3rem;
+}

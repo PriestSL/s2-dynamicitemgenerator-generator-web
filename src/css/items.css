@@ -1,0 +1,193 @@
+.faction_item{
+    display: block;
+    cursor: pointer;
+}
+
+.faction_item.active{
+    background-color: #6b4d21;
+}
+
+.category_item{
+    display: block;
+    cursor: pointer;
+}
+
+.toolbar_item{
+    display: block;
+    cursor: pointer;
+}
+
+.category_item.active{
+    background-color: rgb(255, 255, 255);
+}
+
+.category-item{
+    display: block;
+    padding: 10px;
+    margin: 10px;
+    border: 1px solid black;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.item_container{
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    align-items: flex-start;
+    background-color: lightgray;
+    padding: 5px;
+    width: 100%;
+}
+
+.row_container{
+    display: grid;
+    grid-template-rows: repeat(5, 1fr)
+}
+
+.item_level1{
+    background-color: #59411D;
+    color: white;
+}
+
+.chances_table{
+    background-color: #D9D7D4;
+    display: grid;
+}
+
+.item_row{
+    display: flex;
+    flex-direction: row;
+    background-color: #D9D7D4;
+    border-radius: 5px;
+    height: 25px;
+    border-top: 1px solid black;
+}
+
+.item_column{
+    display: flex;
+    flex-direction: column;
+    background-color: #D9D7D4;
+    border-radius: 5px;
+}
+
+summary.item_row{
+    height: 25px;
+}
+
+details.item_row{
+    margin: 0px 0px 5px 5px;
+}
+
+.attributes_item_row{
+    display: flex;
+    flex-direction: column;
+    background-color: #D9D7D4;
+    border-radius: 5px;
+}
+
+summary.attributes_item_row{
+    height: 25px;
+}
+
+details.attributes_item_row{
+    margin: 0px 0px 5px 5px;
+}
+
+.attributes_grid{
+    display: grid;
+    grid-template-columns: minmax(min-content, 100px) minmax(min-content, 80px) minmax(min-content, 100px) minmax(min-content, 80px);
+    row-gap: 5px;
+    column-gap: 5px;
+    background-color: #D9D7D4;
+}
+
+.chances_item{
+    display: block;
+    min-width: 200px;
+    max-width: 200px;
+    color: black;
+    padding-left: 5px;
+    align-self: center;
+}
+
+.chances_row{
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    border-radius: 5px;
+    column-gap: 5px;
+    color: black;
+}
+
+.attr_row{
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    background-color: #D9D7D4;
+    border-radius: 5px;
+    column-gap: 5px;
+    height: 25px;
+    padding-top: 3px;
+    border-top: 1px solid black;
+}
+
+.attr_item{
+    display: block;
+    min-width: 200px;
+    max-width: 200px;
+    cursor: pointer;
+    background-color: #D9D7D4;
+}
+
+.chance{
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    border: 1px solid black;
+    border-radius: 5px;
+    cursor: pointer;
+    min-width: 100px;
+    max-width: 100px;
+    background-color: white;
+}
+
+.chance_label {
+    position: absolute; 
+    top: 50%; 
+    left: 70%; 
+    transform: translate(-50%, -50%);
+    z-index: 2;
+    pointer-events: none;
+    font-size: 12px;
+    font-style: italic;
+    color: grey;
+}
+
+.chance_persent{
+  position: absolute;
+  top: 10px;
+  right: 5px;
+}
+
+input.chance{
+    padding-block: 0px;
+    padding-inline: 0px;
+}
+
+.item_level3{
+    background-color: lightcoral;
+}
+
+.item_grid{
+    display: grid;
+    grid-template-rows: repeat(5, 1fr);
+    row-gap: 5px;
+}
+
+.item_grid>div{
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+
+}
