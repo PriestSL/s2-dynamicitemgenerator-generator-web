@@ -132,3 +132,5 @@ dist
 
 #dev files
 app-original.js
+
+json_examples/
