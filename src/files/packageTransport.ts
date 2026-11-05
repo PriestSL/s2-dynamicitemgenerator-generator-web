@@ -1,4 +1,4 @@
-// Explicit boundary to restCalls.js, whose full migration remains in stage 7.
+// Boundary between the file workflow and the configured REST transport.
 // Treat its result as external data, including the actual fileName property.
 export type PackageTransport = (name: string, cfg: string) => Promise<unknown>;
 export interface PackageDownload { blob: Blob; fileName: string }

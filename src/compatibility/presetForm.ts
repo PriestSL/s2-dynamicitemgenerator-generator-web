@@ -1,7 +1,7 @@
 /**
  * Preserves the deferred PresetsManager HTML-form input contract.
  * This is the existing legacy filter, not a general-purpose HTML sanitizer.
- * Its dynamic interpolation and full UI migration remain stage 7 / F19.
+ * Its dynamic interpolation and full UI migration remain deferred under F19.
  */
 export function legacyPresetForm(html: string): HTMLElement {
     const node = document.createElement('div');

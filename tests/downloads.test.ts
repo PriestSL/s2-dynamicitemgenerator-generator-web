@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
+import { downloadPackage as restDownload } from '../src/integrations/restCalls.ts';
 import JSZip from 'jszip';
 import { AppState } from '../src/js/state.ts';
 import { generateConfig } from '../src/js/fileStreamGenerator.ts';
@@ -79,27 +79,14 @@ test('download action stays pending through packing, suppresses duplicates, show
     assert.equal(statuses.at(-1)?.error, false);
 });
 
-// Evaluate the unchanged legacy REST module with a local test origin. No declaration
-// claims that this JS implementation is typechecked; its unknown response is checked
-// by the production TS adapter. All network I/O below is replaced before invocation.
-async function installLegacyTransport(): Promise<void> {
-    const source = (await readFile(new URL('../src/js/restCalls.js', import.meta.url), 'utf8'))
-        .replace('import.meta.env.VITE_RESTUrl', JSON.stringify('https://local.test'));
-    const module: unknown = await import(`data:text/javascript;base64,${Buffer.from(source).toString('base64')}`);
-    assert.ok(module && typeof module === 'object' && 'downloadPackage' in module);
-    const legacyDownload = module.downloadPackage;
-    assert.equal(typeof legacyDownload, 'function');
-    if (typeof legacyDownload !== 'function') throw new Error('Missing legacy transport');
-    setPackageTransport(async (name, cfg): Promise<unknown> => legacyDownload(name, cfg));
-}
 
 test('PAK compatibility preserves POST endpoint, name, structure, CFG and existing fallback filename', async t => {
-    await installLegacyTransport();
+    setPackageTransport(restDownload);
     const state = new AppState();
     state.importState(editedConfig());
     const cfg = generateLoadout(state.config);
     t.mock.method(globalThis, 'fetch', async (url: string, options: RequestInit) => {
-        assert.equal(url, 'https://local.test/pack');
+        assert.equal(url, '/pack');
         assert.equal(options.method, 'POST');
         assert.equal(typeof options.body, 'string');
         assert.deepEqual(JSON.parse(String(options.body)), {
@@ -120,7 +107,7 @@ test('PAK compatibility preserves POST endpoint, name, structure, CFG and existi
 });
 
 test('PAK errors and malformed legacy results cannot reach save', async t => {
-    await installLegacyTransport();
+    setPackageTransport(restDownload);
     t.mock.method(console, 'error', () => {});
     const fetch = t.mock.method(globalThis, 'fetch', async () => new Response('', { status: 500 }));
     const state = new AppState();

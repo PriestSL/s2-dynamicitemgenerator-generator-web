@@ -1,15 +1,17 @@
-export default {
+import { defineConfig } from 'vite';
+
+export default defineConfig({
     build: {
         minify: true
     },
     server: {
-        port: process.env.PORT || 3000,
+        port: Number(process.env.PORT) || 3000,
         host: true,
         allowedHosts: true
     },
     preview: {
         host: true,
-        port: process.env.PORT || 3000, 
+        port: Number(process.env.PORT) || 3000,
         allowedHosts: true
     }
-}
+});

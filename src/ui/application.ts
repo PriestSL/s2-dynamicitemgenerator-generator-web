@@ -1,7 +1,6 @@
 import { AppState } from '../js/state.ts';
 import { ModalManager } from '../js/ui/modalManager.ts';
 import { ControllerAdapter } from '../compatibility/controller.ts';
-import type { PresetsUI } from '../compatibility/integrations.ts';
 import { generateConfig } from '../js/fileStreamGenerator.ts';
 import { chooseJSON, downloadJSON } from '../files/json.ts';
 import { categories } from './categories.ts';
@@ -11,6 +10,8 @@ import { Notifications } from './notifications.ts';
 import { bindDownloads } from './downloads.ts';
 import { bindConfigName } from './configName.ts';
 import { bindDisclosure, editorIcon } from './dom.ts';
+
+export interface PresetsUI { openPresetsWindow(): Promise<void> }
 
 /** Composition, navigation and toolbar. Field handlers belong to their components. */
 export class Application {

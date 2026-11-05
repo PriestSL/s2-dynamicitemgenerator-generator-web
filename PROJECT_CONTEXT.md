@@ -85,8 +85,8 @@
 
 | Аспект | Зараз | Напрямок розвитку |
 | --- | --- | --- |
-| Стек | TypeScript у моделі, AppState, генераторі, JSON/ZIP та всьому локальному UI; внутрішній UI PresetsManager і REST ще JS; Vite, локальний Bootstrap, JSZip | Завершити TS-міграцію інтеграцій і tooling |
-| Дані редактора | AppState володіє config; локальні зміни проходять validate → normalize → commit. ControllerAdapter читає актуальні секції; навігація керується view | Завершення міграції інтеграцій |
+| Стек | Strict TypeScript для застосунку, інтеграцій, тестів та tooling. Vite, локальний Bootstrap і JSZip | Перевіряти інвентар джерел у CI |
+| Дані редактора | AppState володіє config; локальні зміни проходять validate → normalize → commit. ControllerAdapter читає актуальні секції; навігація керується view | Підтримувати сумісні точки входу |
 | Порівняння з базою | Незмінний baseConfig із defaults, JSON або серверного пресета; спільні поля/рядки показують базу, diff, validation, reset і відновлення видалених предметів | Узгодження теми, адаптивності та доступності |
 | Серверний пресет | Повне представлення конфігурації | У майбутньому — зміни відносно master-версії пресету; формат ще не визначений |
 | Збереження між сесіями | Ручні файли та серверні пресети | localStorage/автозбереження не є погодженою вимогою |
@@ -110,7 +110,7 @@
 
 `generateLoadout(config)` синхронно повертає CFG без DOM/REST і без запису у вхідні дані. Перед генерацією перевіряється повна конфігурація; порожній набір NPC loadouts, відсутні потрібні armor/pistol-комплекти, невідомі предмети стандартної Secondary та непідтримана структура bpatch спричиняють помилку замість некоректного файлу. Secondary лишається з наявних defaults, Guard — із наявним правилом спільних GeneralNPC armor/pistol-комплектів; це не нові можливості редагування.
 
-`generateConfig(state, useRESTPacking = true, name)` зберігає сумісний вибір ZIP/PAK. Ім'я надходить від UI, а CFG один для обох способів. ZIP очікується до завершення; Bootstrap toast показує стан/помилку, повторний запуск блокується до завершення й дозволений після невдачі. Повідомлення про початок завантаження не підтверджує збереження на диск. `app.ts` підключає незмінений `restCalls.js` через типізований транспорт із перевіркою unknown-відповіді. Відомий F15 щодо імені PAK збережено явно: реальний `fileName` перевіряється, але завантаження використовує попереднє fallback-ім'я `<name>.pak`; виправлення серверного workflow відкладене.
+`generateConfig(state, useRESTPacking = true, name)` зберігає сумісний вибір ZIP/PAK. Ім'я надходить від UI, а CFG один для обох способів. ZIP очікується до завершення; Bootstrap toast показує стан/помилку, повторний запуск блокується до завершення й дозволений після невдачі. Повідомлення про початок завантаження не підтверджує збереження на диск. `app.ts` підключає `integrations/restCalls.ts` через типізований транспорт із перевіркою unknown-відповіді. Відомий F15 щодо імені PAK збережено явно: реальний `fileName` перевіряється, але завантаження використовує попереднє fallback-ім'я `<name>.pak`; виправлення серверного workflow відкладене.
 
 Локальний UI складається через `Application.renderCurrentView` та один реєстр категорій. Поля й таблиці читають актуальний AppState; введення оновлює підписи й помилки без перебудови всього каталогу. Початкові, додані та відновлені рядки використовують той самий компонент. Локальні діалоги мають спільний Bootstrap lifecycle та повернення фокуса. CSS/JS Bootstrap беруться з одного npm-пакета; глобальний `window.bootstrap` збережено для PresetsManager. Внутрішні HTML-форми PresetsManager тимчасово проходять окремий legacy-адаптер; він не є універсальним sanitizer і не закриває F19.
 
@@ -134,15 +134,17 @@
 | [json.ts](src/files/json.ts), [browser.ts](src/files/browser.ts) | Локальний вибір/читання JSON, атомарний імпорт і валідований експорт; окреме браузерне збереження Blob |
 | [app.ts](src/app.ts), [application.ts](src/ui/application.ts), [bootstrap.ts](src/ui/bootstrap.ts) | Ініціалізація, навігація, toolbar, єдиний renderCurrentView та локальний Bootstrap |
 | [categories.ts](src/ui/categories.ts) | Явний реєстр усіх категорій; відображення через спільні компоненти |
-| [controller.ts](src/compatibility/controller.ts), [integrations.ts](src/compatibility/integrations.ts) | Сумісний live-контракт контролера та перевірені unknown-входи відкладених JS-модулів |
+| [controller.ts](src/compatibility/controller.ts), [presetContracts.ts](src/compatibility/presetContracts.ts) | Сумісний live-контракт контролера та перевірка відповідей сервера й сумісність дії Update |
 | [dialogs.ts](src/ui/dialogs.ts), [modalManager.ts](src/js/ui/modalManager.ts), [notifications.ts](src/ui/notifications.ts) | Локальні діалоги, сумісні назви методів PresetsManager і toast-стан операцій |
 | [dom.ts](src/ui/dom.ts), [dom.ts](src/js/utils/dom.ts), [presetForm.ts](src/compatibility/presetForm.ts) | DOM-компоненти, мінімальні legacy helpers і окрема межа HTML-форм PresetsManager |
 | [theme.scss](src/css/theme.scss), [editor.css](src/css/editor.css), [presets.css](src/css/presets.css) | Єдина точка входу теми: Bootstrap, потім стилі пресетів і редактора; diff/error/focus, адаптивна навігація |
 | [loadout.ts](src/generator/loadout.ts), [effective.ts](src/model/effective.ts) | Чистий генератор CFG та спільні правила effective weapon settings/одиниць |
 | [textGenerators.ts](src/js/textGenerators.ts) | Сумісний async-вхід createLoadout(AppState), який делегує генерацію актуального config |
 | [fileStreamGenerator.ts](src/js/fileStreamGenerator.ts), [zip.ts](src/files/zip.ts) | Сумісний generateConfig, очікування ZIP або PAK, окреме локальне пакування CFG |
-| [downloads.ts](src/ui/downloads.ts), [packageTransport.ts](src/files/packageTransport.ts) | Ім'я та pending/error/retry в UI; явна межа з неперенесеним REST і перевірка відповіді PAK |
-| [presetsManager.js](src/js/presets/presetsManager.js), [restCalls.js](src/js/restCalls.js) | Пресети та взаємодія з REST API |
+| [downloads.ts](src/ui/downloads.ts), [packageTransport.ts](src/files/packageTransport.ts) | Ім'я та pending/error/retry в UI; явна межа з REST-транспортом і перевірка відповіді PAK |
+| [presetsManager.ts](src/integrations/presetsManager.ts), [restCalls.ts](src/integrations/restCalls.ts) | Пресети та взаємодія з REST API |
+
+Сумісні входи `window.S2App`, AppState і ControllerAdapter обслуговують навігацію, завантаження пресетів та зовнішні виклики редактора. `generateConfig` викликає панель завантажень. `configs.ts` і `createLoadout` зберігають попередні модульні входи. Прибирати фасад можна після перенесення всіх його споживачів і перевірки контрактів. Окрему межу HTML-форм можна прибрати після перенесення форм PresetsManager на DOM-компоненти.
 
 ## Як підтримувати контекст
 

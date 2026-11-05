@@ -16,20 +16,20 @@
   "name": "s2-dynamicitemgenerator-generator-web",
   "description": "Website to generating NPC Loadout mod to STALKER 2. That's all...\r Deployed: https://dev.s2-loadout-creator.cc/",
   "version": "1.0.0",
-  "main": "index.js",
+  "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "npm run typecheck && vite build",
     "preview": "vite preview",
     "start": "vite preview",
-    "lint": "eslint",
+    "lint": "eslint --flag unstable_native_nodejs_ts_config",
     "test": "node --test tests/*.test.ts",
-    "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.tests.json"
+    "typecheck": "npm run check:sources && tsc --noEmit && tsc --noEmit -p tsconfig.tests.json && tsc --noEmit -p tsconfig.tooling.json",
+    "check:sources": "node scripts/check-sources.ts"
   },
   "author": "PriestSL",
   "license": "MIT",
   "dependencies": {
-    "file-saver": "^2.0.5",
     "jszip": "^3.10.2"
   }
 }

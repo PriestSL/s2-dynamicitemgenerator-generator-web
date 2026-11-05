@@ -1,33 +1,41 @@
+import { presetHeaders, unavailablePresetUpdate, requiredElement, formValue } from '../compatibility/presetContracts.ts';
+import type { PresetHeader } from '../compatibility/presetContracts.ts';
+import type { AppState } from '../js/state.ts';
+import type { ControllerAdapter } from '../compatibility/controller.ts';
+
 /**
  * Presets Manager Module
  * Handle all preset-related functionality
  */
 
-import { createElement, escapeHtml } from '../utils/dom.ts';
-import { fetchHeaders, getPreset, deletePreset, createPreset, updatePreset } from '../restCalls.js';
-import { ModalManager } from '../ui/modalManager.ts';
-import { legacyPresetForm } from '../../compatibility/presetForm.ts';
-import { importSummary } from '../../model/importing.ts';
+import { createElement, escapeHtml } from '../js/utils/dom.ts';
+import { fetchHeaders, getPreset, deletePreset, createPreset, updatePreset } from './restCalls.ts';
+import { ModalManager } from '../js/ui/modalManager.ts';
+import { legacyPresetForm } from '../compatibility/presetForm.ts';
+import { importSummary } from '../model/importing.ts';
 
 export class PresetsManager {
-    constructor(appState, chancesCtrl) {
+    state: AppState;
+    chancesCtrl: ControllerAdapter;
+    modalManager: ModalManager;
+    constructor(appState: AppState, chancesCtrl: ControllerAdapter) {
         this.state = appState;
         this.chancesCtrl = chancesCtrl;
         this.modalManager = new ModalManager();
     }
-    
+
     async openPresetsWindow() {
         // Check if we already have Bootstrap modals in the document
         if (!document.getElementById('presetsModal')) {
             await this._createPresetsModal();
         }
-        
+
         // Show the modal
         if (window.bootstrap) {
-            const presetsModal = new window.bootstrap.Modal(document.getElementById('presetsModal'));
+            const presetsModal = new window.bootstrap.Modal(requiredElement('presetsModal'));
             presetsModal.show();
         }
-        
+
         // Load presets data
         try {
             await this._loadPresets();
@@ -35,7 +43,7 @@ export class PresetsManager {
             console.error('Error loading presets:', error);
         }
     }
-    
+
     async _createPresetsModal() {
         // Create the presets modal HTML structure
         const modalHTML = `
@@ -77,46 +85,39 @@ export class PresetsManager {
                 </div>
             </div>
         `;
-        
+
         document.body.insertAdjacentHTML('beforeend', modalHTML);
-        
+
         // Setup event handlers for the modals
         this._setupEventHandlers();
     }
-    
+
     _setupEventHandlers() {
-        document.getElementById('btn_save_new_preset').addEventListener('click', () => this.handleSaveNewPreset());
-        document.getElementById('btn_update_preset').addEventListener('click', () => this.handleUpdatePreset());
-        
+        requiredElement('btn_save_new_preset').addEventListener('click', () => this.handleSaveNewPreset());
+        requiredElement('btn_update_preset').addEventListener('click', () => unavailablePresetUpdate());
+
         // Add click handler to presets container for delegation
-        document.getElementById('presets-container').addEventListener('click', (e) => this.handlePresetClick(e));
+        requiredElement('presets-container').addEventListener('click', (e) => this.handlePresetClick(e));
     }
-    
+
     async _loadPresets() {
-        const container = document.getElementById('presets-container');
+        const container = requiredElement('presets-container');
         container.innerHTML = '<div class="col-12 text-center"><div class="spinner-border" role="status"></div></div>';
-        
+
         try {
-            // Load presets data using the same approach as original app.js
-            const headers = await fetchHeaders();
-            
-            if (!headers || headers.error) {
-                console.warn('Failed to load presets:', headers?.error || 'No response');
-                container.innerHTML = '<div class="col-12 text-center text-danger"><i class="fas fa-exclamation-triangle me-2"></i>Failed to load presets</div>';
-                return;
-            }
-            
-            const officialPresets = headers.officialPresets || [];
-            const communityPresets = headers.publicPresets || [];
-            
+            const headers = presetHeaders(await fetchHeaders());
+
+            const officialPresets = headers.officialPresets;
+            const communityPresets = headers.publicPresets;
+
             container.innerHTML = '';
-            
+
             // Render official presets
             if (officialPresets.length > 0) {
                 const officialSection = createElement('div', { className: 'col-12 mb-4' });
                 officialSection.innerHTML = '<h6><i class="fas fa-certificate me-2"></i>Official Presets</h6>';
                 container.appendChild(officialSection);
-                
+
                 officialPresets.forEach(preset => {
                     const presetCard = this.createPresetCard(preset, 'official');
                     container.appendChild(presetCard);
@@ -125,20 +126,20 @@ export class PresetsManager {
                 const officialSection = createElement('div', { className: 'col-12 mb-4' });
                 officialSection.innerHTML = '<h6><i class="fas fa-certificate me-2"></i>Official Presets</h6>';
                 container.appendChild(officialSection);
-                
+
                 const emptyMessage = createElement('div', {
                     className: 'col-12 text-center text-muted py-3',
                     textContent: 'No official presets available'
                 });
                 container.appendChild(emptyMessage);
             }
-            
+
             // Render community presets
             if (communityPresets.length > 0) {
                 const communitySection = createElement('div', { className: 'col-12 mb-4 mt-4' });
                 communitySection.innerHTML = '<h6><i class="fas fa-users me-2"></i>Community Presets</h6>';
                 container.appendChild(communitySection);
-                
+
                 communityPresets.forEach(preset => {
                     const presetCard = this.createPresetCard(preset, 'community');
                     container.appendChild(presetCard);
@@ -147,21 +148,21 @@ export class PresetsManager {
                 const communitySection = createElement('div', { className: 'col-12 mb-4 mt-4' });
                 communitySection.innerHTML = '<h6><i class="fas fa-users me-2"></i>Community Presets</h6>';
                 container.appendChild(communitySection);
-                
+
                 const emptyMessage = createElement('div', {
                     className: 'col-12 text-center text-muted py-3',
                     textContent: 'No community presets available'
                 });
                 container.appendChild(emptyMessage);
             }
-            
+
         } catch (error) {
             console.error('Error loading presets:', error);
             container.innerHTML = '<div class="col-12 text-center text-danger"><i class="fas fa-exclamation-triangle me-2"></i>Error loading presets</div>';
         }
     }
-    
-    async _fetchOfficialPresets() {
+
+    async _fetchOfficialPresets(): Promise<unknown> {
         // Mock data for development - replace with actual API call in production
         try {
             const response = await fetch('/api/presets/official');
@@ -183,7 +184,7 @@ export class PresetsManager {
         } catch (error) {
             console.warn('Could not fetch official presets:', error);
         }
-        
+
         // Return mock data for development when API is not available
         console.info('Using mock official presets for development');
         return [
@@ -198,8 +199,8 @@ export class PresetsManager {
             }
         ];
     }
-    
-    async _fetchCommunityPresets() {
+
+    async _fetchCommunityPresets(): Promise<unknown> {
         // Mock data for development - replace with actual API call in production
         try {
             const response = await fetch('/api/presets/community');
@@ -231,12 +232,12 @@ export class PresetsManager {
         }
         return [];
     }
-    
-    createPresetCard(preset, type) {
+
+    createPresetCard(preset: PresetHeader, type: string) {
         const col = createElement('div', {
             className: 'col-md-6 col-lg-4'
         });
-        
+
         const card = createElement('div', {
             className: `card h-100 border-${type === 'official' ? 'primary' : 'warning'} border-opacity-25 card-preset card-preset-${type}`,
             attributes: {
@@ -247,23 +248,23 @@ export class PresetsManager {
                 'data-version': escapeHtml(preset.version || '1.0')
             }
         });
-        
+
         const cardBody = createElement('div', {
             className: type === 'community' ? 'card-body position-relative' : 'card-body'
         });
-        
+
         // Title
         const title = createElement('h5', {
             className: 'card-title',
             textContent: preset.name
         });
         cardBody.appendChild(title);
-        
+
         // Badge and info row
         const badgeRow = createElement('div', {
             className: 'd-flex justify-content-between'
         });
-        
+
         const badge = createElement('span', {
             className: `badge bg-${type === 'official' ? 'primary' : 'warning'} bg-opacity-75 text-dark`
         });
@@ -272,7 +273,7 @@ export class PresetsManager {
         });
         badge.appendChild(badgeIcon);
         badge.appendChild(document.createTextNode(type === 'official' ? 'Official' : 'Community'));
-        
+
         const info = createElement('span', {
             className: 'text-muted small'
         });
@@ -281,20 +282,20 @@ export class PresetsManager {
         });
         info.appendChild(infoIcon);
         info.appendChild(document.createTextNode(
-            type === 'official' 
+            type === 'official'
                 ? `v${preset.version || '1.0'}`
                 : preset.author || 'Anonymous'
         ));
-        
+
         badgeRow.appendChild(badge);
         badgeRow.appendChild(info);
         cardBody.appendChild(badgeRow);
-        
+
         // Second info row
         const infoRow = createElement('div', {
             className: 'mt-2 d-flex justify-content-between'
         });
-        
+
         if (type === 'official') {
             const viewsSpan = createElement('span', {
                 className: 'text-muted small'
@@ -314,7 +315,7 @@ export class PresetsManager {
             });
             versionSpan.appendChild(versionIcon);
             versionSpan.appendChild(document.createTextNode(`v${preset.version || '1.0'}`));
-            
+
             const viewsSpan = createElement('span', {
                 className: 'text-muted small'
             });
@@ -323,19 +324,19 @@ export class PresetsManager {
             });
             viewsSpan.appendChild(viewsIcon);
             viewsSpan.appendChild(document.createTextNode(`${preset.views || 0} views`));
-            
+
             infoRow.appendChild(versionSpan);
             infoRow.appendChild(viewsSpan);
         }
-        
+
         cardBody.appendChild(infoRow);
-        
+
         // Add edit/delete buttons for community presets
         if (type === 'community') {
             const actionButtons = createElement('div', {
                 className: 'position-absolute top-0 end-0 m-2'
             });
-            
+
             const editBtn = createElement('button', {
                 className: 'btn btn-sm btn-outline-warning me-1 preset-edit-btn',
                 attributes: {
@@ -345,7 +346,7 @@ export class PresetsManager {
             });
             const editIcon = createElement('i', { className: 'fas fa-edit' });
             editBtn.appendChild(editIcon);
-            
+
             const deleteBtn = createElement('button', {
                 className: 'btn btn-sm btn-outline-danger preset-delete-btn',
                 attributes: {
@@ -355,36 +356,38 @@ export class PresetsManager {
             });
             const deleteIcon = createElement('i', { className: 'fas fa-trash' });
             deleteBtn.appendChild(deleteIcon);
-            
+
             actionButtons.appendChild(editBtn);
             actionButtons.appendChild(deleteBtn);
             cardBody.appendChild(actionButtons);
         }
-        
+
         card.appendChild(cardBody);
         col.appendChild(card);
-        
+
         return col;
     }
-    
-    handlePresetClick(e) {
-        const card = e.target.closest('.card-preset');
+
+    handlePresetClick(e: MouseEvent) {
+        if (!(e.target instanceof Element)) return;
+        const card = e.target.closest<HTMLElement>('.card-preset');
         if (!card) return;
-        
+
         if (e.target.closest('.preset-edit-btn')) {
             this.handleEditPresetClick(e);
             return;
         }
-        
+
         if (e.target.closest('.preset-delete-btn')) {
             this.handleDeletePresetClick(e);
             return;
         }
-        
+
         // Load preset
         const presetId = card.dataset.id;
         const presetType = card.dataset.type;
         const presetName = card.dataset.name;
+        if (!presetId || !presetType || presetName === undefined) return;
 
         this.modalManager.createConfirmationBox('loadPreset', `Load preset "${presetName}"? This will replace your current settings.`, {
             onConfirm: () => {
@@ -393,21 +396,21 @@ export class PresetsManager {
         });
 
     }
-    
-    async _loadPreset(presetId, type, presetName, version) {
+
+    async _loadPreset(presetId: string, type: string, presetName: string, version?: string) {
         try {
             const data = await getPreset(presetId, type);
-            if (!data) { 
+            if (!data) {
                 this.modalManager.createMessageBox('presetLoadError', 'Error loading preset. Please try again.');
                 return;
             }
-            
+
             const notices = this.state.importPreset(data, { name: presetName, serverId: presetId, ...(version ? { version } : {}) });
             const preset = this.state.exportState();
-            
+
             // Update config name if element exists
             const configNameEl = document.getElementById('config_name');
-            if (configNameEl) {
+            if (configNameEl instanceof HTMLInputElement) {
                 configNameEl.value = presetName;
             }
 
@@ -421,23 +424,26 @@ export class PresetsManager {
             }
 
             this.chancesCtrl.fillSettings(this.state.getChancesSettings());
-            
+
             // Trigger UI refresh - emit event for app to handle
-            window.dispatchEvent(new CustomEvent('presetLoaded', { 
-                detail: { presetId, type, preset } 
+            window.dispatchEvent(new CustomEvent('presetLoaded', {
+                detail: { presetId, type, preset }
             }));
             if (notices.length) this.modalManager.createMessageBox('presetImportSummary', importSummary(notices));
-            
+
         } catch (error) {
             console.error('Error loading preset:', error);
             this.modalManager.createMessageBox('presetLoadError', `Error loading preset: ${error instanceof Error ? error.message : String(error)}`);
         }
     }
-    
-    handleEditPresetClick(e) {
+
+    handleEditPresetClick(e: MouseEvent) {
+        if (!(e.target instanceof Element)) return;
         e.stopPropagation();
-        const presetId = e.target.closest('[data-id]').dataset.id;
-        const card = e.target.closest('.card-preset');
+        const presetId = e.target.closest<HTMLElement>('[data-id]')?.dataset.id;
+        if (!presetId) return;
+        const card = e.target.closest<HTMLElement>('.card-preset');
+        if (!card) return;
 
         const modal = `
             <form id="editPresetForm">
@@ -466,8 +472,8 @@ export class PresetsManager {
         this.modalManager.createConfirmationBox('editPreset', legacyPresetForm(modal), {
             onConfirm: () => this.handleEditPresetSubmit(presetId),
             confirmValidation: () => {
-                const presetName = document.getElementById('presetName').value.trim();
-                const presetPin = document.getElementById('presetPin').value.trim();
+                const presetName = formValue('presetName').trim();
+                const presetPin = formValue('presetPin').trim();
                 if (!presetName) {
                     this.modalManager.createMessageBox('invalidPresetName', 'Preset name is required.');
                     return false;
@@ -486,10 +492,12 @@ export class PresetsManager {
             confirmText: 'Save changes'
         });
     }
-    
-    handleDeletePresetClick(e) {
+
+    handleDeletePresetClick(e: MouseEvent) {
+        if (!(e.target instanceof Element)) return;
         e.stopPropagation();
-        const presetId = e.target.closest('[data-id]').dataset.id;
+        const presetId = e.target.closest<HTMLElement>('[data-id]')?.dataset.id;
+        if (!presetId) return;
         this.modalManager.createConfirmationBox('deletePreset', `Are you sure you want to delete this preset?`, {
             onConfirm: () => {
                 const presetPin = document.createElement('input');
@@ -500,17 +508,17 @@ export class PresetsManager {
 
                 this.modalManager.createConfirmationBox('confirmDelete', presetPin, {
                     onConfirm: () => {
-                        const pin = document.getElementById('presetPin').value;
+                        const pin = formValue('presetPin');
                         if (!pin || pin.length !== 8 || !/^\d+$/.test(pin)) {
                             this.modalManager.createMessageBox('invalidPin', 'Invalid PIN.');
                             return;
                         }
                         deletePreset(presetId, pin).then(response => {
-                            if (response && !response.error) {
+                            if (!response.error) {
                                 this.modalManager.createMessageBox('presetDeleted', 'Preset deleted successfully');
                                 this._loadPresets();
                             } else {
-                                this.modalManager.createMessageBox('presetDeleteError', `Error deleting preset: ${response?.error || 'Unknown error'}`);
+                                this.modalManager.createMessageBox('presetDeleteError', `Error deleting preset: ${response.error || 'Unknown error'}`);
                             }
                         });
                     }
@@ -518,7 +526,7 @@ export class PresetsManager {
             }
         });
     }
-    
+
     handleSaveNewPreset() {
         const modal = `
             <form id="savePresetForm">
@@ -548,8 +556,8 @@ export class PresetsManager {
             this.modalManager.createConfirmationBox('savePreset', legacyPresetForm(modal), {
                 onConfirm: () => this.handleSavePresetSubmit(),
                 confirmValidation: () => {
-                    const presetName = document.getElementById('presetName').value.trim();
-                    const presetPin = document.getElementById('presetPin').value.trim();
+                    const presetName = formValue('presetName').trim();
+                    const presetPin = formValue('presetPin').trim();
                     if (!presetName) {
                         this.modalManager.createMessageBox('invalidPresetName', 'Preset name is required.');
                         return false;
@@ -568,9 +576,9 @@ export class PresetsManager {
                 confirmText: 'Save Preset'
             });
     }
-    
+
     async handleSavePresetSubmit() {
-        const pin = document.getElementById('presetPin').value;
+        const pin = formValue('presetPin');
         if (!pin || pin.length !== 8 || !/^\d+$/.test(pin)) {
             this.modalManager.createMessageBox('invalidPin', 'Invalid PIN.');
             return;
@@ -578,22 +586,22 @@ export class PresetsManager {
 
 
         const presetData = {
-            name: document.getElementById('presetName').value.trim(),
-            author: document.getElementById('presetAuthor').value.trim(),
-            description: document.getElementById('presetDescription').value.trim(),
+            name: formValue('presetName').trim(),
+            author: formValue('presetAuthor').trim(),
+            description: formValue('presetDescription').trim(),
             data: this.state.exportState(),
             created: new Date().toISOString(),
-            version: document.getElementById('presetVersion').value.trim(),
+            version: formValue('presetVersion').trim(),
             pin: pin
         };
 
         try {
             const response = await createPreset(presetData);
-            if (response && !response.error) {
+            if (!response.error) {
                 this.modalManager.createMessageBox('presetCreated', 'Preset created successfully');
                 this._loadPresets();
             } else {
-                this.modalManager.createMessageBox('presetCreateError', `Error creating preset: ${response?.error || 'Unknown error'}`);
+                this.modalManager.createMessageBox('presetCreateError', `Error creating preset: ${response.error || 'Unknown error'}`);
             }
         } catch (error) {
             console.error('Error creating preset:', error);
@@ -601,24 +609,24 @@ export class PresetsManager {
         }
     }
 
-    async handleEditPresetSubmit(presetId) {
+    async handleEditPresetSubmit(presetId: string) {
         const presetData = {
-            name: document.getElementById('presetName').value.trim(),
-            author: document.getElementById('presetAuthor').value.trim(),
-            description: document.getElementById('presetDescription').value.trim(),
+            name: formValue('presetName').trim(),
+            author: formValue('presetAuthor').trim(),
+            description: formValue('presetDescription').trim(),
             data: this.state.exportState(),
-            version: document.getElementById('presetVersion').value.trim(),
-            pin: document.getElementById('presetPin').value.trim(),
+            version: formValue('presetVersion').trim(),
+            pin: formValue('presetPin').trim(),
             created: new Date().toISOString()
         };
 
         try {
             const response = await updatePreset(presetId, presetData);
-            if (response && !response.error) {
+            if (!response.error) {
                 this.modalManager.createMessageBox('presetUpdated', 'Preset updated successfully');
                 this._loadPresets();
             } else {
-                this.modalManager.createMessageBox('presetUpdateError', `Error updating preset: ${response?.error || 'Unknown error'}`);
+                this.modalManager.createMessageBox('presetUpdateError', `Error updating preset: ${response.error || 'Unknown error'}`);
             }
         } catch (error) {
             console.error('Error updating preset:', error);

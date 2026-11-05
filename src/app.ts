@@ -1,17 +1,16 @@
 import * as bootstrap from 'bootstrap';
 import { installBootstrap } from './ui/bootstrap.ts';
 import { Application } from './ui/application.ts';
-import { legacyPresets, legacyPackageTransport } from './compatibility/integrations.ts';
+import { PresetsManager } from './integrations/presetsManager.ts';
+import { downloadPackage } from './integrations/restCalls.ts';
 import { setPackageTransport } from './files/packageTransport.ts';
 import './css/theme.scss';
 
-// Vite imports these deferred JS modules as unknown; the boundary checks exports.
-const deferred = import.meta.glob<unknown>(['./js/presets/presetsManager.js', './js/restCalls.js'], { eager: true });
 export let app: Application;
 function initialize(): void {
     installBootstrap(bootstrap);
-    setPackageTransport(legacyPackageTransport(deferred['./js/restCalls.js']));
-    app = new Application((state, controller) => legacyPresets(deferred['./js/presets/presetsManager.js'], state, controller));
+    setPackageTransport(downloadPackage);
+    app = new Application((state, controller) => new PresetsManager(state, controller));
     app.initialize();
     window.S2App = app;
 }

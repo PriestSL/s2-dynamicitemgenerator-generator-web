@@ -13,8 +13,6 @@ import { Notifications } from '../src/ui/notifications.ts';
 import { bindDownloads } from '../src/ui/downloads.ts';
 import { createDefaultConfig } from '../src/model/config.ts';
 import { legacyPresetForm } from '../src/compatibility/presetForm.ts';
-import { legacyPresets, legacyPackageTransport } from '../src/compatibility/integrations.ts';
-import { ControllerAdapter } from '../src/compatibility/controller.ts';
 import { chooseJSON } from '../src/files/json.ts';
 import { CATEGORIES } from '../src/model/types.ts';
 import type { CategoryId, FactionScope } from '../src/model/types.ts';
@@ -352,8 +350,6 @@ test('app navigation and presetLoaded re-render from current state; adapter meth
     assert.equal(app.state.config.PistolSettings.GeneralNPC_Neutral?.GunPM_HG?.[0], 1200);
     assert.equal(app.getState(), app.state);
     assert.equal(app.getChancesController(), app.chancesCtrl);
-    assert.throws(() => legacyPresets({}, app.state, new ControllerAdapter(app.state)), /unavailable/);
-    assert.throws(() => legacyPackageTransport({ downloadPackage: 123 }), /unavailable/);
     modalClean();
 });
 
